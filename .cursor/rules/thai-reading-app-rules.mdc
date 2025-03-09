@@ -3,72 +3,18 @@ description: Application high level description.
 globs: 
 alwaysApply: false
 ---
+Project Description
+The Thai Language Reading Application is an innovative full-stack web application designed to enhance Thai language acquisition through AI-generated, interactive, and gamified storytelling. Built with Node.js and Express on the back-end, React and Tailwind CSS on the front-end, and planned integration with MongoDB for data persistence, the application leverages the Deepseek AI model to generate personalized Thai stories. As of March 9, 2025, the project aims to provide users with a dynamic learning experience where they can select their reading level, story theme, and practice words, receiving stories with separated words for easy interaction. Key features include clicking words for English translations (via Google Translate API), hearing text through Thai text-to-speech (via Play.ht API), and a gamified "choose your own adventure" (CYOA) mode where users make choices in Thai to progress toward an overarching goal, such as finding a treasure or solving a mystery. Additional gamification elements, like collecting words as "word cards" and earning rewards for story completion, further engage users, making language learning both educational and entertaining.
 
-# Fullstack Thai Language Reading app powered by AI (deepseek).
+The primary goal is to create a user-centric platform that adapts to individual learning needs, fosters engagement through interactivity and gamification, and supports scalable growth. The application will store user profiles, learned words, and story sessions in MongoDB, ensuring a seamless experience across sessions. By combining modern web technologies with AI-driven content generation, the project seeks to offer a unique and effective tool for Thai language learners worldwide.
 
-Application Overview
-This application aims to help users learn Thai through AI-generated stories, offering a customizable and interactive reading experience. It will allow users to tailor stories to their learning level and preferences, enhancing language acquisition through interactive features and gamification.
+Guidelines for AI Assistance
+To the AI assisting with this project (e.g., Grok 3 or similar models), your role is to support the development process by generating code, suggesting improvements, and ensuring alignment with the project’s objectives, using the following guidelines:
 
-Functionality and Features
-Story Generation: Users can input their reading level, preferred story theme, and specific words to practice, with Deepseek generating a Thai story with separated words.
-Interaction: Clicking on words will display English translations, and users can listen to words or the entire story using Thai text-to-speech.
-Gamification: Users can collect and track words they've learned, fostering engagement and progress tracking.
-Technical Considerations
-The front-end will use React and Tailwind for a user-friendly interface, while the back-end, built with Node and Express, will handle API integrations and data management. MongoDB will store user data and stories, ensuring scalability for future expansions.
-
-Detailed Specification for Thai Language Reading Application
-This document outlines a comprehensive specification for a full-stack Thai language reading application powered by AI (Deepseek), utilizing Node, Express, React, Tailwind, and eventually MongoDB. The application is designed to facilitate Thai language learning through AI-generated stories, interactive features, and gamification, catering to users of varying proficiency levels.
-
-Background and Purpose
-As of March 9, 2025, language learning applications increasingly leverage AI to provide personalized content, enhancing user engagement and effectiveness. This application targets Thai language learners, offering a platform to generate custom stories, interact with text, and track progress, aligning with modern educational trends.
-
-System Architecture
-The application follows a full-stack architecture:
-
-Front-end: Built with React for dynamic user interfaces, styled with Tailwind CSS for responsive and modern design.
-Back-end: Implemented using Node.js and Express for handling server-side logic, API integrations, and data management.
-Database: MongoDB will be integrated for storing user data, stories, and learned words, ensuring scalability and flexibility.
-Functional Requirements
-User Management
-Registration and Login: Users can create accounts with username, email, and password, with secure authentication using hashed passwords (e.g., BCrypt). Sessions will be managed securely to ensure user data protection.
-User Profile: Store and display user progress, including learned words, to personalize the learning experience.
-Story Generation
-User Input: Users specify reading level (e.g., beginner, intermediate, advanced), story theme (e.g., adventure, daily life), and practice words they wish to include.
-AI Integration: Utilize Deepseek's API for story generation, ensuring stories are in Thai with words separated for easy interaction. The API, compatible with OpenAI's format, allows for seamless integration (Deepseek API Docs).
-Story Storage: Generated stories are stored in MongoDB with associated metadata (user ID, generation parameters, creation date).
-Text Interaction
-Word Translation: Clicking on a word displays its English translation, facilitated by Google Translate API for real-time translation (Google Translate Docs). For efficiency, common translations may be cached, though on-the-fly translation ensures accuracy for less common words.
-Text-to-Speech: Provide audio playback for individual words and the entire story using a Thai text-to-speech API, such as Play.ht, which offers low-latency, high-quality voices (Play.ht TTS API). This enhances accessibility and pronunciation practice.
-Gamification
-Word Collection: Users can mark words as learned, stored in their profile under the "learned_words" field in MongoDB. This feature encourages engagement and tracks progress.
-Progress Tracking: Display a list of collected words, potentially with statistics (e.g., number learned, frequency of use), to motivate continued learning.
-Non-Functional Requirements
-Performance: Ensure low latency for story generation and audio playback, with API calls optimized for real-time interaction.
-Security: Protect user data with encrypted communications (HTTPS), secure API key storage using environment variables, and regular security audits.
-Scalability: Design the back-end to handle increasing user loads, with MongoDB supporting horizontal scaling for data growth.
-Usability: The interface should be intuitive, with Tailwind CSS ensuring responsive design across devices, catering to language learners of all technical backgrounds.
-Database Schema
-The following table outlines the proposed MongoDB schema:
-
-Collection	Fields	Description
-Users	_id, username, email, password, learned_words	Stores user credentials and learned words array
-Stories	_id, user_id, generation_params, story_text, created_at	Stores generated stories with metadata
-Users Collection: The password field will be hashed for security, and learned_words will be an array for easy retrieval and updates.
-Stories Collection: generation_params will include reading level, theme, and practice words, ensuring stories can be regenerated or analyzed later.
-Integration with External Services
-Deepseek API: Used for story generation, with prompts crafted to ensure Thai output with separated words. Given Deepseek's focus on text generation (Deepseek Website), additional processing may be needed for word segmentation, though user input suggests stories are already separated.
-Google Translate API: Handles Thai-to-English word translations, ensuring accuracy for interactive learning. This choice is based on its widespread use and reliability for language pairs (Google Translate Blog).
-Text-to-Speech API: Selected Play.ht for its Thai voice options and low latency, enhancing the listening experience (Play.ht Features). Alternatives like Listnr or Narakeet were considered but chosen for cost-effectiveness and quality.
-Development Considerations
-Front-end Design: React components will include forms for story generation, a clickable story display with Tailwind-styled layouts, and audio controls for text-to-speech. State management (e.g., React Context or Redux) will handle dynamic updates.
-Back-end Logic: Express routes will manage user authentication, story generation requests, and API integrations. Middleware will handle authentication and error handling for robust operation.
-Testing: Unit tests for front-end components, integration tests for API calls, and end-to-end tests for user flows will ensure reliability. Tools like Jest and Cypress are recommended.
-Deployment: Host on a cloud platform like AWS or Heroku, with MongoDB Atlas for database management, ensuring scalability and uptime.
-Challenges and Mitigations
-Thai Language Processing: Thai lacks spaces between words, but given the requirement for separated words, Deepseek's generation will be prompted accordingly. If issues arise, libraries like PyThaiNLP could assist, though not directly integrated here.
-API Costs: Monitor usage of Deepseek, Google Translate, and text-to-speech APIs to manage costs, potentially implementing caching for frequent translations.
-User Engagement: Gamification may require iterative design, with A/B testing to refine features like word collection, ensuring it aligns with user needs.
-Future Enhancements
-Expand gamification with badges, leaderboards, or quizzes based on learned words.
-Integrate additional AI features, such as grammar correction or vocabulary exercises, using Deepseek's reasoning models if available.
-Support mobile apps for broader accessibility, leveraging React Native for cross-platform development.
+Technology Stack: Adhere strictly to Node.js and Express for server-side logic, React with Tailwind CSS for the front-end, and MongoDB for database operations (to be implemented later). Use Deepseek for story generation (via its API: Deepseek API Documentation), Google Translate for translations (Google Translate Docs), and Play.ht for text-to-speech (Play.ht API). Do not suggest alternative frameworks or technologies unless explicitly requested, ensuring consistency with the defined stack.
+Project Goal: Focus on generating Thai stories that are personalized (based on reading level, theme, and practice words), interactive (supporting translations and audio), and gamified (with CYOA and word collection). Ensure all contributions enhance user engagement and language learning, maintaining a balance between education and entertainment. For CYOA, include an overarching goal in prompts and ensure story coherence across branches.
+Guardrails:
+Language and Content: Generate all story content in Thai with words separated by spaces, avoiding other languages unless translating to English for user interaction.
+API Usage: Validate API integrations follow their respective documentation, securely storing keys in environment variables and optimizing calls to manage costs (e.g., caching frequent translations).
+Gamification Scope: Implement only specified gamification features (word cards, CYOA, rewards) unless additional ideas are requested. Avoid overcomplicating with unapproved elements like leaderboards unless directed.
+Collaboration: When generating code or content, reference the design spec and Cursor IDE rule (if provided) to ensure alignment. If unsure about requirements, ask for clarification rather than assuming, and suggest enhancements only within the project’s scope. For CYOA, ensure prompts to Deepseek include prior context and the story goal to maintain narrative flow.

@@ -42,7 +42,7 @@ const DashboardPage: React.FC = () => {
   };
 
   return (
-    <div className="relative z-10 w-full max-w-4xl p-8 mx-auto bg-white/80 backdrop-blur-md rounded-xl shadow-xl">
+    <div className="w-full max-w-4xl p-8 mx-auto bg-white/80 backdrop-blur-md rounded-xl shadow-xl">
       <h1 className="text-3xl font-bold text-gray-800 mb-6">Dashboard</h1>
 
       <div className="mb-8">

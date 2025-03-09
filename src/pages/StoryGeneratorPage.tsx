@@ -97,7 +97,7 @@ const StoryGeneratorPage: React.FC = () => {
   };
 
   return (
-    <div className="relative z-10 w-full max-w-2xl p-8 mx-auto bg-white/80 backdrop-blur-md rounded-xl shadow-xl">
+    <div className="w-full max-w-2xl p-8 mx-auto bg-white/80 backdrop-blur-md rounded-xl shadow-xl">
       <div className="flex items-center mb-6">
         <div className="text-4xl mr-3">{templateInfo.icon}</div>
         <div>

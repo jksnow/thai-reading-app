@@ -19,9 +19,9 @@ function App() {
 
   return (
     <BrowserRouter>
-      <div className="fixed inset-0 w-full h-full overflow-hidden">
+      <div className="fixed inset-0 w-full h-full overflow-auto">
         {/* Shader Background */}
-        <div className="absolute inset-0 w-full h-full">
+        <div className="fixed inset-0 w-full h-full">
           <Canvas
             style={{ width: "100%", height: "100%" }}
             camera={{ position: [0, 0, 1] }}
@@ -37,8 +37,8 @@ function App() {
         <Navbar />
 
         {/* Content and Routing */}
-        <div className="absolute inset-0 flex items-center justify-center pt-16">
-          <div className="w-full max-w-4xl px-4">
+        <div className="relative min-h-screen pt-16 pb-8 flex items-center justify-center">
+          <div className="w-full max-w-4xl px-4 my-8">
             <Routes>
               <Route
                 path="/"

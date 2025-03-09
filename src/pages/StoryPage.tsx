@@ -122,14 +122,14 @@ const StoryPage: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="relative z-10 w-full max-w-3xl p-8 mx-auto bg-white/80 backdrop-blur-md rounded-xl shadow-xl flex justify-center items-center min-h-[300px]">
+      <div className="w-full max-w-3xl p-8 mx-auto bg-white/80 backdrop-blur-md rounded-xl shadow-xl flex justify-center items-center min-h-[300px]">
         <div className="text-gray-500">Loading story...</div>
       </div>
     );
   }
 
   return (
-    <div className="relative z-10 w-full max-w-3xl p-8 mx-auto bg-white/80 backdrop-blur-md rounded-xl shadow-xl">
+    <div className="w-full max-w-3xl p-8 mx-auto bg-white/80 backdrop-blur-md rounded-xl shadow-xl">
       <div className="mb-6">
         <button
           onClick={() => navigate("/dashboard")}

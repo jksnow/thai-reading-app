@@ -4,6 +4,7 @@ import React, { useState } from "react";
 // Uncomment the line below and comment out the mock service when you have a real API key
 import deepseekService from "../api/deepseekService";
 import ShaderButton from "../components/ShaderButton";
+import TranslationPopup from "../components/TranslationPopup";
 
 const genres = [
   "Adventure",
@@ -58,6 +59,10 @@ const StoryGenerator: React.FC = () => {
 
   // Add font size state
   const [fontSize, setFontSize] = useState("medium"); // small, medium, large
+
+  // Add translation popup state
+  const [selectedWord, setSelectedWord] = useState<string | null>(null);
+  const [popupPosition, setPopupPosition] = useState({ x: 0, y: 0 });
 
   const parseStoryResponse = (response: string): StorySegment => {
     // Split the response into story text and choices
@@ -179,6 +184,41 @@ const StoryGenerator: React.FC = () => {
       default:
         return "text-xl leading-loose";
     }
+  };
+
+  // Word click handler
+  const handleWordClick = (word: string, event: React.MouseEvent) => {
+    setSelectedWord(word);
+    setPopupPosition({ x: event.clientX, y: event.clientY });
+  };
+
+  // Close translation popup
+  const closeTranslationPopup = () => {
+    setSelectedWord(null);
+  };
+
+  // Render Thai words as clickable spans
+  const renderThaiWords = (text: string) => {
+    // Split text by spaces (Thai words are already space-separated)
+    const words = text.split(" ").filter((word) => word.trim() !== "");
+
+    return words.map((word, index) => {
+      // Clean word of punctuation for display but keep it for rendering
+      const displayWord = word.replace(/[.,?!;:]/g, "");
+
+      return (
+        <React.Fragment key={index}>
+          <span
+            className="inline-block cursor-pointer hover:bg-parchment transition-colors duration-100 rounded px-0.5 mx-0.5"
+            onClick={(e) => handleWordClick(displayWord, e)}
+          >
+            {word}
+          </span>
+          {/* Add a space after each word except the last one */}
+          {index < words.length - 1 && " "}
+        </React.Fragment>
+      );
+    });
   };
 
   return (
@@ -361,7 +401,7 @@ const StoryGenerator: React.FC = () => {
           <div
             className={`mb-6 p-5 bg-white border border-parchment-dark rounded-lg whitespace-pre-wrap text-ink shadow-inner-light tracking-wide ${getFontSizeClass()}`}
           >
-            {currentStory.text}
+            {currentStory && renderThaiWords(currentStory.text)}
           </div>
 
           {errorMessage && (
@@ -416,6 +456,15 @@ const StoryGenerator: React.FC = () => {
             </div>
           )}
         </div>
+      )}
+
+      {/* Translation Popup */}
+      {selectedWord && (
+        <TranslationPopup
+          word={selectedWord}
+          onClose={closeTranslationPopup}
+          position={popupPosition}
+        />
       )}
     </div>
   );

@@ -29,28 +29,33 @@ if (!API_KEY) {
   );
 }
 
+const systemPrompt = `
+  You are a professional storyteller.
+  You are tasked with generating a "choose your own adventure" story in the Thai language.
+  Important formatting requirements:
+  1. Place a space between EACH Thai word and a period between each sentence but don't add a space after final word of sentence.
+  
+  3. Make the choices meaningful and significantly different from each other
+  4. Each choice should lead the story in a completely different direction
+  The story should be engaging and interesting.
+
+  If there are choices at the end of the current story segment, Structure like the following:
+  - the story segment
+  - A blank line
+  - The 4 numbered choices, Format the choices as: "1. [choice 1]", "2. [choice 2]", etc.
+
+  If the story reaches a natural conclusion, indicate "THE END" instead of giving choices
+`;
+
 // Helper function to format the initial story prompt
 const formatPrompt = (storyOptions: StoryOptions): string => {
   return `
-    Generate a "choose your own adventure" story in Thai language with the following specifications:
-    
     - Genre/Theme: ${storyOptions.genre}
     - Parental Rating: ${storyOptions.parentalRating}
     - Reading Level: ${storyOptions.readingLevel}
     - Number of paragraphs: ${storyOptions.paragraphs}
     
-    Important formatting requirements:
-    1. Place a space between EACH Thai word to make it easier for beginners to read and a period between each sentence.
-    2. Write a compelling and engaging opening to the story (${storyOptions.paragraphs} paragraphs)
-    3. At the end, in a new line, write [CHOICES] and then provide exactly 4 numbered choices for how the reader can continue the story
-    4. Format the choices as: "1. [choice 1]", "2. [choice 2]", etc.
-    5. Make the choices meaningful and significantly different from each other
-    6. Each choice should lead the story in a completely different direction
-    
-    Structure the response with:
-    - The story segment in Thai (with spaces between all words)
-    - A blank line
-    - The 4 numbered choices
+    At the end, in a new line, write [CHOICES] and then provide exactly 4 numbered choices for how the reader can continue the story
   `;
 };
 
@@ -64,20 +69,6 @@ const formatContinuePrompt = (options: ContinueStoryOptions): string => {
     
     The reader chose:
     ${options.userChoice}
-    
-    Important formatting requirements:
-    1. Place a space between EACH Thai word to make it easier for beginners to read
-    2. Continue the story based on the reader's choice (3-4 paragraphs)
-    3. At the end, in a new line, write [CHOICES] and then provide exactly 4 numbered choices for how the reader can continue the story
-    4. Format the choices as: "1. [choice 1]", "2. [choice 2]", etc.
-    5. Make the choices meaningful and significantly different from each other
-    6. Each choice should lead the story in a completely different direction
-    7. If the story reaches a natural conclusion, indicate "THE END" instead of giving choices
-    
-    Structure the response with:
-    - The story segment in Thai (with spaces between all words)
-    - A blank line
-    - The 4 numbered choices (or "THE END" if the story concludes)
   `;
 };
 
@@ -100,6 +91,10 @@ const generateInitialStory = async (
       {
         model: "deepseek-chat",
         messages: [
+          {
+            role: "system",
+            content: systemPrompt,
+          },
           {
             role: "user",
             content: prompt,
@@ -160,6 +155,10 @@ const continueStory = async (
       {
         model: "deepseek-chat",
         messages: [
+          {
+            role: "system",
+            content: systemPrompt,
+          },
           {
             role: "user",
             content: prompt,

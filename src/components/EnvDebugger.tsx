@@ -35,7 +35,7 @@ const EnvDebugger: React.FC = () => {
                 {deepseekApiKeyAvailable ? "✓ Available" : "✗ Missing"}
               </span>
             </div>
-            <div className="text-ink/[0.7] text-xs mt-2">
+            <div className="text-ink/70 text-xs mt-2">
               <p>
                 Note: For security reasons, the actual values are not displayed.
               </p>

@@ -3,6 +3,7 @@ import React, { useState } from "react";
 // import deepseekService from "../api/mockDeepseekService";
 // Uncomment the line below and comment out the mock service when you have a real API key
 import deepseekService from "../api/deepseekService";
+import ShaderButton from "../components/ShaderButton";
 
 const genres = [
   "Adventure",
@@ -55,9 +56,12 @@ const StoryGenerator: React.FC = () => {
   const [currentStoryIndex, setCurrentStoryIndex] = useState(0);
   const [showChoices, setShowChoices] = useState(false);
 
+  // Add font size state
+  const [fontSize, setFontSize] = useState("medium"); // small, medium, large
+
   const parseStoryResponse = (response: string): StorySegment => {
     // Split the response into story text and choices
-    const parts = response.split("\n\n");
+    const parts = response.split("[CHOICES]");
     const storyText = parts[0];
 
     let choices: Choice[] = [];
@@ -164,6 +168,19 @@ const StoryGenerator: React.FC = () => {
 
   const currentStory = storyHistory[currentStoryIndex];
 
+  const getFontSizeClass = () => {
+    switch (fontSize) {
+      case "small":
+        return "text-base leading-loose";
+      case "medium":
+        return "text-xl leading-loose";
+      case "large":
+        return "text-2xl leading-loose";
+      default:
+        return "text-xl leading-loose";
+    }
+  };
+
   return (
     <div className="container mx-auto p-4 max-w-4xl">
       {storyHistory.length === 0 ? (
@@ -249,13 +266,15 @@ const StoryGenerator: React.FC = () => {
             </p>
           </div>
 
-          <button
+          <ShaderButton
             onClick={generateInitialStory}
             disabled={isGenerating}
-            className="adventure-button-primary w-full py-3 px-4 disabled:bg-accent-primary/50 disabled:cursor-not-allowed"
+            variant="primary"
+            fullWidth
+            className="py-3"
           >
             {isGenerating ? "Generating Story..." : "Generate Story"}
-          </button>
+          </ShaderButton>
 
           {errorMessage && (
             <div className="mt-4 p-4 bg-danger/10 text-danger rounded-md border border-danger/30">
@@ -302,15 +321,46 @@ const StoryGenerator: React.FC = () => {
             <h1 className="text-2xl font-bold text-ink font-serif">
               Your Thai Adventure
             </h1>
-            <button
+            <ShaderButton
               onClick={resetStory}
-              className="px-4 py-2 text-sm bg-white text-ink rounded-md hover:bg-parchment-dark border border-parchment-dark"
+              variant="tertiary"
+              className="px-4 py-2 text-sm"
             >
               New Story
-            </button>
+            </ShaderButton>
           </div>
 
-          <div className="mb-6 p-5 bg-white border border-parchment-dark rounded-lg whitespace-pre-wrap text-ink shadow-inner-light">
+          {/* Font size controls */}
+          <div className="mb-4 flex items-center justify-between">
+            <div className="text-ink font-medium">Font Size:</div>
+            <div className="flex space-x-2">
+              <ShaderButton
+                onClick={() => setFontSize("small")}
+                variant={fontSize === "small" ? "tertiary" : "primary"}
+                className="px-3 py-1 text-sm opacity-70 hover:opacity-100"
+              >
+                Small
+              </ShaderButton>
+              <ShaderButton
+                onClick={() => setFontSize("medium")}
+                variant={fontSize === "medium" ? "tertiary" : "primary"}
+                className="px-3 py-1 text-sm opacity-70 hover:opacity-100"
+              >
+                Medium
+              </ShaderButton>
+              <ShaderButton
+                onClick={() => setFontSize("large")}
+                variant={fontSize === "large" ? "tertiary" : "primary"}
+                className="px-3 py-1 text-sm opacity-70 hover:opacity-100"
+              >
+                Large
+              </ShaderButton>
+            </div>
+          </div>
+
+          <div
+            className={`mb-6 p-5 bg-white border border-parchment-dark rounded-lg whitespace-pre-wrap text-ink shadow-inner-light tracking-wide ${getFontSizeClass()}`}
+          >
             {currentStory.text}
           </div>
 
@@ -332,26 +382,32 @@ const StoryGenerator: React.FC = () => {
                 Choose your next action:
               </h2>
               {currentStory.choices.map((choice) => (
-                <button
+                <div
                   key={choice.id}
-                  onClick={() => handleChoiceSelect(choice)}
-                  className="adventure-choice block w-full text-left"
-                  disabled={isGenerating}
+                  className={`mb-3 ${getFontSizeClass()}`}
                 >
-                  <span className="font-medium text-accent-primary">
-                    {choice.id}.
-                  </span>{" "}
-                  {choice.text}
-                </button>
+                  <ShaderButton
+                    onClick={() => handleChoiceSelect(choice)}
+                    variant="primary"
+                    fullWidth
+                    className="text-left p-4"
+                    disabled={isGenerating}
+                  >
+                    <span className="font-medium">{choice.id}.</span>{" "}
+                    {choice.text}
+                  </ShaderButton>
+                </div>
               ))}
             </div>
           ) : (
-            <button
+            <ShaderButton
               onClick={handleShowChoices}
-              className="adventure-button-secondary w-full py-3 px-4"
+              variant="secondary"
+              fullWidth
+              className="py-3"
             >
               What Will You Do Next?
-            </button>
+            </ShaderButton>
           )}
 
           {isGenerating && (

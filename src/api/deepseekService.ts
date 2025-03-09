@@ -12,6 +12,9 @@ interface ContinueStoryOptions {
   userChoice: string;
 }
 
+const temperature: number = 1.5;
+const max_tokens: number = 2000;
+
 // Configuration
 // Vite uses import.meta.env instead of process.env
 const API_KEY = import.meta.env.VITE_DEEPSEEK_API_KEY || "";
@@ -37,9 +40,9 @@ const formatPrompt = (storyOptions: StoryOptions): string => {
     - Number of paragraphs: ${storyOptions.paragraphs}
     
     Important formatting requirements:
-    1. Place a space between EACH Thai word to make it easier for beginners to read
-    2. Write a compelling opening to the story (${storyOptions.paragraphs} paragraphs)
-    3. At the end, provide exactly 4 numbered choices for how the reader can continue the story
+    1. Place a space between EACH Thai word to make it easier for beginners to read and a period between each sentence.
+    2. Write a compelling and engaging opening to the story (${storyOptions.paragraphs} paragraphs)
+    3. At the end, in a new line, write [CHOICES] and then provide exactly 4 numbered choices for how the reader can continue the story
     4. Format the choices as: "1. [choice 1]", "2. [choice 2]", etc.
     5. Make the choices meaningful and significantly different from each other
     6. Each choice should lead the story in a completely different direction
@@ -65,7 +68,7 @@ const formatContinuePrompt = (options: ContinueStoryOptions): string => {
     Important formatting requirements:
     1. Place a space between EACH Thai word to make it easier for beginners to read
     2. Continue the story based on the reader's choice (3-4 paragraphs)
-    3. At the end, provide exactly 4 numbered choices for how the reader can continue the story
+    3. At the end, in a new line, write [CHOICES] and then provide exactly 4 numbered choices for how the reader can continue the story
     4. Format the choices as: "1. [choice 1]", "2. [choice 2]", etc.
     5. Make the choices meaningful and significantly different from each other
     6. Each choice should lead the story in a completely different direction
@@ -102,8 +105,8 @@ const generateInitialStory = async (
             content: prompt,
           },
         ],
-        temperature: 0.7,
-        max_tokens: 2000,
+        temperature,
+        max_tokens,
       },
       {
         headers: {
@@ -162,8 +165,8 @@ const continueStory = async (
             content: prompt,
           },
         ],
-        temperature: 0.7,
-        max_tokens: 2000,
+        temperature,
+        max_tokens,
       },
       {
         headers: {

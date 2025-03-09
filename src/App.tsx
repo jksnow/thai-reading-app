@@ -4,6 +4,7 @@ import { useColorTransition } from "./utils/useColorTransition";
 import { BrowserRouter, Routes, Route, Link } from "react-router-dom";
 import StoryGenerator from "./pages/StoryGenerator";
 import EnvDebugger from "./components/EnvDebugger";
+import ShaderButton from "./components/ShaderButton";
 
 function App() {
   // Use our custom hook for color management
@@ -69,20 +70,28 @@ function App() {
                       Improve your Thai reading skills with interactive stories
                       and Choose Your Own Adventure games.
                     </p>
-                    <button
-                      className="adventure-button-tertiary px-6 py-3 w-full mb-4"
+                    <ShaderButton
+                      variant="tertiary"
                       onClick={changeColorScheme}
                       disabled={isTransitioning}
+                      fullWidth
+                      className="mb-4 py-3"
                     >
                       <span className="font-medium">
                         Change Background Mood
                       </span>
-                    </button>
+                    </ShaderButton>
                     <Link
                       to="/story-generator"
-                      className="adventure-button-primary inline-block w-full text-center py-3 px-6"
+                      className="block w-full"
                     >
-                      Create Your Adventure
+                      <ShaderButton
+                        variant="primary"
+                        fullWidth
+                        className="py-3"
+                      >
+                        Create Your Adventure
+                      </ShaderButton>
                     </Link>
                   </div>
                 </div>

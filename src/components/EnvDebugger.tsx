@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import ShaderButton from "./ShaderButton";
 
 const EnvDebugger: React.FC = () => {
   const [showingDetails, setShowingDetails] = useState(false);
@@ -10,12 +11,13 @@ const EnvDebugger: React.FC = () => {
 
   return (
     <div className="fixed bottom-4 right-4 z-50">
-      <button
+      <ShaderButton
         onClick={() => setShowingDetails((prev) => !prev)}
-        className="adventure-button-tertiary px-3 py-1 text-sm"
+        variant="tertiary"
+        className="text-sm px-3 py-1"
       >
         {showingDetails ? "Hide Env Info" : "Debug Env"}
-      </button>
+      </ShaderButton>
 
       {showingDetails && (
         <div className="mt-2 p-4 adventure-container text-sm">

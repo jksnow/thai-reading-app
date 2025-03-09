@@ -13,8 +13,17 @@ interface ContinueStoryOptions {
 }
 
 // Configuration
-const API_KEY = process.env.REACT_APP_DEEPSEEK_API_KEY || "";
+// Vite uses import.meta.env instead of process.env
+const API_KEY = import.meta.env.VITE_DEEPSEEK_API_KEY || "";
+// Based on official documentation at https://api-docs.deepseek.com/
 const BASE_URL = "https://api.deepseek.com";
+
+// Check API key and display developer-friendly message
+if (!API_KEY) {
+  console.error(
+    "⚠️ VITE_DEEPSEEK_API_KEY is not set. Please add it to your .env file."
+  );
+}
 
 // Helper function to format the initial story prompt
 const formatPrompt = (storyOptions: StoryOptions): string => {
@@ -72,11 +81,18 @@ const formatContinuePrompt = (options: ContinueStoryOptions): string => {
 const generateInitialStory = async (
   storyOptions: StoryOptions
 ): Promise<string> => {
+  if (!API_KEY) {
+    throw new Error(
+      "Deepseek API key is missing. Please add VITE_DEEPSEEK_API_KEY to your .env file and restart the application."
+    );
+  }
+
   try {
     const prompt = formatPrompt(storyOptions);
 
+    // Updating to match the exact endpoint from documentation
     const response = await axios.post(
-      `${BASE_URL}/v1/chat/completions`,
+      `${BASE_URL}/chat/completions`,
       {
         model: "deepseek-chat",
         messages: [
@@ -97,9 +113,27 @@ const generateInitialStory = async (
     );
 
     return response.data.choices[0].message.content;
-  } catch (error) {
+  } catch (error: any) {
+    // Enhanced error handling
+    if (axios.isAxiosError(error)) {
+      if (error.response?.status === 401) {
+        throw new Error(
+          "Authentication failed: Your Deepseek API key is invalid or expired. Please check and update your API key."
+        );
+      } else if (error.response) {
+        throw new Error(
+          `API error (${error.response.status}): ${
+            error.response.data?.error?.message || error.message
+          }`
+        );
+      } else if (error.request) {
+        throw new Error(
+          "Network error: Could not connect to Deepseek API. Please check your internet connection."
+        );
+      }
+    }
     console.error("Error generating story:", error);
-    throw new Error("Failed to generate story");
+    throw new Error(`Failed to generate story: ${error.message}`);
   }
 };
 
@@ -107,11 +141,18 @@ const generateInitialStory = async (
 const continueStory = async (
   options: ContinueStoryOptions
 ): Promise<string> => {
+  if (!API_KEY) {
+    throw new Error(
+      "Deepseek API key is missing. Please add VITE_DEEPSEEK_API_KEY to your .env file and restart the application."
+    );
+  }
+
   try {
     const prompt = formatContinuePrompt(options);
 
+    // Updating to match the exact endpoint from documentation
     const response = await axios.post(
-      `${BASE_URL}/v1/chat/completions`,
+      `${BASE_URL}/chat/completions`,
       {
         model: "deepseek-chat",
         messages: [
@@ -132,9 +173,27 @@ const continueStory = async (
     );
 
     return response.data.choices[0].message.content;
-  } catch (error) {
+  } catch (error: any) {
+    // Enhanced error handling
+    if (axios.isAxiosError(error)) {
+      if (error.response?.status === 401) {
+        throw new Error(
+          "Authentication failed: Your Deepseek API key is invalid or expired. Please check and update your API key."
+        );
+      } else if (error.response) {
+        throw new Error(
+          `API error (${error.response.status}): ${
+            error.response.data?.error?.message || error.message
+          }`
+        );
+      } else if (error.request) {
+        throw new Error(
+          "Network error: Could not connect to Deepseek API. Please check your internet connection."
+        );
+      }
+    }
     console.error("Error continuing story:", error);
-    throw new Error("Failed to continue story");
+    throw new Error(`Failed to continue story: ${error.message}`);
   }
 };
 

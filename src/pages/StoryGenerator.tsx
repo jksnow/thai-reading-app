@@ -23,6 +23,7 @@ const parentalRatings = [
 ];
 
 const readingLevels = [
+  "Age 3-7 (Very Simple vocabulary, short sentences)",
   "Age 7-8 (Simple vocabulary, short sentences)",
   "Age 9-10 (Basic vocabulary, simple sentences)",
   "Age 11-12 (Moderate vocabulary, compound sentences)",
@@ -104,8 +105,12 @@ const StoryGenerator: React.FC = () => {
       setStoryHistory([parsedStory]);
       setCurrentStoryIndex(0);
       setShowChoices(false);
-    } catch (error) {
-      setErrorMessage("Failed to generate story. Please try again.");
+    } catch (error: any) {
+      // Display a more user-friendly error message
+      setErrorMessage(
+        error.message || "Failed to generate story. Please try again."
+      );
+      console.error("Error details:", error);
     } finally {
       setIsGenerating(false);
     }
@@ -132,8 +137,12 @@ const StoryGenerator: React.FC = () => {
       // Update story history
       setStoryHistory((prev) => [...prev, parsedStory]);
       setCurrentStoryIndex((prev) => prev + 1);
-    } catch (error) {
-      setErrorMessage("Failed to continue story. Please try again.");
+    } catch (error: any) {
+      // Display a more user-friendly error message
+      setErrorMessage(
+        error.message || "Failed to continue story. Please try again."
+      );
+      console.error("Error details:", error);
     } finally {
       setIsGenerating(false);
     }
@@ -249,8 +258,41 @@ const StoryGenerator: React.FC = () => {
           </button>
 
           {errorMessage && (
-            <div className="mt-4 p-3 bg-red-100 text-red-700 rounded-md">
-              {errorMessage}
+            <div className="mt-4 p-4 bg-red-100 text-red-700 rounded-md border border-red-300">
+              <p className="font-medium">Error:</p>
+              <p>{errorMessage}</p>
+              {errorMessage.includes("API key") && (
+                <p className="mt-2 text-sm">
+                  To run this app, you need to:
+                  <ol className="list-decimal ml-5 mt-1">
+                    <li>
+                      Create a{" "}
+                      <a
+                        href="https://api-docs.deepseek.com/"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="underline"
+                      >
+                        Deepseek account
+                      </a>{" "}
+                      and get an API key
+                    </li>
+                    <li>
+                      Create a{" "}
+                      <code className="bg-gray-100 px-1 rounded">.env</code>{" "}
+                      file in the project root
+                    </li>
+                    <li>
+                      Add{" "}
+                      <code className="bg-gray-100 px-1 rounded">
+                        VITE_DEEPSEEK_API_KEY=your_key_here
+                      </code>{" "}
+                      to the file
+                    </li>
+                    <li>Restart the development server</li>
+                  </ol>
+                </p>
+              )}
             </div>
           )}
         </div>

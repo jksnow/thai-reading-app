@@ -3,6 +3,7 @@ import { ShaderBackground } from "./components/ShaderBackground";
 import { useColorTransition } from "./utils/useColorTransition";
 import { BrowserRouter, Routes, Route, Link } from "react-router-dom";
 import StoryGenerator from "./pages/StoryGenerator";
+import EnvDebugger from "./components/EnvDebugger";
 
 function App() {
   // Use our custom hook for color management
@@ -95,6 +96,9 @@ function App() {
             />
           </Routes>
         </div>
+
+        {/* Environment Variable Debugger */}
+        <EnvDebugger />
       </div>
     </BrowserRouter>
   );

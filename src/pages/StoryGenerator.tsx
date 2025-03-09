@@ -167,19 +167,19 @@ const StoryGenerator: React.FC = () => {
   return (
     <div className="container mx-auto p-4 max-w-4xl">
       {storyHistory.length === 0 ? (
-        <div className="bg-white rounded-lg shadow-lg p-6">
-          <h1 className="text-2xl font-bold mb-6">
+        <div className="adventure-container p-8 shadow-lg">
+          <h1 className="text-2xl font-bold text-ink mb-6 font-serif text-center">
             Thai Adventure Story Generator
           </h1>
 
           <div className="mb-4">
-            <label className="block text-gray-700 font-medium mb-2">
+            <label className="block text-ink font-medium mb-2">
               Story Genre
             </label>
             <select
               value={genre}
               onChange={(e) => setGenre(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 border border-parchment-dark bg-white text-ink rounded-md focus:outline-none focus:ring-2 focus:ring-accent-tertiary focus:border-accent-tertiary"
             >
               {genres.map((g) => (
                 <option
@@ -193,13 +193,13 @@ const StoryGenerator: React.FC = () => {
           </div>
 
           <div className="mb-4">
-            <label className="block text-gray-700 font-medium mb-2">
+            <label className="block text-ink font-medium mb-2">
               Parental Rating
             </label>
             <select
               value={parentalRating}
               onChange={(e) => setParentalRating(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 border border-parchment-dark bg-white text-ink rounded-md focus:outline-none focus:ring-2 focus:ring-accent-tertiary focus:border-accent-tertiary"
             >
               {parentalRatings.map((r) => (
                 <option
@@ -213,13 +213,13 @@ const StoryGenerator: React.FC = () => {
           </div>
 
           <div className="mb-4">
-            <label className="block text-gray-700 font-medium mb-2">
+            <label className="block text-ink font-medium mb-2">
               Reading Level
             </label>
             <select
               value={readingLevel}
               onChange={(e) => setReadingLevel(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 border border-parchment-dark bg-white text-ink rounded-md focus:outline-none focus:ring-2 focus:ring-accent-tertiary focus:border-accent-tertiary"
             >
               {readingLevels.map((l) => (
                 <option
@@ -233,7 +233,7 @@ const StoryGenerator: React.FC = () => {
           </div>
 
           <div className="mb-6">
-            <label className="block text-gray-700 font-medium mb-2">
+            <label className="block text-ink font-medium mb-2">
               Number of Paragraphs
             </label>
             <input
@@ -242,9 +242,9 @@ const StoryGenerator: React.FC = () => {
               max="5"
               value={paragraphs}
               onChange={(e) => setParagraphs(parseInt(e.target.value))}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 border border-parchment-dark bg-white text-ink rounded-md focus:outline-none focus:ring-2 focus:ring-accent-tertiary focus:border-accent-tertiary"
             />
-            <p className="text-sm text-gray-500 mt-1">
+            <p className="text-sm text-ink/70 mt-1">
               Recommended: 2-4 paragraphs for optimal story length
             </p>
           </div>
@@ -252,13 +252,13 @@ const StoryGenerator: React.FC = () => {
           <button
             onClick={generateInitialStory}
             disabled={isGenerating}
-            className="w-full py-3 px-4 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:bg-blue-300"
+            className="adventure-button-primary w-full py-3 px-4 disabled:bg-accent-primary/50 disabled:cursor-not-allowed"
           >
             {isGenerating ? "Generating Story..." : "Generate Story"}
           </button>
 
           {errorMessage && (
-            <div className="mt-4 p-4 bg-red-100 text-red-700 rounded-md border border-red-300">
+            <div className="mt-4 p-4 bg-danger/10 text-danger rounded-md border border-danger/30">
               <p className="font-medium">Error:</p>
               <p>{errorMessage}</p>
               {errorMessage.includes("API key") && (
@@ -279,12 +279,12 @@ const StoryGenerator: React.FC = () => {
                     </li>
                     <li>
                       Create a{" "}
-                      <code className="bg-gray-100 px-1 rounded">.env</code>{" "}
-                      file in the project root
+                      <code className="bg-white px-1 rounded">env</code> file in
+                      the project root
                     </li>
                     <li>
                       Add{" "}
-                      <code className="bg-gray-100 px-1 rounded">
+                      <code className="bg-white px-1 rounded">
                         VITE_DEEPSEEK_API_KEY=your_key_here
                       </code>{" "}
                       to the file
@@ -297,57 +297,65 @@ const StoryGenerator: React.FC = () => {
           )}
         </div>
       ) : (
-        <div className="bg-white rounded-lg shadow-lg p-6">
+        <div className="adventure-container p-8 shadow-lg">
           <div className="flex justify-between items-center mb-6">
-            <h1 className="text-2xl font-bold">Your Thai Adventure</h1>
+            <h1 className="text-2xl font-bold text-ink font-serif">
+              Your Thai Adventure
+            </h1>
             <button
               onClick={resetStory}
-              className="px-4 py-2 text-sm bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300"
+              className="px-4 py-2 text-sm bg-white text-ink rounded-md hover:bg-parchment-dark border border-parchment-dark"
             >
               New Story
             </button>
           </div>
 
-          <div className="mb-6 p-4 bg-gray-50 rounded-lg whitespace-pre-wrap">
+          <div className="mb-6 p-5 bg-white border border-parchment-dark rounded-lg whitespace-pre-wrap text-ink shadow-inner-light">
             {currentStory.text}
           </div>
 
           {errorMessage && (
-            <div className="mb-4 p-3 bg-red-100 text-red-700 rounded-md">
-              {errorMessage}
+            <div className="mb-4 p-4 bg-danger/10 text-danger rounded-md border border-danger/30">
+              <p className="font-medium">Error:</p>
+              <p>{errorMessage}</p>
             </div>
           )}
 
           {currentStory.isEnding ? (
-            <div className="text-center p-4 bg-yellow-100 rounded-lg mb-4">
+            <div className="text-center p-4 bg-success/10 border border-success/30 text-success rounded-lg mb-4">
               <p className="font-medium text-lg">The End</p>
-              <p className="text-gray-600">Your adventure has concluded.</p>
+              <p className="text-success/80">Your adventure has concluded.</p>
             </div>
           ) : showChoices ? (
             <div className="space-y-3 mt-6">
-              <h2 className="font-medium text-lg">Choose your next action:</h2>
+              <h2 className="font-medium text-lg text-ink font-serif">
+                Choose your next action:
+              </h2>
               {currentStory.choices.map((choice) => (
                 <button
                   key={choice.id}
                   onClick={() => handleChoiceSelect(choice)}
-                  className="block w-full p-4 text-left border border-gray-200 rounded-lg hover:bg-blue-50 hover:border-blue-300 transition-colors"
+                  className="adventure-choice block w-full text-left"
                   disabled={isGenerating}
                 >
-                  {choice.id}. {choice.text}
+                  <span className="font-medium text-accent-primary">
+                    {choice.id}.
+                  </span>{" "}
+                  {choice.text}
                 </button>
               ))}
             </div>
           ) : (
             <button
               onClick={handleShowChoices}
-              className="w-full py-3 px-4 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 focus:outline-none"
+              className="adventure-button-secondary w-full py-3 px-4"
             >
               What Will You Do Next?
             </button>
           )}
 
           {isGenerating && (
-            <div className="text-center mt-4 p-3 bg-blue-100 text-blue-700 rounded-md">
+            <div className="text-center mt-4 p-3 bg-accent-tertiary/10 text-accent-tertiary rounded-md border border-accent-tertiary/30">
               Generating next part of your adventure...
             </div>
           )}

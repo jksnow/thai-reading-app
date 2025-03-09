@@ -29,24 +29,24 @@ function App() {
         </div>
 
         {/* Navigation */}
-        <nav className="relative z-10 bg-white/80 backdrop-blur-md p-4 shadow-md">
-          <div className="container mx-auto flex justify-between items-center">
+        <nav className="relative z-20 bg-white shadow-lg border-b border-parchment-dark">
+          <div className="container mx-auto flex justify-between items-center py-4 px-6">
             <Link
               to="/"
-              className="text-xl font-bold text-blue-600"
+              className="text-xl font-serif font-bold text-accent-primary"
             >
-              Thai Reading App
+              Thai Reading Adventure
             </Link>
             <div className="space-x-4">
               <Link
                 to="/"
-                className="text-gray-700 hover:text-blue-600"
+                className="text-ink hover:text-accent-primary transition-colors"
               >
                 Home
               </Link>
               <Link
                 to="/story-generator"
-                className="text-gray-700 hover:text-blue-600"
+                className="text-ink hover:text-accent-primary transition-colors"
               >
                 Story Generator
               </Link>
@@ -55,37 +55,35 @@ function App() {
         </nav>
 
         {/* Content and Routing */}
-        <div className="relative min-h-screen pt-16 pb-8">
+        <div className="relative min-h-screen pt-20 pb-8">
           <Routes>
             <Route
               path="/"
               element={
                 <div className="container mx-auto p-4 flex items-center justify-center h-[calc(100vh-8rem)]">
-                  <div className="bg-white/80 backdrop-blur-md p-8 rounded-lg shadow-lg text-center max-w-md">
-                    <h1 className="text-3xl font-bold mb-4">
-                      Thai Reading App
+                  <div className="adventure-container p-8 max-w-md shadow-lg">
+                    <h1 className="text-3xl font-bold mb-4 text-ink text-center">
+                      Thai Reading Adventure
                     </h1>
-                    <p className="mb-6 text-gray-600">
+                    <p className="mb-6 text-ink text-center">
                       Improve your Thai reading skills with interactive stories
                       and Choose Your Own Adventure games.
                     </p>
                     <button
-                      className="bg-blue-600 text-white px-6 py-3 rounded-lg shadow-md transition-transform hover:bg-blue-700 hover:scale-105 active:scale-95"
+                      className="adventure-button-tertiary px-6 py-3 w-full mb-4"
                       onClick={changeColorScheme}
                       disabled={isTransitioning}
                     >
-                      <span className="font-semibold">
-                        Change Background Colors
+                      <span className="font-medium">
+                        Change Background Mood
                       </span>
                     </button>
-                    <div className="mt-8">
-                      <Link
-                        to="/story-generator"
-                        className="inline-block bg-green-600 text-white px-6 py-3 rounded-lg shadow-md hover:bg-green-700"
-                      >
-                        Create Your Adventure
-                      </Link>
-                    </div>
+                    <Link
+                      to="/story-generator"
+                      className="adventure-button-primary inline-block w-full text-center py-3 px-6"
+                    >
+                      Create Your Adventure
+                    </Link>
                   </div>
                 </div>
               }

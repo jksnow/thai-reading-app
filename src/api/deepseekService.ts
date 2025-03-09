@@ -16,7 +16,8 @@ interface ContinueStoryOptions {
 // Vite uses import.meta.env instead of process.env
 const API_KEY = import.meta.env.VITE_DEEPSEEK_API_KEY || "";
 // Based on official documentation at https://api-docs.deepseek.com/
-const BASE_URL = "https://api.deepseek.com";
+const BASE_URL =
+  import.meta.env.VITE_DEEPSEEK_BASE_URL || "https://api.deepseek.com/v1";
 
 // Check API key and display developer-friendly message
 if (!API_KEY) {

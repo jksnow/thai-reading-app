@@ -1,42 +1,87 @@
 import { Canvas } from "@react-three/fiber";
 import { ShaderBackground } from "./components/ShaderBackground";
 import { useColorTransition } from "./utils/useColorTransition";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import WelcomePage from "./pages/WelcomePage";
+import LoginPage from "./pages/LoginPage";
+import RegisterPage from "./pages/RegisterPage";
+import DashboardPage from "./pages/DashboardPage";
+import StoryGeneratorPage from "./pages/StoryGeneratorPage";
+import StoryPage from "./pages/StoryPage";
+import DemoPage from "./pages/DemoPage";
+import Navbar from "./components/Navbar";
 
 function App() {
   // Use our custom hook for color management
-  const { colorA, colorB, isTransitioning, changeColorScheme } =
-    useColorTransition({
-      transitionDuration: 2000,
-    });
+  const { colorA, colorB } = useColorTransition({
+    transitionDuration: 2000,
+  });
 
   return (
-    <div className="fixed inset-0 w-full h-full overflow-hidden">
-      {/* Shader Background */}
-      <div className="absolute inset-0 w-full h-full">
-        <Canvas
-          style={{ width: "100%", height: "100%" }}
-          camera={{ position: [0, 0, 1] }}
-        >
-          <ShaderBackground
-            colorA={colorA}
-            colorB={colorB}
-          />
-        </Canvas>
-      </div>
+    <BrowserRouter>
+      <div className="fixed inset-0 w-full h-full overflow-hidden">
+        {/* Shader Background */}
+        <div className="absolute inset-0 w-full h-full">
+          <Canvas
+            style={{ width: "100%", height: "100%" }}
+            camera={{ position: [0, 0, 1] }}
+          >
+            <ShaderBackground
+              colorA={colorA}
+              colorB={colorB}
+            />
+          </Canvas>
+        </div>
 
-      {/* Centered Content */}
-      <div className="absolute inset-0 flex items-center justify-center">
-        <button
-          className="bg-white/80 backdrop-blur-sm px-6 py-4 rounded-lg shadow-lg transition-transform hover:scale-105 active:scale-95"
-          onClick={changeColorScheme}
-          disabled={isTransitioning}
-        >
-          <span className="text-gray-900 text-xl font-semibold">
-            Change Colors
-          </span>
-        </button>
+        {/* Navbar */}
+        <Navbar />
+
+        {/* Content and Routing */}
+        <div className="absolute inset-0 flex items-center justify-center pt-16">
+          <div className="w-full max-w-4xl px-4">
+            <Routes>
+              <Route
+                path="/"
+                element={<WelcomePage />}
+              />
+              <Route
+                path="/login"
+                element={<LoginPage />}
+              />
+              <Route
+                path="/register"
+                element={<RegisterPage />}
+              />
+              <Route
+                path="/demo"
+                element={<DemoPage />}
+              />
+              <Route
+                path="/dashboard"
+                element={<DashboardPage />}
+              />
+              <Route
+                path="/story-generator/:templateId"
+                element={<StoryGeneratorPage />}
+              />
+              <Route
+                path="/story/:storyId"
+                element={<StoryPage />}
+              />
+              <Route
+                path="*"
+                element={
+                  <Navigate
+                    to="/"
+                    replace
+                  />
+                }
+              />
+            </Routes>
+          </div>
+        </div>
       </div>
-    </div>
+    </BrowserRouter>
   );
 }
 

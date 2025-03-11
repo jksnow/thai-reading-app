@@ -36,6 +36,24 @@ body {
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+
+  /* Adventure theme color palette */
+  --color-parchment: #f5f1e6;
+  --color-parchment-dark: #e8e0ca;
+  --color-ink: #2a2522;
+  --color-accent-primary: #7c3626; /* Rustic red */
+  --color-accent-secondary: #2c5545; /* Forest green */
+  --color-accent-tertiary: #4a5e7b; /* Dusty blue */
+  --color-success: #3b6e46;
+  --color-warning: #c2863f;
+  --color-danger: #a13232;
+
+  /* New color palette */
+  --color-saffron: #f4a261;
+  --color-teal: #2a9d8f;
+  --color-offwhite: #f8f1e9;
+  --color-deepred: #e76f51;
+  --color-charcoal: #264653;
 }
 
 a {
@@ -90,19 +108,6 @@ button:focus-visible {
   button {
     background-color: #f9f9f9;
   }
-}
-
-:root {
-  /* Adventure theme color palette */
-  --color-parchment: #f5f1e6;
-  --color-parchment-dark: #e8e0ca;
-  --color-ink: #2a2522;
-  --color-accent-primary: #7c3626; /* Rustic red */
-  --color-accent-secondary: #2c5545; /* Forest green */
-  --color-accent-tertiary: #4a5e7b; /* Dusty blue */
-  --color-success: #3b6e46;
-  --color-warning: #c2863f;
-  --color-danger: #a13232;
 }
 
 @layer base {

@@ -13,6 +13,11 @@ export default {
         success: "var(--color-success)",
         warning: "var(--color-warning)",
         danger: "var(--color-danger)",
+        saffron: "var(--color-saffron)",
+        teal: "var(--color-teal)",
+        offwhite: "var(--color-offwhite)",
+        deepred: "var(--color-deepred)",
+        charcoal: "var(--color-charcoal)",
       },
       keyframes: {
         fadeIn: {

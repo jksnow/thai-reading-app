@@ -5,6 +5,7 @@ import { BrowserRouter, Routes, Route, Link } from "react-router-dom";
 import StoryGenerator from "./pages/StoryGenerator";
 import EnvDebugger from "./components/EnvDebugger";
 import ShaderButton from "./components/ShaderButton";
+import { ThaiTaleLogo, ThaiTaleText } from "./components/ThaiTaleLogo";
 
 function App() {
   // Use our custom hook for color management
@@ -34,9 +35,10 @@ function App() {
           <div className="container mx-auto flex justify-between items-center py-4 px-6">
             <Link
               to="/"
-              className="text-xl font-serif font-bold text-accent-primary"
+              className="flex items-center space-x-2"
             >
-              Thai Reading Adventure
+              <ThaiTaleLogo />
+              <ThaiTaleText />
             </Link>
             <div className="space-x-4">
               <Link

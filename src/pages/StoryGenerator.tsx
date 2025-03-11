@@ -60,6 +60,9 @@ const StoryGenerator: React.FC = () => {
   // Add font size state
   const [fontSize, setFontSize] = useState("medium"); // small, medium, large
 
+  // Add word spacing toggle state
+  const [showWordSpacing, setShowWordSpacing] = useState(true);
+
   // Add translation popup state
   const [selectedWord, setSelectedWord] = useState<string | null>(null);
   const [popupPosition, setPopupPosition] = useState({ x: 0, y: 0 });
@@ -197,26 +200,46 @@ const StoryGenerator: React.FC = () => {
     setSelectedWord(null);
   };
 
+  // Toggle word spacing
+  const toggleWordSpacing = () => {
+    setShowWordSpacing(!showWordSpacing);
+  };
+
   // Render Thai words as clickable spans
   const renderThaiWords = (text: string) => {
     // Split text by spaces (Thai words are already space-separated)
     const words = text.split(" ").filter((word) => word.trim() !== "");
 
+    // Check if the word is standalone punctuation
+    const isPunctuation = (word: string) => /^[.,?!;:]$/.test(word);
+
     return words.map((word, index) => {
       // Clean word of punctuation for display but keep it for rendering
       const displayWord = word.replace(/[.,?!;:]/g, "");
 
+      // Skip rendering standalone punctuation when spacing is off
+      if (!showWordSpacing && isPunctuation(word)) {
+        return null;
+      }
+
+      // Common props for both rendering modes
+      const commonProps = {
+        key: index,
+        onClick: (e: React.MouseEvent) => handleWordClick(displayWord, e),
+      };
+
+      // Apply different styling based on spacing mode
+      const className = showWordSpacing
+        ? "inline-block cursor-pointer hover:bg-parchment transition-colors duration-100 rounded px-0.5 mx-0.5"
+        : "cursor-pointer hover:bg-parchment transition-colors duration-100 rounded";
+
       return (
-        <React.Fragment key={index}>
-          <span
-            className="inline-block cursor-pointer hover:bg-parchment transition-colors duration-100 rounded px-0.5 mx-0.5"
-            onClick={(e) => handleWordClick(displayWord, e)}
-          >
-            {word}
-          </span>
-          {/* Add a space after each word except the last one */}
-          {index < words.length - 1 && " "}
-        </React.Fragment>
+        <span
+          {...commonProps}
+          className={className}
+        >
+          {word}
+        </span>
       );
     });
   };
@@ -370,31 +393,48 @@ const StoryGenerator: React.FC = () => {
             </ShaderButton>
           </div>
 
-          {/* Font size controls */}
-          <div className="mb-4 flex items-center justify-between">
-            <div className="text-ink font-medium">Font Size:</div>
-            <div className="flex space-x-2">
-              <ShaderButton
-                onClick={() => setFontSize("small")}
-                variant={fontSize === "small" ? "tertiary" : "primary"}
-                className="px-3 py-1 text-sm opacity-70 hover:opacity-100"
-              >
-                Small
-              </ShaderButton>
-              <ShaderButton
-                onClick={() => setFontSize("medium")}
-                variant={fontSize === "medium" ? "tertiary" : "primary"}
-                className="px-3 py-1 text-sm opacity-70 hover:opacity-100"
-              >
-                Medium
-              </ShaderButton>
-              <ShaderButton
-                onClick={() => setFontSize("large")}
-                variant={fontSize === "large" ? "tertiary" : "primary"}
-                className="px-3 py-1 text-sm opacity-70 hover:opacity-100"
-              >
-                Large
-              </ShaderButton>
+          {/* Reading controls */}
+          <div className="mb-4 space-y-2">
+            {/* Font size controls */}
+            <div className="flex items-center justify-between">
+              <div className="text-ink font-medium">Font Size:</div>
+              <div className="flex space-x-2">
+                <ShaderButton
+                  onClick={() => setFontSize("small")}
+                  variant={fontSize === "small" ? "tertiary" : "primary"}
+                  className="px-3 py-1 text-sm opacity-70 hover:opacity-100"
+                >
+                  Small
+                </ShaderButton>
+                <ShaderButton
+                  onClick={() => setFontSize("medium")}
+                  variant={fontSize === "medium" ? "tertiary" : "primary"}
+                  className="px-3 py-1 text-sm opacity-70 hover:opacity-100"
+                >
+                  Medium
+                </ShaderButton>
+                <ShaderButton
+                  onClick={() => setFontSize("large")}
+                  variant={fontSize === "large" ? "tertiary" : "primary"}
+                  className="px-3 py-1 text-sm opacity-70 hover:opacity-100"
+                >
+                  Large
+                </ShaderButton>
+              </div>
+            </div>
+
+            {/* Word spacing toggle */}
+            <div className="flex items-center justify-between">
+              <div className="text-ink font-medium">Word Spacing:</div>
+              <div className="flex space-x-2">
+                <ShaderButton
+                  onClick={toggleWordSpacing}
+                  variant={showWordSpacing ? "tertiary" : "primary"}
+                  className="px-3 py-1 text-sm opacity-70 hover:opacity-100"
+                >
+                  {showWordSpacing ? "Spaced Words" : "Connected Words"}
+                </ShaderButton>
+              </div>
             </div>
           </div>
 

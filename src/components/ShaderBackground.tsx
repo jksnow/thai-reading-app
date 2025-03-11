@@ -6,6 +6,7 @@ import * as THREE from "three";
 import "../utils/shaderMaterials";
 // Then import the type
 import type { BalatroPaintShaderMaterialImpl } from "../utils/shaderMaterials";
+import { useAppState } from "../context/AppStateContext";
 
 interface ShaderBackgroundProps {
   colorA: THREE.Color;
@@ -14,20 +15,33 @@ interface ShaderBackgroundProps {
 
 export function ShaderBackground({ colorA, colorB }: ShaderBackgroundProps) {
   const materialRef = useRef<BalatroPaintShaderMaterialImpl>(null);
+  const { state: appState } = useAppState();
 
   // Update shader uniforms on each frame
-  useFrame((state) => {
+  useFrame((frameState) => {
     if (materialRef.current) {
-      // Update time and resolution
-      materialRef.current.uniforms.time.value = state.clock.getElapsedTime();
+      // Only update time if animation is active
+      if (appState.startAnimation) {
+        materialRef.current.uniforms.time.value =
+          frameState.clock.getElapsedTime();
+      }
+
+      // Update resolution
       materialRef.current.uniforms.resolution.value.set(
-        state.size.width,
-        state.size.height
+        frameState.size.width,
+        frameState.size.height
       );
 
       // Update colors
       materialRef.current.uniforms.colorA.value.copy(colorA);
       materialRef.current.uniforms.colorB.value.copy(colorB);
+
+      // Update shader properties from app state
+      materialRef.current.uniforms.spinRotationSpeed.value =
+        appState.spinRotationSpeed;
+      materialRef.current.uniforms.moveSpeed.value = appState.moveSpeed;
+      materialRef.current.uniforms.spinAmount.value = appState.spinAmount;
+      materialRef.current.uniforms.pixelFilter.value = appState.pixelFilter;
     }
   });
 

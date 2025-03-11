@@ -1,20 +1,16 @@
 ---
+description: 
+globs: 
+alwaysApply: false
+---
+---
 description: Application high level description.
 globs: 
 alwaysApply: false
 ---
 Project Description
-The Thai Language Reading Application is an innovative full-stack web application designed to enhance Thai language acquisition through AI-generated, interactive, and gamified storytelling. Built with Node.js and Express on the back-end, React and Tailwind CSS on the front-end, and planned integration with MongoDB for data persistence, the application leverages the Deepseek AI model to generate personalized Thai stories. As of March 9, 2025, the project aims to provide users with a dynamic learning experience where they can select their reading level, story theme, and practice words, receiving stories with separated words for easy interaction. Key features include clicking words for English translations (via Google Translate API), hearing text through Thai text-to-speech (via Play.ht API), and a gamified "choose your own adventure" (CYOA) mode where users make choices in Thai to progress toward an overarching goal, such as finding a treasure or solving a mystery. Additional gamification elements, like collecting words as "word cards" and earning rewards for story completion, further engage users, making language learning both educational and entertaining.
+Thai Tale is a thai reading and practice app that uses AI Deepseek api to create choose your own adventure stories. The AI response will provide at least: A story that takes into account some user parameters such as genre, number of paragraphs, etc, it will provide choices the user can pick to progress the story, and a summary of the story to pass to the next api call for context.
 
-The primary goal is to create a user-centric platform that adapts to individual learning needs, fosters engagement through interactivity and gamification, and supports scalable growth. The application will store user profiles, learned words, and story sessions in MongoDB, ensuring a seamless experience across sessions. By combining modern web technologies with AI-driven content generation, the project seeks to offer a unique and effective tool for Thai language learners worldwide.
+Clicking a thai word will pop up a translation to english from our mongoDB, if no translation can be found, we will send a request to the AI with the word and format requirements and when we get the response, we will add it to our database.
 
-Guidelines for AI Assistance
-To the AI assisting with this project (e.g., Grok 3 or similar models), your role is to support the development process by generating code, suggesting improvements, and ensuring alignment with the project’s objectives, using the following guidelines:
-
-Technology Stack: Adhere strictly to Node.js and Express for server-side logic, React with Tailwind CSS for the front-end, and MongoDB for database operations (to be implemented later). Use Deepseek for story generation (via its API: Deepseek API Documentation), Google Translate for translations (Google Translate Docs), and Play.ht for text-to-speech (Play.ht API). Do not suggest alternative frameworks or technologies unless explicitly requested, ensuring consistency with the defined stack.
-Project Goal: Focus on generating Thai stories that are personalized (based on reading level, theme, and practice words), interactive (supporting translations and audio), and gamified (with CYOA and word collection). Ensure all contributions enhance user engagement and language learning, maintaining a balance between education and entertainment. For CYOA, include an overarching goal in prompts and ensure story coherence across branches.
-Guardrails:
-Language and Content: Generate all story content in Thai with words separated by spaces, avoiding other languages unless translating to English for user interaction.
-API Usage: Validate API integrations follow their respective documentation, securely storing keys in environment variables and optimizing calls to manage costs (e.g., caching frequent translations).
-Gamification Scope: Implement only specified gamification features (word cards, CYOA, rewards) unless additional ideas are requested. Avoid overcomplicating with unapproved elements like leaderboards unless directed.
-Collaboration: When generating code or content, reference the design spec and Cursor IDE rule (if provided) to ensure alignment. If unsure about requirements, ask for clarification rather than assuming, and suggest enhancements only within the project’s scope. For CYOA, ensure prompts to Deepseek include prior context and the story goal to maintain narrative flow.
+Please check for necessary files before updating code

@@ -9,6 +9,8 @@ interface StoryOptions {
 
 interface ContinueStoryOptions {
   storyContext: string;
+  storyGoal: string;
+  summary: string;
   userChoice: string;
 }
 
@@ -87,16 +89,27 @@ const formatPrompt = (storyOptions: StoryOptions): string => {
 // Helper function to format the continue story prompt
 const formatContinuePrompt = (options: ContinueStoryOptions): string => {
   return `
-    Continue the following "choose your own adventure" story in Thai language.
+    Continue the story based on the user's choice.
     
     Story goal:
     ${options.storyGoal}
 
+    Previous story summary:
+    ${options.summary}
+    
     Previous story context:
     ${options.storyContext}
     
-    The reader chose:
+    User selected:
     ${options.userChoice}
+    
+    Continue the story based on this choice. Follow the same formatting requirements.
+    Response must start with:
+    Write [GOAL] and use the same story goal provided above. 
+    Write [STORY] and then continue the story.
+    Write [SUMMARY] to summarize the story so far in english.
+    If the story has reached the goal, write THE END
+    If the story has not reached the goal write [CHOICES] and then write exactly 3 numbered choices to continue the story.
   `;
 };
 

@@ -8,7 +8,7 @@ import {
 } from "../utils/storyUtils";
 
 // example response from deepseekService.generateInitialStory
-// "[คำศัพท์] [ผจญภัย] [ป่า] [สมบัติ]  \n[GOAL] -name-สมชาย ต้อง หา สมบัติ ใน ป่า และ กลับ บ้าน อย่าง ปลอดภัย.  \n[SUMMARY] -name-สมชาย เดิน ทาง เข้า ป่า เพื่อ หา สมบัติ ที่ ถูก ซ่อน ไว้. เขา ต้อง เผชิญ กับ อุปสรรค และ ตัดสินใจ อย่าง ฉลาด เพื่อ ไป ถึง เป้าหมาย.  \n\n-name-สมชาย ยืน อยู่ ที่ ทาง เข้า ป่า. เขา มอง ไป ที่ แผนที่ เก่า ๆ ใน มือ. แผนที่ บอก ว่า สมบัติ อยู่ ที่ ต้นไม้ ใหญ่ ตรง กลาง ป่า. -name-สมชาย เริ่ม เดิน เข้า ไป ใน ป่า.  \n\nระหว่าง ทาง เขา เห็น ทาง แยก. ทาง ซ้าย มี เสียง นก ร้อง. ทาง ขวา มี แสง สว่าง วิบ วิบ. -name-สมชาย ต้อง ตัดสินใจ ว่า จะ ไป ทาง ไหน.  \n\n[CHOICES]  \n1. เดิน ไป ทาง ซ้าย ฟัง เสียง นก.  \n2. เดิน ไป ทาง ขวา ตาม แสง สว่าง.  \n3. หยุด นิ่ง และ ฟัง เสียง รอบ ตัว."
+// "[GOAL]  \nThe protagonist must uncover the truth behind the haunted house and escape before the malevolent spirit claims their soul.\n\n[STORY]  \n[name]อ๊อด เดิน เข้า ไป ใน บ้าน เก่า แห่ง หนึ่ง ที่ เพื่อน บอก ว่า มี ผี สิง. ทุก อย่าง ดู เงียบ เกิน ไป. [name]อ๊อด เห็น เงา หนึ่ง เคลื่อน ไหว ที่ มุม ห้อง. เขา รู้สึก หนาว สั้น. ตรง กำแพง มี รูป วาด เก่า ๆ ที่ ตา ใน รูป ดู เหมือน จะ มอง มา ที่ เขา.  \n\n[name]อ๊อด ได้ยิน เสียง หัวเราะ เบา ๆ จาก ห้อง ข้าง บน. เสียง นั้น ทำให้ เขา รู้สึก กลัว. เขา เริ่ม เดิน ไป ที่ บันได เพื่อ ขึ้น ไป ดู ที่ ห้อง ข้าง บน. แต่ ขณะ เดิน ขึ้น บันได เขา เห็น รอย เลือด ที่ ไหล ลง มา จาก ขั้น บันได.  \n\n[SUMMARY]  \nAod explores an old, supposedly haunted house. He notices eerie shadows, unsettling paintings, and hears faint laughter. As he climbs the stairs to investigate, he sees blood dripping down the steps, heightening the tension and mystery.  \n\n[CHOICES]  \n1. เดิน ขึ้น ไป ต่อ ที่ ห้อง ข้าง บน.  \n2. วิ่ง กลับ ออก ไป จาก บ้าน ทันที.  \n3. เปิด ประตู ห้อง ที่ อยู่ ข้าง ๆ เพื่อ ดู ว่า มี อะไร อยู่."
 
 export function useStoryGeneration() {
   const [isGenerating, setIsGenerating] = useState(false);
@@ -57,11 +57,12 @@ export function useStoryGeneration() {
     try {
       // Get the current story context
       const previousStories = storyHistory.slice(0, currentStoryIndex + 1);
-      const storyGoal = storyHistory[currentStoryIndex].goal;
+      const currentStory = storyHistory[currentStoryIndex];
       const storyContext = previousStories.map((s) => s.text).join("\n");
 
       const response = await deepseekService.continueStory({
-        storyGoal,
+        storyGoal: currentStory.goal,
+        summary: currentStory.summary,
         storyContext,
         userChoice: choiceText,
       });

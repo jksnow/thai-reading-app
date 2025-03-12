@@ -7,8 +7,6 @@ interface AppState {
   moveSpeed: number;
   spinAmount: number;
   pixelFilter: number;
-  showIntro: boolean;
-  initialAnimationComplete: boolean;
 }
 
 // Define the context interface including state and setter functions
@@ -17,14 +15,10 @@ interface AppStateContextType {
   setState: React.Dispatch<React.SetStateAction<AppState>>;
   // Helper functions for common operations
   updateShaderProperty: (
-    key: keyof Omit<
-      AppState,
-      "startAnimation" | "showIntro" | "initialAnimationComplete"
-    >,
+    key: keyof Omit<AppState, "startAnimation">,
     value: number
   ) => void;
   toggleAnimation: () => void;
-  completeIntroAnimation: () => void;
 }
 
 // Set default values
@@ -34,8 +28,6 @@ const defaultState: AppState = {
   moveSpeed: 3.0,
   spinAmount: 0.25,
   pixelFilter: 1500.0,
-  showIntro: true,
-  initialAnimationComplete: false,
 };
 
 // Create the context
@@ -51,10 +43,7 @@ export const AppStateProvider: React.FC<{ children: ReactNode }> = ({
 
   // Helper function to update shader properties
   const updateShaderProperty = (
-    key: keyof Omit<
-      AppState,
-      "startAnimation" | "showIntro" | "initialAnimationComplete"
-    >,
+    key: keyof Omit<AppState, "startAnimation">,
     value: number
   ) => {
     setState((prev) => ({ ...prev, [key]: value }));
@@ -65,24 +54,9 @@ export const AppStateProvider: React.FC<{ children: ReactNode }> = ({
     setState((prev) => ({ ...prev, startAnimation: !prev.startAnimation }));
   };
 
-  // Mark intro animation as complete
-  const completeIntroAnimation = () => {
-    setState((prev) => ({
-      ...prev,
-      showIntro: false,
-      initialAnimationComplete: true,
-    }));
-  };
-
   return (
     <AppStateContext.Provider
-      value={{
-        state,
-        setState,
-        updateShaderProperty,
-        toggleAnimation,
-        completeIntroAnimation,
-      }}
+      value={{ state, setState, updateShaderProperty, toggleAnimation }}
     >
       {children}
     </AppStateContext.Provider>

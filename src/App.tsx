@@ -7,7 +7,6 @@ import ShaderButton from "./components/ShaderButton";
 import { AppStateProvider } from "./context/AppStateContext";
 import { GeneralSettings } from "./components/GeneralSettings";
 import { SettingsIcon } from "./components/SettingsIcon";
-import { IntroAnimation } from "./components/IntroAnimation";
 import { useState } from "react";
 
 function App() {
@@ -37,11 +36,8 @@ function App() {
             </Canvas>
           </div>
 
-          {/* Intro Animation */}
-          <IntroAnimation />
-
           {/* Settings Icon */}
-          <div className="fixed top-4 right-4 z-30">
+          <div className="fixed top-4 right-4 z-30 text-white">
             <SettingsIcon onClick={() => setIsSettingsOpen(true)} />
           </div>
 

@@ -23,7 +23,7 @@ export const GeneralSettings: React.FC<GeneralSettingsProps> = ({
     <>
       {/* Modal backdrop */}
       <div
-        className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40"
+        className="fixed inset-0 bg-gray-800/70 z-40"
         onClick={onClose}
       />
 

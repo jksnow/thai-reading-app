@@ -12,7 +12,7 @@ export const SettingsIcon: React.FC<SettingsIconProps> = ({
   return (
     <button
       onClick={onClick}
-      className={`p-2 hover:bg-white/20 rounded-full transition-colors ${className}`}
+      className={`p-2 bg-transparent hover:bg-black/30 rounded-full transition-colors focus:outline-none focus:ring-0 border-0 hover:border-0 ${className}`}
       aria-label="Open Settings"
     >
       <svg

@@ -3,6 +3,7 @@ import { ShaderBackground } from "./components/ShaderBackground";
 import { useColorTransition } from "./utils/useColorTransition";
 import { BrowserRouter, Routes, Route, Link } from "react-router-dom";
 import StoryGenerator from "./pages/StoryGenerator";
+import StoryModifierSelection from "./pages/StoryModifierSelection";
 import ShaderButton from "./components/ShaderButton";
 import { AppStateProvider } from "./context/AppStateContext";
 import { GeneralSettings } from "./components/GeneralSettings";
@@ -57,7 +58,7 @@ function App() {
                         stories and Choose Your Own Adventure games.
                       </p>
                       <Link
-                        to="/story-generator"
+                        to="/modifier-selection"
                         className="block w-full"
                       >
                         <ShaderButton
@@ -71,6 +72,10 @@ function App() {
                     </div>
                   </div>
                 }
+              />
+              <Route
+                path="/modifier-selection"
+                element={<StoryModifierSelection />}
               />
               <Route
                 path="/story-generator"

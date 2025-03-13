@@ -33,7 +33,7 @@ const ColorSchemeCarousel: React.FC = () => {
       onNext={handleNext}
       renderItem={renderColorScheme}
       disabled={isColorTransitioning}
-      variant="blue"
+      variant="purple"
     />
   );
 };

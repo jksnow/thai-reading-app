@@ -12,6 +12,7 @@ export interface CarouselProps<T> {
   containerStyle?: React.CSSProperties;
   containerClassName?: string;
   showDots?: boolean;
+  fullWidth?: boolean;
 }
 
 const Carousel = <T,>({
@@ -21,10 +22,11 @@ const Carousel = <T,>({
   onNext,
   renderItem,
   disabled = false,
-  variant = "blue",
+  variant = "purple",
   containerStyle = {},
   containerClassName = "bg-gray-800",
   showDots = true,
+  fullWidth = true,
 }: CarouselProps<T>) => {
   // Generate dots for navigation
   const renderDots = () => {
@@ -39,7 +41,9 @@ const Carousel = <T,>({
   };
 
   return (
-    <div className="flex items-center w-full gap-2">
+    <div
+      className={`flex items-center ${fullWidth ? "w-full" : "w-auto"} gap-2`}
+    >
       {/* Left arrow button */}
       <div className="flex-shrink-0">
         <ButtonOptions
@@ -63,7 +67,7 @@ const Carousel = <T,>({
       >
         {items.length > 0 && renderItem(items[currentIndex])}
         {showDots && (
-          <div className="flex justify-center mt-2">{renderDots()}</div>
+          <div className="flex justify-center mt-1">{renderDots()}</div>
         )}
       </div>
 

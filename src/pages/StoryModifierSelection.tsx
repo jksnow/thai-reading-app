@@ -5,6 +5,7 @@ import storyModifiers, {
 } from "../data/storyModifiers";
 import ShaderButton from "../components/ShaderButton";
 import { useAppState } from "../context/AppStateContext";
+import GlobalButtonContainer from "../components/GlobalButtonContainer";
 
 // Add global styles
 const globalStyles = `
@@ -296,7 +297,7 @@ const StoryModifierSelection = () => {
   }, []);
 
   return (
-    <div className="container mx-auto px-4 flex flex-col items-center justify-center h-[calc(100vh-8rem)] overflow-hidden">
+    <div className="container mx-auto px-4 flex flex-col items-center justify-center h-[calc(100vh-8rem)]">
       <h1 className="text-4xl font-bold mb-10 text-white">
         Choose 3 Modifiers
       </h1>
@@ -394,6 +395,8 @@ const StoryModifierSelection = () => {
       >
         Continue to Story Generator
       </ShaderButton>
+
+      <GlobalButtonContainer />
     </div>
   );
 };

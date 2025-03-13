@@ -6,6 +6,7 @@ import { StoryControls, StoryDisplay } from "../components/story";
 import TranslationPopup from "../components/TranslationPopup";
 import StoryLoadingScreen from "../components/StoryLoadingScreen";
 import { useAppState } from "../context/AppStateContext";
+import GlobalButtonContainer from "../components/GlobalButtonContainer";
 
 const StoryGenerator: React.FC = () => {
   // Access the app state context for selected modifiers, generation status and navigation
@@ -223,6 +224,8 @@ const StoryGenerator: React.FC = () => {
           />
         )}
       </div>
+
+      <GlobalButtonContainer />
     </div>
   );
 };

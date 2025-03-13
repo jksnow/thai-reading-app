@@ -5,6 +5,8 @@ import {
 } from "../utils/storyUtils";
 import { setApiResponseTimeCallback } from "../api/deepseekService";
 import responseTimeService from "../api/responseTimeService";
+import { useColorTransition } from "../utils/useColorTransition";
+import * as THREE from "three";
 
 // Define the section types
 export type AppSection = "home" | "modifier-selection" | "story-generator";
@@ -18,6 +20,9 @@ interface AppState {
   estimatedResponseTime: number;
   selectedModifiers: string[];
   currentSection: AppSection;
+  colorA: THREE.Color;
+  colorB: THREE.Color;
+  isColorTransitioning: boolean;
   setCurrentStory: (story: Story | null) => void;
   addStoryToHistory: (story: Story) => void;
   resetStory: () => void;
@@ -26,6 +31,7 @@ interface AppState {
   recordApiResponseTime: (timeInMs: number) => void;
   getEstimatedResponseTime: () => number;
   setCurrentSection: (section: AppSection) => void;
+  changeColorScheme: () => void;
 }
 
 // Define the context interface including state and setter functions
@@ -58,6 +64,9 @@ const defaultState: AppState = {
   estimatedResponseTime: 8000, // Default 8 seconds
   selectedModifiers: [],
   currentSection: "home", // Default to home screen
+  colorA: new THREE.Color(0.5, 0.5, 0.5),
+  colorB: new THREE.Color(0.5, 0.5, 0.5),
+  isColorTransitioning: false,
   setCurrentStory: () => {},
   addStoryToHistory: () => {},
   resetStory: () => {},
@@ -66,6 +75,7 @@ const defaultState: AppState = {
   recordApiResponseTime: () => {},
   getEstimatedResponseTime: () => 8000,
   setCurrentSection: () => {},
+  changeColorScheme: () => {},
 };
 
 // Create the context
@@ -85,6 +95,16 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({
     useState<number>(8000);
   // State to track current section
   const [currentSection, setCurrentSection] = useState<AppSection>("home");
+
+  // Use color transition hook
+  const {
+    colorA,
+    colorB,
+    isTransitioning: isColorTransitioning,
+    changeColorScheme,
+  } = useColorTransition({
+    transitionDuration: 2000,
+  });
 
   // Fetch the initial estimated response time from the database
   useEffect(() => {
@@ -172,6 +192,9 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({
     estimatedResponseTime,
     selectedModifiers,
     currentSection,
+    colorA,
+    colorB,
+    isColorTransitioning,
     setCurrentStory,
     addStoryToHistory,
     resetStory,
@@ -180,6 +203,7 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({
     recordApiResponseTime,
     getEstimatedResponseTime,
     setCurrentSection,
+    changeColorScheme,
   };
 
   return (

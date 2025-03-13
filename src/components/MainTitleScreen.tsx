@@ -1,8 +1,7 @@
 import React from "react";
 import thaiTaleLogo from "../assets/ThaiTaleLogo.png";
-import ButtonOptions from "./ButtonOptions";
-import ButtonContainer from "./ButtonContainer";
 import { useAppState } from "../context/AppStateContext";
+import GlobalButtonContainer from "./GlobalButtonContainer";
 
 const MainTitleScreen: React.FC = () => {
   const { setCurrentSection } = useAppState();
@@ -29,19 +28,10 @@ const MainTitleScreen: React.FC = () => {
         </h1>
       </div>
 
-      {/* Button Container */}
-      <ButtonContainer>
-        <ButtonOptions
-          onClick={() => setCurrentSection("modifier-selection")}
-          variant="primary"
-        >
-          START
-        </ButtonOptions>
-
-        <ButtonOptions variant="secondary">OPTIONS</ButtonOptions>
-
-        <ButtonOptions variant="tertiary">COLLECTION</ButtonOptions>
-      </ButtonContainer>
+      {/* Global Button Container positioned in center for home screen */}
+      <div className="flex justify-center">
+        <GlobalButtonContainer />
+      </div>
     </div>
   );
 };

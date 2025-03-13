@@ -5,14 +5,10 @@ import SettingsModal from "./SettingsModal";
 
 interface OptionsModalContentProps {
   onClose: () => void;
-  onChangeBackgroundMood: () => void;
-  isTransitioning: boolean;
 }
 
 const OptionsModalContent: React.FC<OptionsModalContentProps> = ({
   onClose,
-  onChangeBackgroundMood,
-  isTransitioning,
 }) => {
   const { setCurrentSection } = useAppState();
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
@@ -75,8 +71,6 @@ const OptionsModalContent: React.FC<OptionsModalContentProps> = ({
       <SettingsModal
         isOpen={isSettingsOpen}
         onClose={closeSettings}
-        onChangeBackgroundMood={onChangeBackgroundMood}
-        isTransitioning={isTransitioning}
         isChildModal={true}
       />
     </>

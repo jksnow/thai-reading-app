@@ -6,6 +6,7 @@ import {
 import { setApiResponseTimeCallback } from "../api/deepseekService";
 import responseTimeService from "../api/responseTimeService";
 import { useColorTransition } from "../utils/useColorTransition";
+import { BALATRO_COLOR_SCHEMES } from "../utils/colorSchemes";
 import * as THREE from "three";
 
 // Define the section types
@@ -23,6 +24,9 @@ interface AppState {
   colorA: THREE.Color;
   colorB: THREE.Color;
   isColorTransitioning: boolean;
+  currentSchemeIndex: number;
+  colorSchemeName: string;
+  colorSchemeCount: number;
   setCurrentStory: (story: Story | null) => void;
   addStoryToHistory: (story: Story) => void;
   resetStory: () => void;
@@ -32,6 +36,7 @@ interface AppState {
   getEstimatedResponseTime: () => number;
   setCurrentSection: (section: AppSection) => void;
   changeColorScheme: () => void;
+  setColorScheme: (index: number) => void;
 }
 
 // Define the context interface including state and setter functions
@@ -67,6 +72,9 @@ const defaultState: AppState = {
   colorA: new THREE.Color(0.5, 0.5, 0.5),
   colorB: new THREE.Color(0.5, 0.5, 0.5),
   isColorTransitioning: false,
+  currentSchemeIndex: 0,
+  colorSchemeName: BALATRO_COLOR_SCHEMES[0].name,
+  colorSchemeCount: BALATRO_COLOR_SCHEMES.length,
   setCurrentStory: () => {},
   addStoryToHistory: () => {},
   resetStory: () => {},
@@ -76,6 +84,7 @@ const defaultState: AppState = {
   getEstimatedResponseTime: () => 8000,
   setCurrentSection: () => {},
   changeColorScheme: () => {},
+  setColorScheme: () => {},
 };
 
 // Create the context
@@ -102,9 +111,17 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({
     colorB,
     isTransitioning: isColorTransitioning,
     changeColorScheme,
+    setColorScheme,
+    currentSchemeIndex,
   } = useColorTransition({
-    transitionDuration: 2000,
+    transitionDuration: 800,
   });
+
+  // Get the name of the current color scheme
+  const colorSchemeName = BALATRO_COLOR_SCHEMES[currentSchemeIndex].name;
+
+  // Count of color schemes
+  const colorSchemeCount = BALATRO_COLOR_SCHEMES.length;
 
   // Fetch the initial estimated response time from the database
   useEffect(() => {
@@ -195,6 +212,9 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({
     colorA,
     colorB,
     isColorTransitioning,
+    currentSchemeIndex,
+    colorSchemeName,
+    colorSchemeCount,
     setCurrentStory,
     addStoryToHistory,
     resetStory,
@@ -204,6 +224,7 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({
     getEstimatedResponseTime,
     setCurrentSection,
     changeColorScheme,
+    setColorScheme,
   };
 
   return (

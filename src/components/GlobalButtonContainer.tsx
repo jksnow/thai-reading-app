@@ -6,12 +6,7 @@ import ModalContainer from "./ModalContainer";
 import OptionsModalContent from "./OptionsModalContent";
 
 const GlobalButtonContainer: React.FC = () => {
-  const {
-    currentSection,
-    setCurrentSection,
-    changeColorScheme,
-    isColorTransitioning,
-  } = useAppState();
+  const { currentSection, setCurrentSection } = useAppState();
 
   const [isOptionsModalOpen, setIsOptionsModalOpen] = useState(false);
 
@@ -65,11 +60,7 @@ const GlobalButtonContainer: React.FC = () => {
         onClose={closeOptionsModal}
         size="small"
       >
-        <OptionsModalContent
-          onClose={closeOptionsModal}
-          onChangeBackgroundMood={changeColorScheme}
-          isTransitioning={isColorTransitioning}
-        />
+        <OptionsModalContent onClose={closeOptionsModal} />
       </ModalContainer>
     </>
   );

@@ -1,9 +1,8 @@
 import React, { ReactNode } from "react";
-import { Link } from "react-router-dom";
 
 interface ButtonOptionsProps {
   children: ReactNode;
-  to?: string;
+  to?: string; // Keep for backward compatibility
   variant?: "primary" | "secondary" | "tertiary";
   backgroundColor?: string;
   fontSize?: string;
@@ -52,7 +51,7 @@ const ButtonOptions: React.FC<ButtonOptionsProps> = ({
     app-button-reset
   `;
 
-  // Button content
+  // Button content with onClick handler
   const buttonContent = (
     <button
       className={buttonStyles}
@@ -67,19 +66,7 @@ const ButtonOptions: React.FC<ButtonOptionsProps> = ({
     </button>
   );
 
-  // If "to" prop is provided, wrap with Link component
-  if (to) {
-    return (
-      <Link
-        to={to}
-        className="flex-1"
-      >
-        {buttonContent}
-      </Link>
-    );
-  }
-
-  // Otherwise just return the button
+  // Just return the button in a div
   return <div className="flex-1">{buttonContent}</div>;
 };
 

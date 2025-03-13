@@ -1,5 +1,4 @@
 import { useState, useEffect, useRef, useMemo } from "react";
-import { useNavigate } from "react-router-dom";
 import storyModifiers, {
   StoryModifier,
   ModifierCategory,
@@ -223,8 +222,8 @@ const getCategoryStyles = (category: string) => {
 };
 
 const StoryModifierSelection = () => {
-  const navigate = useNavigate();
-  const { selectedModifiers, setSelectedModifiers } = useAppState();
+  const { selectedModifiers, setSelectedModifiers, setCurrentSection } =
+    useAppState();
   const [randomModifiers, setRandomModifiers] = useState<StoryModifier[]>([]);
   const [animationComplete, setAnimationComplete] = useState(false);
 
@@ -273,7 +272,7 @@ const StoryModifierSelection = () => {
 
   const handleContinue = () => {
     // Navigate to story generator, the selected modifiers are now in context
-    navigate("/story-generator");
+    setCurrentSection("story-generator");
   };
 
   // Create stars component - memoized to prevent recreation on every render
@@ -330,7 +329,7 @@ const StoryModifierSelection = () => {
                 className={`card bg-gradient-to-br ${
                   styles.background
                 } rounded-xl shadow-xl w-full h-full
-                  transform preserve-3d relative
+                  transform preserve-3d relative drop-shadow-[7px_7px_5px_rgba(10,10,10,0.8)]
                   ${
                     isSelected(modifier.id)
                       ? "translate-y-[-15px] rotate-y-0 rotate-x-0 scale-105 border-2 border-yellow-400"

@@ -6,6 +6,9 @@ import {
 import { setApiResponseTimeCallback } from "../api/deepseekService";
 import responseTimeService from "../api/responseTimeService";
 
+// Define the section types
+export type AppSection = "home" | "modifier-selection" | "story-generator";
+
 // Define the initial state interface
 interface AppState {
   currentStory: Story | null;
@@ -14,6 +17,7 @@ interface AppState {
   apiResponseTimes: number[];
   estimatedResponseTime: number;
   selectedModifiers: string[];
+  currentSection: AppSection;
   setCurrentStory: (story: Story | null) => void;
   addStoryToHistory: (story: Story) => void;
   resetStory: () => void;
@@ -21,6 +25,7 @@ interface AppState {
   setSelectedModifiers: (modifiers: string[]) => void;
   recordApiResponseTime: (timeInMs: number) => void;
   getEstimatedResponseTime: () => number;
+  setCurrentSection: (section: AppSection) => void;
 }
 
 // Define the context interface including state and setter functions
@@ -52,6 +57,7 @@ const defaultState: AppState = {
   apiResponseTimes: [],
   estimatedResponseTime: 8000, // Default 8 seconds
   selectedModifiers: [],
+  currentSection: "home", // Default to home screen
   setCurrentStory: () => {},
   addStoryToHistory: () => {},
   resetStory: () => {},
@@ -59,6 +65,7 @@ const defaultState: AppState = {
   setSelectedModifiers: () => {},
   recordApiResponseTime: () => {},
   getEstimatedResponseTime: () => 8000,
+  setCurrentSection: () => {},
 };
 
 // Create the context
@@ -76,6 +83,8 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({
   // Default estimated time to 8 seconds if no data yet
   const [estimatedResponseTime, setEstimatedResponseTime] =
     useState<number>(8000);
+  // State to track current section
+  const [currentSection, setCurrentSection] = useState<AppSection>("home");
 
   // Fetch the initial estimated response time from the database
   useEffect(() => {
@@ -162,6 +171,7 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({
     apiResponseTimes,
     estimatedResponseTime,
     selectedModifiers,
+    currentSection,
     setCurrentStory,
     addStoryToHistory,
     resetStory,
@@ -169,6 +179,7 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({
     setSelectedModifiers,
     recordApiResponseTime,
     getEstimatedResponseTime,
+    setCurrentSection,
   };
 
   return (

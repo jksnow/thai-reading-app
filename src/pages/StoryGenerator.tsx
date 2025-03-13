@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useNavigate } from "react-router-dom";
 import { useStoryGeneration } from "../hooks/useStoryGeneration";
 import { getFontSizeClass, StoryParams } from "../utils/storyUtils";
 import { StoryControls, StoryDisplay } from "../components/story";
@@ -9,9 +8,9 @@ import StoryLoadingScreen from "../components/StoryLoadingScreen";
 import { useAppState } from "../context/AppStateContext";
 
 const StoryGenerator: React.FC = () => {
-  // Access the app state context for selected modifiers and generation status
-  const { selectedModifiers, setIsGeneratingStory } = useAppState();
-  const navigate = useNavigate();
+  // Access the app state context for selected modifiers, generation status and navigation
+  const { selectedModifiers, setIsGeneratingStory, setCurrentSection } =
+    useAppState();
 
   // Use a ref to track previous generation state
   const prevIsGeneratingRef = useRef<boolean | null>(null);
@@ -51,9 +50,9 @@ const StoryGenerator: React.FC = () => {
   // Redirect to modifier selection if no modifiers are selected
   useEffect(() => {
     if (selectedModifiers.length === 0) {
-      navigate("/modifier-selection");
+      setCurrentSection("modifier-selection");
     }
-  }, [selectedModifiers, navigate]);
+  }, [selectedModifiers, setCurrentSection]);
 
   // Update app state only when isGenerating actually changes
   useEffect(() => {

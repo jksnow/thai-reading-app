@@ -2,8 +2,6 @@ import * as THREE from "three";
 
 // Authentic Balatro color schemes
 export const BALATRO_COLOR_SCHEMES = [
-  // Red outside blue inside
-  // Green scheme
   {
     colorA: new THREE.Color(0.5, 0.1, 0.5), // Dark purple
     colorB: new THREE.Color(0.15, 0.6, 0.18), // Dark green

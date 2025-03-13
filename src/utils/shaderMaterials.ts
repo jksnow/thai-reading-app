@@ -22,15 +22,15 @@ export const BalatroPaintShaderMaterial = shaderMaterial(
   {
     time: 0,
     resolution: new THREE.Vector2(1, 1),
-    colorA: new THREE.Color(0.13, 0.13, 0.2), // Primary color (dark blue in Balatro)
-    colorB: new THREE.Color(0.05, 0.1, 0.2), // Secondary color (darker blue in Balatro)
-    colorC: new THREE.Color(0.086, 0.137, 0.145), // Background color (very dark in Balatro)
-    spinRotationSpeed: 0.5,
-    moveSpeed: 3.0,
-    contrast: 2.5,
-    lighting: 0.4,
-    spinAmount: 0.25,
-    pixelFilter: 1500.0, // 740.0 default,
+    colorA: new THREE.Color(0.1, 0.1, 0.1), // Primary color (dark blue in Balatro)
+    colorB: new THREE.Color(0.1, 0.1, 0.1), // Secondary color (darker blue in Balatro)
+    colorC: new THREE.Color(0.05, 0.05, 0.05), // Background color (very dark in Balatro)
+    spinRotationSpeed: 0.5, // 0.5 default
+    moveSpeed: 3.0, // 3.0 default
+    contrast: 2.5, // 2.5 default
+    lighting: 0.4, // 0.4 default
+    spinAmount: 0.25, // 0.25 default
+    pixelFilter: 1300.0, // 1300.0 default
   },
   // Vertex shader
   `

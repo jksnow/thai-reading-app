@@ -1,8 +1,6 @@
-import React, { useRef, useEffect } from "react";
+import React, { useRef, useEffect, useState } from "react";
 import { useFrame, Canvas, useThree } from "@react-three/fiber";
-import { Text, useTexture } from "@react-three/drei";
 import * as THREE from "three";
-import { useAppState } from "../context/AppStateContext";
 
 // Shader for dissolution effect
 const fragmentShader = `
@@ -40,14 +38,37 @@ interface LogoMaterialProps {
   time: { value: number };
 }
 
+// A simplified version of the IntroAnimation that doesn't depend on context
+export const IntroAnimation: React.FC = () => {
+  const [showIntro, setShowIntro] = useState(true);
+
+  // Auto-hide the intro after 3.5 seconds
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setShowIntro(false);
+    }, 3500);
+
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (!showIntro) return null;
+
+  return (
+    <div className="fixed inset-0 z-50 pointer-events-none">
+      <Canvas>
+        <IntroCard onComplete={() => setShowIntro(false)} />
+      </Canvas>
+    </div>
+  );
+};
+
 // Card component with dissolution effect
-const IntroCard = () => {
-  const { state, completeIntroAnimation } = useAppState();
+const IntroCard = ({ onComplete }: { onComplete: () => void }) => {
   const { viewport } = useThree();
   const meshRef = useRef<THREE.Mesh>(null);
   const materialRef = useRef<THREE.ShaderMaterial>(null);
-  const [startTime] = React.useState(Date.now());
-  const [animationComplete, setAnimationComplete] = React.useState(false);
+  const [startTime] = useState(Date.now());
+  const [animationComplete, setAnimationComplete] = useState(false);
   const logoTexture = useRef<THREE.CanvasTexture | null>(null);
 
   // Create canvas texture for ThaiTale logo
@@ -99,7 +120,7 @@ const IntroCard = () => {
     // Animation complete
     else if (elapsed >= 3 && !animationComplete) {
       setAnimationComplete(true);
-      completeIntroAnimation();
+      onComplete();
     }
   });
 
@@ -121,19 +142,5 @@ const IntroCard = () => {
         }}
       />
     </mesh>
-  );
-};
-
-export const IntroAnimation: React.FC = () => {
-  const { state } = useAppState();
-
-  if (!state.showIntro) return null;
-
-  return (
-    <div className="fixed inset-0 z-50 pointer-events-none">
-      <Canvas>
-        <IntroCard />
-      </Canvas>
-    </div>
   );
 };

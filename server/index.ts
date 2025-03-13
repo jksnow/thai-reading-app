@@ -1,8 +1,18 @@
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
-import { pingDatabase } from "./db";
+import { pingDatabase, getClient } from "./db";
 import { translateWord } from "./controllers/dictionaryController";
+import {
+  getResponseTimeData,
+  updateResponseTimeData,
+} from "./controllers/responseTimeController";
+import { fileURLToPath } from "url";
+import path from "path";
+
+// ES Module equivalent of __dirname
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 dotenv.config();
 
@@ -34,17 +44,23 @@ app.get("/api/db-ping", async (req, res) => {
 // Thai dictionary translation endpoint
 app.get("/api/translate", translateWord);
 
-app.listen(port, () => {
-  console.log(`Server running on port ${port}`);
+// Response times API endpoints
+app.get("/api/response-times", getResponseTimeData);
+app.post("/api/response-times", updateResponseTimeData);
 
-  // Test database connection on startup
-  pingDatabase()
-    .then((result) => {
-      if (!result.success) {
-        console.warn("Warning: MongoDB connection test failed on startup");
-      }
-    })
-    .catch((err) => {
-      console.error("Error testing MongoDB connection on startup:", err);
+// Initialize MongoDB connection and start server
+async function startServer() {
+  try {
+    // Connect to MongoDB at startup
+    await getClient();
+
+    app.listen(port, () => {
+      console.log(`Server running on port ${port}`);
     });
-});
+  } catch (error) {
+    console.error("Failed to start server:", error);
+    process.exit(1);
+  }
+}
+
+startServer();

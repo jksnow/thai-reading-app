@@ -11,15 +11,37 @@ if (!uri) {
   process.exit(1);
 }
 
+// Create a new MongoClient
 const client = new MongoClient(uri);
+
+// Variable to track connection status
+let isConnected = false;
+
+/**
+ * Get the MongoDB client and ensure it's connected
+ * @returns Connected MongoDB client
+ */
+export async function getClient() {
+  if (!isConnected) {
+    try {
+      await client.connect();
+      isConnected = true;
+      console.log("Connected to MongoDB");
+    } catch (error) {
+      console.error("Error connecting to MongoDB:", error);
+      throw error;
+    }
+  }
+  return client;
+}
 
 export async function pingDatabase() {
   try {
-    // Connect to the MongoDB server
-    await client.connect();
+    // Get the connected client
+    const connectedClient = await getClient();
 
     // Send a ping to confirm a successful connection
-    await client.db("admin").command({ ping: 1 });
+    await connectedClient.db("admin").command({ ping: 1 });
     console.log("Successfully connected to MongoDB!");
     return { success: true, message: "Successfully connected to MongoDB!" };
   } catch (error) {
@@ -27,12 +49,12 @@ export async function pingDatabase() {
     return {
       success: false,
       message: "Failed to connect to MongoDB",
-      error: error.message || String(error),
+      error: error instanceof Error ? error.message : String(error),
     };
-  } finally {
-    // Close the connection when done
-    await client.close();
   }
 }
+
+// Export constants
+export const DEFAULT_DB_NAME = "thai-reading-app";
 
 export default client;

@@ -5,24 +5,8 @@ import storyModifiers, {
   ModifierCategory,
 } from "../data/storyModifiers";
 import ShaderButton from "../components/ShaderButton";
+import { useAppState } from "../context/AppStateContext";
 
-//   @keyframes float {
-//   0% {
-//     transform: translateY(0px) rotateX(0deg) rotateY(0deg);
-//   }
-//   25% {
-//     transform: translateY(-5px) rotateX(1deg) rotateY(-1deg);
-//   }
-//   50% {
-//     transform: translateY(-10px) rotateX(20deg) rotateY(0deg);
-//   }
-//   75% {
-//     transform: translateY(-5px) rotateX(1deg) rotateY(1deg);
-//   }
-//   100% {
-//     transform: translateY(0px) rotateX(0deg) rotateY(0deg);
-//   }
-// }
 // Add global styles
 const globalStyles = `
   .perspective-1000 {
@@ -240,7 +224,7 @@ const getCategoryStyles = (category: string) => {
 
 const StoryModifierSelection = () => {
   const navigate = useNavigate();
-  const [selectedModifiers, setSelectedModifiers] = useState<string[]>([]);
+  const { selectedModifiers, setSelectedModifiers } = useAppState();
   const [randomModifiers, setRandomModifiers] = useState<StoryModifier[]>([]);
   const [animationComplete, setAnimationComplete] = useState(false);
 
@@ -272,29 +256,24 @@ const StoryModifierSelection = () => {
   }, []);
 
   const toggleModifier = (id: string) => {
-    setSelectedModifiers((prev) => {
-      // If already selected, remove it
-      if (prev.includes(id)) {
-        return prev.filter((modId) => modId !== id);
-      }
+    const currentModifiers = [...selectedModifiers];
 
-      // If already have 3 selections, don't allow more
-      if (prev.length >= 3) {
-        return prev;
-      }
-
+    // If already selected, remove it
+    if (currentModifiers.includes(id)) {
+      setSelectedModifiers(currentModifiers.filter((modId) => modId !== id));
+    }
+    // If already have 3 selections, don't allow more
+    else if (currentModifiers.length < 3) {
       // Add new selection
-      return [...prev, id];
-    });
+      setSelectedModifiers([...currentModifiers, id]);
+    }
   };
 
   const isSelected = (id: string) => selectedModifiers.includes(id);
 
   const handleContinue = () => {
-    // Pass selected modifiers to story generator
-    navigate("/story-generator", {
-      state: { selectedModifiers: selectedModifiers },
-    });
+    // Navigate to story generator, the selected modifiers are now in context
+    navigate("/story-generator");
   };
 
   // Create stars component - memoized to prevent recreation on every render
@@ -414,7 +393,7 @@ const StoryModifierSelection = () => {
           selectedModifiers.length !== 3 ? "opacity-50 cursor-not-allowed" : ""
         }`}
       >
-        Continue to Story
+        Continue to Story Generator
       </ShaderButton>
     </div>
   );

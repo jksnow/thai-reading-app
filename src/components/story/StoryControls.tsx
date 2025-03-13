@@ -22,8 +22,8 @@ const parentalRatings = [
 ];
 
 const readingLevels = [
-  "Age 7-8 (Very basic vocabulary, single sentences)",
-  "Age 9-10 (Basic vocabulary, simple sentences)",
+  "Age 5-7 (Very basic vocabulary First 500 words you learn in school)",
+  "Age 8-10 (Basic vocabulary, simple sentences)",
   "Age 11-12 (Moderate vocabulary, compound sentences)",
   "Age 13-14 (Rich vocabulary, complex sentences)",
   "Age 15+ (Advanced vocabulary, complex narrative)",
@@ -45,7 +45,7 @@ const StoryControls: React.FC<StoryControlsProps> = ({
   return (
     <div className="adventure-container p-8 shadow-lg">
       <h1 className="text-2xl font-bold text-ink mb-6 font-serif text-center">
-        Thai Adventure Story Generator
+        Choose your story options.
       </h1>
 
       <div className="mb-4">

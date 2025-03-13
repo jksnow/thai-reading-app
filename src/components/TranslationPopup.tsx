@@ -69,6 +69,14 @@ const TranslationPopup = ({
   // Fetch translation when component mounts
   useEffect(() => {
     const fetchTranslation = async () => {
+      // Special case for character names
+      if (word === "character_name") {
+        setLoading(false);
+        setTranslations([]);
+        setError(null);
+        return;
+      }
+
       try {
         setLoading(true);
         const results = await translateThaiWord(word);
@@ -165,6 +173,34 @@ const TranslationPopup = ({
     return () => clearTimeout(timer);
   }, [translations]);
 
+  // Render special content for character name
+  if (word === "character_name") {
+    return (
+      <div
+        ref={popupRef}
+        className="fixed bg-white shadow-lg rounded-md p-4 z-50 max-w-md border border-gray-200"
+        style={getPopupStyle()}
+      >
+        <div className="flex justify-between items-center mb-3">
+          <h3 className="text-2xl font-bold text-gray-800">Character Name</h3>
+          <button
+            onClick={onClose}
+            className="text-gray-500 hover:text-gray-700"
+            aria-label="Close"
+          >
+            ✕
+          </button>
+        </div>
+        <div className="py-4">
+          <p className="text-gray-700">
+            This is a character name in the story. Names are not translated.
+          </p>
+        </div>
+        <div className="absolute w-3 h-3 bg-white transform rotate-45 left-1/2 -ml-1.5 -bottom-1.5 border-r border-b border-gray-200"></div>
+      </div>
+    );
+  }
+
   return (
     <div
       ref={popupRef}
@@ -227,7 +263,7 @@ const TranslationPopup = ({
                 </div>
 
                 {/* Definition */}
-                {translation.define && translation.define.length > 0 && (
+                {translation.define && (
                   <div className="mb-2">
                     <h4 className="text-sm font-semibold text-gray-700 mb-1">
                       Definition:

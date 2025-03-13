@@ -16,16 +16,24 @@ export function useStoryGeneration() {
   const [storyHistory, setStoryHistory] = useState<StorySegment[]>([]);
   const [currentStoryIndex, setCurrentStoryIndex] = useState(0);
   const [showChoices, setShowChoices] = useState(false);
+  const [activeModifiers, setActiveModifiers] = useState<string[]>([]);
 
   /**
    * Generate the initial story based on the provided parameters
    */
-  const generateInitialStory = async (params: StoryParams) => {
+  const generateInitialStory = async (
+    params: StoryParams,
+    selectedModifiers: string[] = []
+  ) => {
     setIsGenerating(true);
     setErrorMessage("");
+    setActiveModifiers(selectedModifiers); // Store the modifiers for later use
 
     try {
-      const response = await deepseekService.generateInitialStory(params);
+      const response = await deepseekService.generateInitialStory(
+        params,
+        selectedModifiers
+      );
       const parsedStory = parseStoryResponse(response);
 
       setStoryHistory([parsedStory]);
@@ -60,12 +68,17 @@ export function useStoryGeneration() {
       const currentStory = storyHistory[currentStoryIndex];
       const storyContext = previousStories.map((s) => s.text).join("\n");
 
-      const response = await deepseekService.continueStory({
-        storyGoal: currentStory.goal,
-        summary: currentStory.summary,
-        storyContext,
-        userChoice: choiceText,
-      });
+      // We'll use the stored modifiers here
+      // This way, the same modifiers are used throughout the story
+      const response = await deepseekService.continueStory(
+        {
+          storyGoal: currentStory.goal,
+          summary: currentStory.summary,
+          storyContext,
+          userChoice: choiceText,
+        },
+        activeModifiers
+      );
 
       const parsedStory = parseStoryResponse(response);
 

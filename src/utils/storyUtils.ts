@@ -100,11 +100,11 @@ export const cleanCharacterName = (word: string): string => {
 export const getFontSizeClass = (size: string): string => {
   switch (size) {
     case "small":
-      return "text-base leading-loose";
+      return "text-lg leading-loose";
     case "medium":
       return "text-xl leading-loose";
     case "large":
-      return "text-2xl leading-loose";
+      return "text-3xl leading-loose";
     default:
       return "text-xl leading-loose";
   }

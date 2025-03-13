@@ -8,6 +8,7 @@ import ShaderButton from "./components/ShaderButton";
 import { AppStateProvider } from "./context/AppStateContext";
 import { GeneralSettings } from "./components/GeneralSettings";
 import { SettingsIcon } from "./components/SettingsIcon";
+import SelectedModifiersModal from "./components/SelectedModifiersModal";
 import { useState } from "react";
 
 function App() {
@@ -42,8 +43,11 @@ function App() {
             <SettingsIcon onClick={() => setIsSettingsOpen(true)} />
           </div>
 
+          {/* Selected Modifiers Modal */}
+          <SelectedModifiersModal />
+
           {/* Content and Routing */}
-          <div className="relative min-h-screen pt-20 pb-8">
+          <div className="relative min-h-screen pt-24 pb-8">
             <Routes>
               <Route
                 path="/"
@@ -51,7 +55,7 @@ function App() {
                   <div className="container mx-auto p-4 flex items-center justify-center h-[calc(100vh-8rem)]">
                     <div className="adventure-container p-8 max-w-md shadow-lg">
                       <h1 className="text-3xl font-bold mb-4 text-ink text-center">
-                        Thai Reading Adventure
+                        Thai Tale
                       </h1>
                       <p className="mb-6 text-ink text-center">
                         Improve your Thai reading skills with interactive

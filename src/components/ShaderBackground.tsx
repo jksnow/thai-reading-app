@@ -15,16 +15,22 @@ interface ShaderBackgroundProps {
 
 export function ShaderBackground({ colorA, colorB }: ShaderBackgroundProps) {
   const materialRef = useRef<BalatroPaintShaderMaterialImpl>(null);
-  const { state: appState } = useAppState();
+
+  // For now, we'll use default shader properties since they're no longer in the AppContext
+  const shaderProps = {
+    startAnimation: true,
+    spinRotationSpeed: 0.5,
+    moveSpeed: 3.0,
+    spinAmount: 0.25,
+    pixelFilter: 1500.0,
+  };
 
   // Update shader uniforms on each frame
   useFrame((frameState) => {
     if (materialRef.current) {
-      // Only update time if animation is active
-      if (appState.startAnimation) {
-        materialRef.current.uniforms.time.value =
-          frameState.clock.getElapsedTime();
-      }
+      // Always update time (using fixed values since startAnimation is removed from context)
+      materialRef.current.uniforms.time.value =
+        frameState.clock.getElapsedTime();
 
       // Update resolution
       materialRef.current.uniforms.resolution.value.set(
@@ -36,12 +42,12 @@ export function ShaderBackground({ colorA, colorB }: ShaderBackgroundProps) {
       materialRef.current.uniforms.colorA.value.copy(colorA);
       materialRef.current.uniforms.colorB.value.copy(colorB);
 
-      // Update shader properties from app state
+      // Update shader properties from fixed values
       materialRef.current.uniforms.spinRotationSpeed.value =
-        appState.spinRotationSpeed;
-      materialRef.current.uniforms.moveSpeed.value = appState.moveSpeed;
-      materialRef.current.uniforms.spinAmount.value = appState.spinAmount;
-      materialRef.current.uniforms.pixelFilter.value = appState.pixelFilter;
+        shaderProps.spinRotationSpeed;
+      materialRef.current.uniforms.moveSpeed.value = shaderProps.moveSpeed;
+      materialRef.current.uniforms.spinAmount.value = shaderProps.spinAmount;
+      materialRef.current.uniforms.pixelFilter.value = shaderProps.pixelFilter;
     }
   });
 

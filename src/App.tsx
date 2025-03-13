@@ -1,15 +1,17 @@
 import { Canvas } from "@react-three/fiber";
 import { ShaderBackground } from "./components/ShaderBackground";
 import { useColorTransition } from "./utils/useColorTransition";
-import { BrowserRouter, Routes, Route, Link } from "react-router-dom";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import StoryGenerator from "./pages/StoryGenerator";
 import StoryModifierSelection from "./pages/StoryModifierSelection";
-import ShaderButton from "./components/ShaderButton";
 import { AppStateProvider } from "./context/AppStateContext";
 import { GeneralSettings } from "./components/GeneralSettings";
 import { SettingsIcon } from "./components/SettingsIcon";
 import SelectedModifiersModal from "./components/SelectedModifiersModal";
 import { useState } from "react";
+import thaiTaleLogo from "./assets/ThaiTaleLogo.png";
+import ButtonOptions from "./components/ButtonOptions";
+import ButtonContainer from "./components/ButtonContainer";
 
 function App() {
   // Use our custom hook for color management
@@ -47,33 +49,49 @@ function App() {
           <SelectedModifiersModal />
 
           {/* Content and Routing */}
-          <div className="relative min-h-screen pt-24 pb-8">
+          <div className="relative min-h-screen pt-8 pb-8">
             <Routes>
               <Route
                 path="/"
                 element={
-                  <div className="container mx-auto p-4 flex items-center justify-center h-[calc(100vh-8rem)]">
-                    <div className="adventure-container p-8 max-w-md shadow-lg">
-                      <h1 className="text-3xl font-bold mb-4 text-ink text-center">
-                        Thai Tale
-                      </h1>
-                      <p className="mb-6 text-ink text-center">
-                        Improve your Thai reading skills with interactive
-                        stories and Choose Your Own Adventure games.
-                      </p>
-                      <Link
-                        to="/modifier-selection"
-                        className="block w-full"
+                  <div className="container mx-auto p-4 flex flex-col items-center justify-center h-[calc(100vh-8rem)]">
+                    {/* Logo and Title - Large, taking significant screen real estate */}
+                    <div className="flex items-center justify-center mb-16 mt-[-2rem]">
+                      {/* add text-shadow: 0.025em 0.025em 0 gray, 0.05em 0.05em 0 blue, 0.075em 0.075em 0 red, 0.1em 0.1em 0 black;*/}
+                      <h1
+                        className="special-text text-white inline-flex items-center"
+                        style={{
+                          fontSize: "16rem",
+                          textShadow:
+                            "0.025em 0.025em 0 gray, 0.05em 0.05em 0 black",
+                        }}
                       >
-                        <ShaderButton
-                          variant="primary"
-                          fullWidth
-                          className="py-3"
-                        >
-                          Create Your Adventure
-                        </ShaderButton>
-                      </Link>
+                        Thai
+                        <img
+                          src={thaiTaleLogo}
+                          alt="Thai Tale Logo"
+                          className="mx-6 w-auto"
+                          style={{ height: "20rem" }}
+                        />
+                        Tale
+                      </h1>
                     </div>
+
+                    {/* Button Container */}
+                    <ButtonContainer>
+                      <ButtonOptions
+                        to="/modifier-selection"
+                        variant="primary"
+                      >
+                        START
+                      </ButtonOptions>
+
+                      <ButtonOptions variant="secondary">OPTIONS</ButtonOptions>
+
+                      <ButtonOptions variant="tertiary">
+                        COLLECTION
+                      </ButtonOptions>
+                    </ButtonContainer>
                   </div>
                 }
               />

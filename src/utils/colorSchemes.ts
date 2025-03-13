@@ -3,30 +3,30 @@ import * as THREE from "three";
 // Authentic Balatro color schemes
 export const BALATRO_COLOR_SCHEMES = [
   // Red outside blue inside
-  {
-    colorA: new THREE.Color(0.4, 0.1, 0.1), // RED
-    colorB: new THREE.Color(0.05, 0.1, 0.23), // Secondary (darker blue)
-  },
-
-  {
-    colorA: new THREE.Color(0.13, 0.13, 0.3), // BLUE
-    colorB: new THREE.Color(0.35, 0.1, 0.05), // RED
-  },
-
   // Green scheme
   {
-    colorA: new THREE.Color(0.21, 0.05, 0.24), // Dark purple
-    colorB: new THREE.Color(0.05, 0.25, 0.1), // Dark green
+    colorA: new THREE.Color(0.5, 0.1, 0.5), // Dark purple
+    colorB: new THREE.Color(0.15, 0.6, 0.18), // Dark green
   },
+  {
+    colorA: new THREE.Color(0.3, 0.2, 0.05), // Gold
+    colorB: new THREE.Color(0.19, 0.4, 0.19), // Forest green
+  },
+  {
+    colorA: new THREE.Color(1, 0.2, 0.2), // RED
+    colorB: new THREE.Color(0.05, 0.2, 1), // Secondary (darker blue)
+  },
+
+  {
+    colorA: new THREE.Color(0.2, 0.2, 0.8), // BLUE
+    colorB: new THREE.Color(0.9, 0.2, 0.15), // RED
+  },
+
   // Purple scheme
   {
     colorA: new THREE.Color(0.2, 0.3, 0.05), // Dark gold
-    colorB: new THREE.Color(0.25, 0.05, 0.25), // Deep purple
+    colorB: new THREE.Color(0.8, 0.2, 0.8), // Deep purple
   },
 
   // Gold/Brown scheme
-  {
-    colorA: new THREE.Color(0.3, 0.2, 0.05), // Gold
-    colorB: new THREE.Color(0.19, 0.29, 0.19), // Forest green
-  },
 ];

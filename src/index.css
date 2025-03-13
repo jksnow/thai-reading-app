@@ -2,6 +2,57 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Font declarations */
+@font-face {
+  font-family: "AnonymousPro";
+  src: url("./fonts/AnonymousPro-Regular.ttf") format("truetype");
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "AnonymousPro";
+  src: url("./fonts/AnonymousPro-Bold.ttf") format("truetype");
+  font-weight: bold;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "AnonymousPro";
+  src: url("./fonts/AnonymousPro-Italic.ttf") format("truetype");
+  font-weight: normal;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "AnonymousPro";
+  src: url("./fonts/AnonymousPro-BoldItalic.ttf") format("truetype");
+  font-weight: bold;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "MysteryQuest";
+  src: url("./fonts/MysteryQuest-Regular.ttf") format("truetype");
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "NotoSerifThai";
+  src: url("./fonts/NotoSerifThai-VariableFont_wdth,wght.ttf")
+    format("truetype-variations");
+  font-weight: 100 900;
+  font-stretch: 75% 125%;
+  font-style: normal;
+  font-display: swap;
+}
+
 /* Base styles */
 :root {
   color-scheme: light dark;
@@ -13,7 +64,7 @@ body {
   padding: 0;
   overflow: hidden;
   background-color: #1a1a1a;
-  font-family: system-ui, -apple-system, sans-serif;
+  font-family: "AnonymousPro", system-ui, -apple-system, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -24,7 +75,7 @@ body {
 }
 
 :root {
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
+  font-family: "AnonymousPro", system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
 
@@ -87,14 +138,15 @@ button {
   font-family: inherit;
   background-color: #1a1a1a;
   cursor: pointer;
-  transition: border-color 0.25s;
 }
+
 button:hover {
-  border-color: #646cff;
+  /* border-color: #646cff; */
 }
+
 button:focus,
 button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
+  outline: none;
 }
 
 @media (prefers-color-scheme: light) {
@@ -122,8 +174,36 @@ button:focus-visible {
   h4,
   h5,
   h6 {
-    font-family: Merriweather, Georgia, serif;
+    font-family: "MysteryQuest", Georgia, serif;
   }
+}
+
+/* Thai text styling */
+.thai-text {
+  font-family: "NotoSerifThai", serif;
+  font-variation-settings: "wght" 400;
+}
+
+/* Font weight variations for Thai text */
+.thai-text-light {
+  font-variation-settings: "wght" 300;
+}
+
+.thai-text-normal {
+  font-variation-settings: "wght" 400;
+}
+
+.thai-text-medium {
+  font-variation-settings: "wght" 500;
+}
+
+.thai-text-bold {
+  font-variation-settings: "wght" 700;
+}
+
+/* Special text */
+.special-text {
+  font-family: "MysteryQuest", cursive;
 }
 
 @layer components {
@@ -218,5 +298,11 @@ button:focus-visible {
       var(--color-parchment-dark) 30%,
       white
     );
+  }
+
+  /* App-specific button reset - ensures all app buttons have consistent styling without browser defaults */
+  .app-button-reset {
+    @apply focus:outline-none focus:ring-0 active:outline-none;
+    -webkit-tap-highlight-color: transparent;
   }
 }

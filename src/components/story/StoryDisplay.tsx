@@ -89,7 +89,9 @@ const StoryDisplay: React.FC<StoryDisplayProps> = ({
           <button
             onClick={() => onFontSizeChange("small")}
             className={`px-2 py-1 rounded ${
-              fontSizeClass.includes("text-lg")
+              fontSizeClass.includes("text-3xl") &&
+              !fontSizeClass.includes("text-4xl") &&
+              !fontSizeClass.includes("text-5xl")
                 ? "bg-indigo-600 text-white"
                 : "bg-gray-200 text-gray-700"
             }`}
@@ -99,8 +101,7 @@ const StoryDisplay: React.FC<StoryDisplayProps> = ({
           <button
             onClick={() => onFontSizeChange("medium")}
             className={`px-2 py-1 rounded ${
-              fontSizeClass.includes("text-xl") &&
-              !fontSizeClass.includes("text-3xl")
+              fontSizeClass.includes("text-4xl")
                 ? "bg-indigo-600 text-white"
                 : "bg-gray-200 text-gray-700"
             }`}
@@ -110,7 +111,7 @@ const StoryDisplay: React.FC<StoryDisplayProps> = ({
           <button
             onClick={() => onFontSizeChange("large")}
             className={`px-2 py-1 rounded ${
-              fontSizeClass.includes("text-3xl")
+              fontSizeClass.includes("text-5xl")
                 ? "bg-indigo-600 text-white"
                 : "bg-gray-200 text-gray-700"
             }`}

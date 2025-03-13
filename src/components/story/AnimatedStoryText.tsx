@@ -55,9 +55,7 @@ const AnimatedStoryText: React.FC<AnimatedStoryTextProps> = ({
     if (word.startsWith("[name]")) {
       const nameText = word.replace("[name]", "");
       return (
-        <span className="text-black font-normal thai-character-name">
-          {nameText}
-        </span>
+        <span className="text-black font-normal special-text">{nameText}</span>
       );
     }
     return word;
@@ -76,7 +74,7 @@ const AnimatedStoryText: React.FC<AnimatedStoryTextProps> = ({
 
   return (
     <motion.div
-      className={`${fontSizeClass} leading-relaxed text-black mx-auto font-normal`}
+      className={`${fontSizeClass} leading-relaxed text-black mx-auto font-normal thai-text`}
       initial="hidden"
       animate="visible"
       variants={containerVariants}

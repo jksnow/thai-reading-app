@@ -350,7 +350,7 @@ const StoryModifierSelection = () => {
                       {modifier.category}
                     </span>
                     <h3
-                      className={`text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r ${styles.titleGradient} mt-1`}
+                      className={`text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r ${styles.titleGradient} mt-1`}
                     >
                       {modifier.modifier}
                     </h3>

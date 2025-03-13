@@ -20,7 +20,7 @@ const ThaiWordRenderer: React.FC<ThaiWordRendererProps> = ({
   const words = text.split(" ").filter((word) => word.trim() !== "");
 
   return (
-    <>
+    <div className="thai-text">
       {words.map((word, index) => {
         // Check if this is a character name
         const isName = isCharacterName(word);
@@ -50,7 +50,9 @@ const ThaiWordRenderer: React.FC<ThaiWordRendererProps> = ({
           : "cursor-pointer hover:bg-parchment transition-colors duration-100 rounded";
 
         // Character names get a special styling
-        const nameClassName = isName ? "font-bold text-accent-tertiary" : "";
+        const nameClassName = isName
+          ? "font-bold text-accent-tertiary special-text"
+          : "";
 
         return (
           <span
@@ -61,7 +63,7 @@ const ThaiWordRenderer: React.FC<ThaiWordRendererProps> = ({
           </span>
         );
       })}
-    </>
+    </div>
   );
 };
 

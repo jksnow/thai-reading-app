@@ -5,6 +5,7 @@ import StoryModifierSelection from "./pages/StoryModifierSelection";
 import { AppStateProvider, useAppState } from "./context/AppStateContext";
 import SelectedModifiersModal from "./components/SelectedModifiersModal";
 import MainTitleScreen from "./components/MainTitleScreen";
+import SocialMediaButtons from "./components/SocialMediaButtons";
 
 // Component for the background and main content
 const AppContent = () => {
@@ -42,6 +43,9 @@ const AppContent = () => {
 
       {/* Selected Modifiers Modal */}
       <SelectedModifiersModal />
+
+      {/* Social Media Buttons */}
+      <SocialMediaButtons />
 
       {/* Content based on app state */}
       <div className="relative min-h-screen pt-8 pb-8">{renderContent()}</div>

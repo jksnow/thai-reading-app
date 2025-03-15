@@ -4,6 +4,7 @@ import { Choice, StorySegment } from "../../utils/storyUtils";
 import ThaiWordRenderer from "./ThaiWordRenderer";
 import AnimatedStoryText from "./AnimatedStoryText";
 import ShaderButton from "../ShaderButton";
+import ButtonOptions from "../ButtonOptions";
 
 interface StoryDisplayProps {
   storyHistory: StorySegment[];
@@ -66,14 +67,14 @@ const StoryDisplay: React.FC<StoryDisplayProps> = ({
 
   return (
     <motion.div
-      className="adventure-container p-8 shadow-lg max-w-4xl w-full rounded-xl bg-white border border-gray-200"
+      className="parchment-paper p-8 shadow-lg max-w-4xl w-full"
       initial="hidden"
       animate="visible"
       variants={containerVariants}
     >
       <div className="flex justify-between items-center mb-4">
         <motion.h1
-          className="text-xl font-bold text-black font-serif"
+          className="text-xl font-bold font-serif"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.4 }}
@@ -92,8 +93,8 @@ const StoryDisplay: React.FC<StoryDisplayProps> = ({
               fontSizeClass.includes("text-3xl") &&
               !fontSizeClass.includes("text-4xl") &&
               !fontSizeClass.includes("text-5xl")
-                ? "bg-indigo-600 text-white"
-                : "bg-gray-200 text-gray-700"
+                ? "bg-amber-700 text-white"
+                : "bg-amber-100 text-amber-800"
             }`}
           >
             A-
@@ -102,8 +103,8 @@ const StoryDisplay: React.FC<StoryDisplayProps> = ({
             onClick={() => onFontSizeChange("medium")}
             className={`px-2 py-1 rounded ${
               fontSizeClass.includes("text-4xl")
-                ? "bg-indigo-600 text-white"
-                : "bg-gray-200 text-gray-700"
+                ? "bg-amber-700 text-white"
+                : "bg-amber-100 text-amber-800"
             }`}
           >
             A
@@ -112,8 +113,8 @@ const StoryDisplay: React.FC<StoryDisplayProps> = ({
             onClick={() => onFontSizeChange("large")}
             className={`px-2 py-1 rounded ${
               fontSizeClass.includes("text-5xl")
-                ? "bg-indigo-600 text-white"
-                : "bg-gray-200 text-gray-700"
+                ? "bg-amber-700 text-white"
+                : "bg-amber-100 text-amber-800"
             }`}
           >
             A+
@@ -131,15 +132,15 @@ const StoryDisplay: React.FC<StoryDisplayProps> = ({
           onClick={onToggleWordSpacing}
           className={`px-3 py-2 rounded text-sm ${
             showWordSpacing
-              ? "bg-indigo-600 text-white"
-              : "bg-gray-200 text-gray-700"
+              ? "bg-amber-700 text-white"
+              : "bg-amber-100 text-amber-800"
           }`}
         >
           {showWordSpacing ? "Spaced Words" : "Connected Words"}
         </button>
       </motion.div>
 
-      <div className="story-text mb-6 text-black">
+      <div className="story-text mb-6">
         <AnimatedStoryText
           text={currentStory.text}
           fontSizeClass={fontSizeClass}
@@ -155,16 +156,14 @@ const StoryDisplay: React.FC<StoryDisplayProps> = ({
         >
           {showChoices ? (
             <>
-              <h2 className="text-lg font-semibold mb-2 text-black">
-                Choose your path:
-              </h2>
+              <h2 className="text-lg font-semibold mb-2">Choose your path:</h2>
               <div className="space-y-2">
                 {currentStory.choices.map((choice, index) => (
                   <motion.button
                     key={choice.id}
                     onClick={() => onChoiceSelect(choice)}
                     disabled={isGenerating}
-                    className="block w-full px-4 py-2 bg-gray-100 hover:bg-gray-200 text-left rounded transition-colors duration-200 border border-gray-300 text-black"
+                    className="block w-full px-4 py-2 bg-amber-50 hover:bg-amber-100 text-left rounded transition-colors duration-200 border border-amber-200"
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: 0.1 * index }}
@@ -176,12 +175,13 @@ const StoryDisplay: React.FC<StoryDisplayProps> = ({
             </>
           ) : (
             <div className="text-center">
-              <ShaderButton
+              <ButtonOptions
                 onClick={onShowChoices}
-                className="px-4 py-2 rounded text-white"
+                variant="amber"
+                padding="py-2 px-4"
               >
                 What will you do next?
-              </ShaderButton>
+              </ButtonOptions>
             </div>
           )}
         </motion.div>
@@ -192,15 +192,14 @@ const StoryDisplay: React.FC<StoryDisplayProps> = ({
           className="ending-message mb-6 text-center"
           variants={buttonVariants}
         >
-          <p className="text-lg font-bold text-black mb-4">
-            The End of Your Adventure
-          </p>
-          <ShaderButton
+          <p className="text-lg font-bold mb-4">The End of Your Adventure</p>
+          <ButtonOptions
             onClick={onResetStory}
-            className="px-4 py-2 rounded text-white"
+            variant="amber"
+            padding="py-2 px-4"
           >
             Start a New Adventure
-          </ShaderButton>
+          </ButtonOptions>
         </motion.div>
       )}
     </motion.div>

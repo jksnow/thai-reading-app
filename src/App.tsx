@@ -6,14 +6,36 @@ import { AppStateProvider, useAppState } from "./context/AppStateContext";
 import SelectedModifiersModal from "./components/SelectedModifiersModal";
 import MainTitleScreen from "./components/MainTitleScreen";
 import SocialMediaButtons from "./components/SocialMediaButtons";
+import { AuthProvider, useAuth } from "./context/AuthContext";
+import AuthForm from "./components/AuthForm";
 
 // Component for the background and main content
 const AppContent = () => {
   // Get colors from context
   const { colorA, colorB, currentSection } = useAppState();
+  const { currentUser, loading } = useAuth();
 
-  // Render different components based on currentSection
+  // Render different components based on currentSection and auth state
   const renderContent = () => {
+    // If still loading auth state, return loading indicator
+    if (loading) {
+      return (
+        <div className="flex items-center justify-center h-screen">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-500"></div>
+        </div>
+      );
+    }
+
+    // If not authenticated, show auth form
+    if (!currentUser) {
+      return (
+        <div className="flex flex-col justify-center items-center h-screen">
+          <AuthForm />
+        </div>
+      );
+    }
+
+    // Otherwise show app content based on current section
     switch (currentSection) {
       case "home":
         return <MainTitleScreen />;
@@ -41,23 +63,25 @@ const AppContent = () => {
         </Canvas>
       </div>
 
-      {/* Selected Modifiers Modal */}
-      <SelectedModifiersModal />
+      {/* Selected Modifiers Modal (only when authenticated) */}
+      {currentUser && <SelectedModifiersModal />}
 
       {/* Social Media Buttons */}
       <SocialMediaButtons />
 
       {/* Content based on app state */}
-      <div className="relative min-h-screen pt-8 pb-8">{renderContent()}</div>
+      <div className="relative min-h-screen">{renderContent()}</div>
     </div>
   );
 };
 
 function App() {
   return (
-    <AppStateProvider>
-      <AppContent />
-    </AppStateProvider>
+    <AuthProvider>
+      <AppStateProvider>
+        <AppContent />
+      </AppStateProvider>
+    </AuthProvider>
   );
 }
 

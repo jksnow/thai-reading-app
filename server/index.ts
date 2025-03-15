@@ -10,6 +10,7 @@ import {
 import { fileURLToPath } from "url";
 import path from "path";
 import paymentRoutes from "./routes/paymentRoutes";
+import userRoutes from "./routes/userRoutes";
 
 // ES Module equivalent of __dirname
 const __filename = fileURLToPath(import.meta.url);
@@ -59,6 +60,9 @@ app.get("/api/translate", translateWord);
 // Response times API endpoints
 app.get("/api/response-times", getResponseTimeData);
 app.post("/api/response-times", updateResponseTimeData);
+
+// User routes
+app.use("/api/users", userRoutes);
 
 // Payment routes
 app.use("/api/payments", paymentRoutes);

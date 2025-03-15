@@ -9,6 +9,7 @@ import {
 } from "./controllers/responseTimeController";
 import { fileURLToPath } from "url";
 import path from "path";
+import paymentRoutes from "./routes/paymentRoutes";
 
 // ES Module equivalent of __dirname
 const __filename = fileURLToPath(import.meta.url);
@@ -18,6 +19,17 @@ dotenv.config();
 
 const app = express();
 const port = process.env.PORT || 3000;
+
+// Log Stripe environment variables to ensure they're loaded
+// (Remove in production)
+console.log(
+  "Stripe Secret Key available:",
+  !!process.env.VITE_STRIPE_SECRET_KEY
+);
+console.log(
+  "Stripe Publishable Key available:",
+  !!process.env.VITE_STRIPE_PUBLISHABLE_KEY
+);
 
 app.use(cors());
 app.use(express.json());
@@ -47,6 +59,14 @@ app.get("/api/translate", translateWord);
 // Response times API endpoints
 app.get("/api/response-times", getResponseTimeData);
 app.post("/api/response-times", updateResponseTimeData);
+
+// Payment routes
+app.use("/api/payments", paymentRoutes);
+
+// Special route configuration for Stripe webhooks
+// This must come after the express.json() middleware but only for non-webhook routes
+// For webhook routes, we need the raw body
+app.use("/api/payments/webhook", express.raw({ type: "application/json" }));
 
 // Initialize MongoDB connection and start server
 async function startServer() {

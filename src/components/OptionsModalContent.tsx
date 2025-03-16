@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import ButtonOptions from "./ButtonOptions";
 import { useAppState } from "../context/AppStateContext";
+import { useAuth } from "../context/AuthContext";
 import SettingsModal from "./SettingsModal";
 
 interface OptionsModalContentProps {
@@ -11,6 +12,7 @@ const OptionsModalContent: React.FC<OptionsModalContentProps> = ({
   onClose,
 }) => {
   const { setCurrentSection } = useAppState();
+  const { signOut } = useAuth();
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
   const handleMainMenu = () => {
@@ -24,6 +26,11 @@ const OptionsModalContent: React.FC<OptionsModalContentProps> = ({
 
   const closeSettings = () => {
     setIsSettingsOpen(false);
+  };
+
+  const handleLogout = async () => {
+    await signOut();
+    onClose();
   };
 
   return (
@@ -62,6 +69,14 @@ const OptionsModalContent: React.FC<OptionsModalContentProps> = ({
               padding="py-2"
             >
               App Information
+            </ButtonOptions>
+
+            <ButtonOptions
+              variant="red"
+              padding="py-2"
+              onClick={handleLogout}
+            >
+              Logout
             </ButtonOptions>
           </div>
         </div>

@@ -4,11 +4,13 @@ import ButtonContainer from "./ButtonContainer";
 import { useAppState } from "../context/AppStateContext";
 import ModalContainer from "./ModalContainer";
 import OptionsModalContent from "./OptionsModalContent";
+import CollectionModalContent from "./CollectionModalContent";
 
 const GlobalButtonContainer: React.FC = () => {
   const { currentSection, setCurrentSection } = useAppState();
 
   const [isOptionsModalOpen, setIsOptionsModalOpen] = useState(false);
+  const [isCollectionModalOpen, setIsCollectionModalOpen] = useState(false);
 
   // Define positioning based on current section
   const getContainerClasses = () => {
@@ -27,6 +29,14 @@ const GlobalButtonContainer: React.FC = () => {
 
   const closeOptionsModal = () => {
     setIsOptionsModalOpen(false);
+  };
+
+  const openCollectionModal = () => {
+    setIsCollectionModalOpen(true);
+  };
+
+  const closeCollectionModal = () => {
+    setIsCollectionModalOpen(false);
   };
 
   return (
@@ -50,7 +60,12 @@ const GlobalButtonContainer: React.FC = () => {
             OPTIONS
           </ButtonOptions>
 
-          <ButtonOptions variant="amber">COLLECTION</ButtonOptions>
+          <ButtonOptions 
+            variant="amber"
+            onClick={openCollectionModal}
+          >
+            COLLECTION
+          </ButtonOptions>
         </ButtonContainer>
       </div>
 
@@ -61,6 +76,15 @@ const GlobalButtonContainer: React.FC = () => {
         size="small"
       >
         <OptionsModalContent onClose={closeOptionsModal} />
+      </ModalContainer>
+
+      {/* Collection Modal */}
+      <ModalContainer
+        isOpen={isCollectionModalOpen}
+        onClose={closeCollectionModal}
+        size="small"
+      >
+        <CollectionModalContent onClose={closeCollectionModal} />
       </ModalContainer>
     </>
   );

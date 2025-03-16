@@ -14,6 +14,7 @@ export interface StorySegment {
   summary: string;
   choices: Choice[];
   isEnding: boolean;
+  characterNames?: string[];
 }
 
 export interface StoryParams {
@@ -27,50 +28,109 @@ export interface StoryParams {
  * Parse the raw response from the AI service into a structured StorySegment
  */
 export const parseStoryResponse = (response: string): StorySegment => {
-  // Extract goal
-  const goalMatch = response.match(/\[GOAL\](.+?)(?=\[STORY\])/s);
-  const goal = goalMatch ? goalMatch[1].trim() : "";
+  try {
+    // Try to parse the response as JSON
+    const parsedResponse = JSON.parse(response);
 
-  // Extract story
-  const storyMatch = response.match(/\[STORY\](.+?)(?=\[SUMMARY\])/s);
-  const storyText = storyMatch ? storyMatch[1].trim() : "";
+    // If successfully parsed as JSON, extract the fields directly
+    const goal = parsedResponse.goal || "";
+    const storyText = parsedResponse.story || "";
+    const summary = parsedResponse.summary || "";
+    const isEnding = parsedResponse.is_complete || false;
+    const characterNames = parsedResponse.character_names || [];
 
-  // Extract summary
-  const summaryMatch = response.match(/\[SUMMARY\](.+?)(?=\[CHOICES\]|$)/s);
-  const summary = summaryMatch ? summaryMatch[1].trim() : "";
+    // Parse choices
+    let choices: Choice[] = [];
+    if (!isEnding && Array.isArray(parsedResponse.choices)) {
+      choices = parsedResponse.choices.map(
+        (choiceText: string, index: number) => {
+          // Extract the choice text without the numbering if present
+          const match =
+            typeof choiceText === "string"
+              ? choiceText.match(/^\d+\.\s*(.*)/)
+              : null;
+          return {
+            id: index + 1,
+            text: match ? match[1].trim() : choiceText.trim(),
+          };
+        }
+      );
+    }
 
-  // Extract choices
-  const choicesMatch = response.match(/\[CHOICES\](.+?)$/s);
+    return {
+      text: storyText,
+      goal,
+      summary,
+      choices,
+      isEnding,
+      characterNames,
+    };
+  } catch (error) {
+    // Fallback to the old format parsing if JSON parsing fails
+    console.warn(
+      "Failed to parse response as JSON, falling back to tag-based parsing",
+      error
+    );
 
-  let choices: Choice[] = [];
-  let isEnding = false;
+    // Extract goal
+    const goalMatch = response.match(/\[GOAL\](.+?)(?=\[STORY\])/s);
+    const goal = goalMatch ? goalMatch[1].trim() : "";
 
-  // Check if the story has reached an ending
-  if (!choicesMatch || choicesMatch[1].includes("THE END")) {
-    isEnding = true;
-  } else if (choicesMatch) {
-    // Parse the choices
-    const choicesText = choicesMatch[1];
-    const choiceLines = choicesText.split("\n");
+    // Extract story
+    const storyMatch = response.match(/\[STORY\](.+?)(?=\[SUMMARY\])/s);
+    const storyText = storyMatch ? storyMatch[1].trim() : "";
 
-    choices = choiceLines
-      .filter((line) => /^\d+\./.test(line)) // Filter lines that start with a number and dot
-      .map((line, index) => {
-        const match = line.match(/^\d+\.\s*(.*)/);
-        return {
-          id: index + 1,
-          text: match ? match[1].trim() : line.trim(),
-        };
-      });
+    // Extract summary
+    const summaryMatch = response.match(/\[SUMMARY\](.+?)(?=\[CHOICES\]|$)/s);
+    const summary = summaryMatch ? summaryMatch[1].trim() : "";
+
+    // Extract choices
+    const choicesMatch = response.match(/\[CHOICES\](.+?)$/s);
+
+    let choices: Choice[] = [];
+    let isEnding = false;
+
+    // Check if the story has reached an ending
+    if (!choicesMatch || choicesMatch[1].includes("THE END")) {
+      isEnding = true;
+    } else if (choicesMatch) {
+      // Parse the choices
+      const choicesText = choicesMatch[1];
+      const choiceLines = choicesText.split("\n");
+
+      choices = choiceLines
+        .filter((line) => /^\d+\./.test(line)) // Filter lines that start with a number and dot
+        .map((line, index) => {
+          const match = line.match(/^\d+\.\s*(.*)/);
+          return {
+            id: index + 1,
+            text: match ? match[1].trim() : line.trim(),
+          };
+        });
+    }
+
+    return {
+      text: storyText,
+      goal,
+      summary,
+      choices,
+      isEnding,
+      // Extract character names from text manually for backward compatibility
+      characterNames: extractCharacterNamesFromText(storyText),
+    };
   }
+};
 
-  return {
-    text: storyText,
-    goal,
-    summary,
-    choices,
-    isEnding,
-  };
+/**
+ * Extract character names from text that uses [name] markers
+ * This is for backward compatibility with the old format
+ */
+const extractCharacterNamesFromText = (text: string): string[] => {
+  const nameRegex = /\[name\]([^\s.]+)/g;
+  const matches = text.match(nameRegex) || [];
+
+  // Clean the names and remove duplicates
+  return [...new Set(matches.map((name) => cleanCharacterName(name)))];
 };
 
 /**
@@ -81,14 +141,15 @@ export const isPunctuation = (word: string): boolean => {
 };
 
 /**
- * Check if a word is a character name
+ * Check if a word is a character name (for backward compatibility)
+ * New approach uses the characterNames array directly
  */
 export const isCharacterName = (word: string): boolean => {
   return word.startsWith("[name]");
 };
 
 /**
- * Clean a character name by removing the [name] prefix
+ * Clean a character name by removing the [name] prefix (for backward compatibility)
  */
 export const cleanCharacterName = (word: string): string => {
   return word.replace("[name]", "");

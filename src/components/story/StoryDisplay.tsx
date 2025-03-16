@@ -5,6 +5,7 @@ import ThaiWordRenderer from "./ThaiWordRenderer";
 import AnimatedStoryText from "./AnimatedStoryText";
 import ShaderButton from "../ShaderButton";
 import ButtonOptions from "../ButtonOptions";
+import CharacterNames from "./CharacterNames";
 
 interface StoryDisplayProps {
   storyHistory: StorySegment[];
@@ -140,11 +141,17 @@ const StoryDisplay: React.FC<StoryDisplayProps> = ({
         </button>
       </motion.div>
 
+      {currentStory.characterNames &&
+        currentStory.characterNames.length > 0 && (
+          <CharacterNames characterNames={currentStory.characterNames} />
+        )}
+
       <div className="story-text mb-6">
         <AnimatedStoryText
           text={currentStory.text}
           fontSizeClass={fontSizeClass}
           showWordSpacing={showWordSpacing}
+          characterNames={currentStory.characterNames || []}
           onWordClick={onWordClick}
         />
       </div>

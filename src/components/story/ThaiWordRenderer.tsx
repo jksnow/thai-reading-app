@@ -1,40 +1,40 @@
 import React from "react";
-import {
-  isPunctuation,
-  isCharacterName,
-  cleanCharacterName,
-} from "../../utils/storyUtils";
+import { isPunctuation } from "../../utils/storyUtils";
 
 interface ThaiWordRendererProps {
   text: string;
   showWordSpacing: boolean;
+  characterNames: string[];
   onWordClick: (word: string, event: React.MouseEvent) => void;
 }
 
 const ThaiWordRenderer: React.FC<ThaiWordRendererProps> = ({
   text,
   showWordSpacing,
+  characterNames,
   onWordClick,
 }) => {
   // Split text by spaces (Thai words are already space-separated)
   const words = text.split(" ").filter((word) => word.trim() !== "");
 
+  // Check if a word is a character name from the array
+  const isCharacterName = (word: string): boolean => {
+    return characterNames.some((name) => name === word);
+  };
+
   return (
     <div className="thai-text">
       {words.map((word, index) => {
-        // Check if this is a character name
+        // Check if this word is a character name
         const isName = isCharacterName(word);
-
-        // Clean character names by removing the [name] prefix
-        const cleanedWord = isName ? cleanCharacterName(word) : word;
 
         // Clean word of punctuation for display but keep it for rendering
         const displayWord = isName
           ? "character_name" // Special handling for character names
-          : cleanedWord.replace(/[.,?!;:]/g, "");
+          : word.replace(/[.,?!;:]/g, "");
 
         // Skip rendering standalone punctuation when spacing is off
-        if (!showWordSpacing && isPunctuation(cleanedWord)) {
+        if (!showWordSpacing && isPunctuation(word)) {
           return null;
         }
 
@@ -59,7 +59,7 @@ const ThaiWordRenderer: React.FC<ThaiWordRendererProps> = ({
             {...commonProps}
             className={`${className} ${nameClassName}`}
           >
-            {cleanedWord}
+            {word}
           </span>
         );
       })}

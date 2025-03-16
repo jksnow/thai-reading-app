@@ -5,6 +5,7 @@ interface AnimatedStoryTextProps {
   text: string;
   showWordSpacing: boolean;
   fontSizeClass: string;
+  characterNames: string[];
   onWordClick?: (word: string, event: React.MouseEvent) => void;
 }
 
@@ -12,6 +13,7 @@ const AnimatedStoryText: React.FC<AnimatedStoryTextProps> = ({
   text,
   showWordSpacing,
   fontSizeClass,
+  characterNames,
   onWordClick,
 }) => {
   const [words, setWords] = useState<string[]>([]);
@@ -49,13 +51,19 @@ const AnimatedStoryText: React.FC<AnimatedStoryTextProps> = ({
     },
   };
 
-  // Helper function to identify and mark Thai names
+  // Helper function to check if a word is a character name
+  const isCharacterName = (word: string): boolean => {
+    return characterNames.some((name) => name === word);
+  };
+
+  // Helper function to process word for display
   const processWord = (word: string) => {
-    // Check if this is a Thai name (marked with [name] prefix)
-    if (word.startsWith("[name]")) {
-      const nameText = word.replace("[name]", "");
+    // Check if this is a character name
+    if (isCharacterName(word)) {
       return (
-        <span className="text-black font-normal special-text">{nameText}</span>
+        <span className="text-black font-bold text-accent-tertiary special-text">
+          {word}
+        </span>
       );
     }
     return word;
@@ -64,11 +72,11 @@ const AnimatedStoryText: React.FC<AnimatedStoryTextProps> = ({
   const handleWordClick = (word: string, e: React.MouseEvent) => {
     if (!onWordClick) return;
 
-    // If word is a name (starts with [name]), provide "character_name" instead
-    if (word.startsWith("[name]")) {
+    // If word is a character name, provide "character_name" instead
+    if (isCharacterName(word)) {
       onWordClick("character_name", e);
     } else {
-      onWordClick(word.replace("[name]", ""), e);
+      onWordClick(word, e);
     }
   };
 

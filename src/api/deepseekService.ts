@@ -82,7 +82,7 @@ const systemPrompt = (
   // Format the modifiers for the prompt
   const modifiersText =
     modifiers.length > 0
-      ? `\nThe story should include the following modifiers:\n${modifiers
+      ? `\nThe story should include the following creative writing modifiers:\n${modifiers
           .map(
             (mod) =>
               `- ${mod?.category}: ${mod?.modifier} (${mod?.description})`
@@ -90,31 +90,88 @@ const systemPrompt = (
           .join("\n")}`
       : "";
 
-  return `
-  You are a professional creative story writer. You write stories in the thai language. You understand how to make a captivating story for all age levels to enjoy..
-  Create a "choose your own adventure" story in the Thai language. You will write the story in parts and then create options for the user to continue the story.
+  // return `
+  // You are a professional creative story writer. You write stories in the thai language. You understand how to make a captivating story for all age levels to enjoy..
+  // Create a "choose your own adventure" story in the Thai language. You will write the story in parts and then create options for the user to continue the story.
 
-  - Genre/Theme: ${storyOptions.genre}
-  - Parental Rating: ${storyOptions.parentalRating}
-  - Reading Level: ${storyOptions.readingLevel}
-  - Number of paragraphs: ${storyOptions.paragraphs}${modifiersText}
+  // - Genre/Theme: ${storyOptions.genre}
+  // - Parental Rating: ${storyOptions.parentalRating}
+  // - Reading Level: ${storyOptions.readingLevel}
+  // - Number of paragraphs: ${storyOptions.paragraphs}${modifiersText}
 
-  Format and extra instructions:
-  Write [GOAL] and then write a story conclusion goal. Think of what would make a good ending to the story.
-  Write [STORY] and then write the story in thai based on the story criteria above. The story should build to the goal but not too quickly or forced. Don't be too predictable.
-  Write [SUMMARY] and then write a story summary in english: summarize the important beats of the story. No more than 1 paragraph.
-  If the story has reached the goal, write THE END
-  If the story has not reached the goal write [CHOICES] and then write 3 numbered choices to continue the story.
-  example format:
-  1. choice 1
-  2. choice 2
-  3. choice 3
+  // Format and extra instructions:
+  // Write [GOAL] and then write a story conclusion goal. Think of what would make a good ending to the story.
+  // Write [STORY] and then write the story in thai based on the story criteria above. The story should build to the goal but not too quickly or forced. Don't be too predictable.
+  // Write [SUMMARY] and then write a story summary in english: summarize the important beats of the story. No more than 1 paragraph.
+  // If the story has reached the goal, write THE END
+  // If the story has not reached the goal write [CHOICES] and then write 3 numbered choices to continue the story.
+  // example format:
+  // 1. choice 1
+  // 2. choice 2
+  // 3. choice 3
 
-  Format requirements:
-  Put a space between each Thai word. Period (.) at each sentence end.
-  Before the name of a character add [name] to indicate that it is a name with no space between [name] and the name written.
-  example: [name]เจฟฟ์
-  do not add [name] before name descriptors like คุณ or น้องหญิง. only before the actual name.
+  // Format requirements:
+  // Put a space between each Thai word. Period (.) at each sentence end.
+  // Before the name of a character add [name] to indicate that it is a name with no space between [name] and the name written.
+  // example: [name]เจฟฟ์
+  // do not add [name] before name descriptors like คุณ or น้องหญิง. only before the actual name.
+  return `You are a professional creative writer specializing in Thai language stories. You craft captivating "choose your own adventure" stories suitable for all age levels. Your task is to generate a story part based on the provided criteria and return the response in a structured JSON format.
+
+Story Criteria:
+- Genre/Theme: ${storyOptions.genre}
+- Parental Rating: ${storyOptions.parentalRating}
+- Reading Level: ${storyOptions.readingLevel}
+- Number of Paragraphs: ${storyOptions.paragraphs}${modifiersText}
+
+Instructions:
+1. Create a story conclusion goal that would make an engaging ending, considering the genre and theme.
+2. Write the story part in Thai, building toward the goal naturally without rushing or being too predictable. Use ${storyOptions.paragraphs} paragraphs.
+3. Provide a summary of the story part in English, highlighting key events in no more than one paragraph.
+4. If the story reaches the goal, indicate it has ended. If not, provide 3 numbered choices for the user to continue the story.
+
+Formatting Requirements:
+- In the Thai story text, put a space between each complete word (not between individual letters or syllables within a word) and end each sentence with a period (.). For example: "คุณ เดิน เข้า ไป ใน ป่า" (correct), NOT "ค ุ ณ เ ดิ น" (incorrect).
+- Write character names naturally in Thai without adding any special tags (e.g., just "สมชาย", not "[name]สมชาย").
+
+Response Format:
+Return the entire response as a single JSON object with the following structure:
+- "goal": A string describing the story's conclusion goal in English.
+- "story": A string containing the Thai story text with specified formatting.
+- "summary": A string with the English summary of the story part, using the same character names as listed in "character_names" (e.g., if "สมชาย" is in the story, use "Somchai" in the summary).
+- "is_complete": A boolean indicating if the story has reached the goal (true) or not (false).
+- "character_names": An array of strings containing the exact Thai names of characters as they appear in the story (e.g., "สมชาย").
+- "choices": An array of 3 strings (each a numbered choice like "1. choice text") if is_complete is false; an empty array if true. Choices should use character names consistently with "character_names".
+
+Example JSON Response:
+{
+  "goal": "Our characters must find the hidden treasure in the ancient temple.",
+  "story": "คุณ เดิน เข้า ไป ใน ป่า ที่ มืด มิด . สมชาย เพื่อน ของ คุณ เดิน ตาม มา . คุณ เห็น แสง สว่าง ลาง ๆ ข้าง หน้า .",
+  "summary": "You enter a dark forest with your friend Somchai, noticing a faint light ahead.",
+  "is_complete": false,
+  "character_names": ["สมชาย"],
+  "choices": [
+    "1. เดิน ไป ยัง แสง สว่าง",
+    "2. หยุด และ ตรวจ สอบ รอบ ๆ",
+    "3. เรียก หา สมชาย เพื่อ วาง แผน"
+  ]
+}
+OR
+{
+  "goal": "Escape the haunted house.",
+  "story": "คุณ เปิด ประตู และ วิ่ง ออก มา . อรุณ เพื่อน ของ คุณ รอ อยู่ ข้าง นอก . คุณ ปลอดภัย แล้ว .",
+  "summary": "You open the door and escape the haunted house, finding your friend Arun waiting outside.",
+  "is_complete": true,
+  "character_names": ["อรุณ"],
+  "choices": []
+}
+
+Key Clarifications:
+- Ensure spacing in the Thai story text is between whole words only, as shown in the examples. Do not space between letters within a word. 
+- Ensure if a word is made of multiple word sections (example: นักท่องเที่ยว) don't space each word section. The entire word should be written together.
+- Use the exact names from "character_names" in both the story (written naturally in Thai) and summary (transliterated to English), maintaining consistency (e.g., "สมชาย" in story = "Somchai" in summary).
+- Do not add any tags like [name] before character names in the story text; write them as plain Thai names.
+
+Now, generate the JSON response based on the criteria above.
 `;
 };
 
@@ -183,14 +240,21 @@ const formatContinuePrompt = (
     User selected:
     ${options.userChoice}${modifiersText}
     
-    Continue the story based on this choice. Follow the same formatting requirements.
-
-    Response must start with:
-    Write [GOAL] and use the same story goal provided above. 
-    Write [STORY] and then continue the story.
-    Write [SUMMARY] to summarize the story so far in english.
-    If the story has reached the goal, write THE END
-    If the story has not reached the goal write [CHOICES] and then write exactly 3 numbered choices to continue the story.
+    Continue the story in the same Thai style, using the same formatting requirements as before.
+    
+    Remember to:
+    1. Use the same story goal
+    2. Put a space between each Thai word and end each sentence with a period (.)
+    3. Before a character's name, add [name] with no space (e.g., [name]เจฟฟ์)
+    4. Build naturally toward the goal without rushing
+    
+    Return the response as a JSON object with these fields:
+    - "goal": The same story conclusion goal in English
+    - "summary": An updated English summary of the story so far
+    - "story": The continued Thai story text with proper formatting
+    - "is_complete": A boolean indicating if the story has reached the goal (true) or not (false)
+    - "character_names": An array of strings containing all character names in Thai
+    - "choices": An array of 3 strings (choices) if not complete, empty array if complete
   `;
 };
 

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { Choice, StorySegment } from "../../utils/storyUtils";
 import ThaiWordRenderer from "./ThaiWordRenderer";
@@ -6,6 +6,7 @@ import AnimatedStoryText from "./AnimatedStoryText";
 import ShaderButton from "../ShaderButton";
 import ButtonOptions from "../ButtonOptions";
 import CharacterNames from "./CharacterNames";
+import ModalContainer from "../ModalContainer";
 
 interface StoryDisplayProps {
   storyHistory: StorySegment[];
@@ -37,6 +38,7 @@ const StoryDisplay: React.FC<StoryDisplayProps> = ({
   onFontSizeChange,
 }) => {
   const currentStory = storyHistory[currentStoryIndex];
+  const [isSummaryModalOpen, setIsSummaryModalOpen] = useState(false);
 
   // Animation variants for the container
   const containerVariants = {
@@ -88,6 +90,13 @@ const StoryDisplay: React.FC<StoryDisplayProps> = ({
           animate={{ opacity: 1 }}
           transition={{ delay: 0.6 }}
         >
+          <ButtonOptions
+            onClick={() => setIsSummaryModalOpen(true)}
+            variant="amber"
+            padding="px-3 py-1"
+          >
+            English Summary
+          </ButtonOptions>
           <button
             onClick={() => onFontSizeChange("small")}
             className={`px-2 py-1 rounded ${
@@ -209,6 +218,17 @@ const StoryDisplay: React.FC<StoryDisplayProps> = ({
           </ButtonOptions>
         </motion.div>
       )}
+
+      <ModalContainer
+        isOpen={isSummaryModalOpen}
+        onClose={() => setIsSummaryModalOpen(false)}
+        size="small"
+      >
+        <div className="p-4 text-white">
+          <h2 className="text-2xl font-bold mb-4 text-center">English Summary</h2>
+          <p className="text-lg leading-relaxed">{currentStory.summary}</p>
+        </div>
+      </ModalContainer>
     </motion.div>
   );
 };

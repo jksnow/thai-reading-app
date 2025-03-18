@@ -14,11 +14,8 @@ export async function getResponseTime(): Promise<ResponseTime> {
     const db = client.db(DEFAULT_DB_NAME);
     const collection = db.collection(RESPONSE_TIMES_COLLECTION);
 
-    // Get the most recent response time document
-    const result = await collection.findOne<ResponseTime>(
-      {},
-      { sort: { lastUpdated: -1 } }
-    );
+    // Get the single document
+    const result = await collection.findOne<ResponseTime>({});
 
     if (result) {
       return result;
@@ -58,7 +55,13 @@ export async function updateResponseTime(
       lastUpdated: new Date().toISOString(),
     };
 
-    await collection.insertOne(updatedData);
+    // Update the single document or create if it doesn't exist
+    await collection.updateOne(
+      {}, // empty filter to match any document
+      { $set: updatedData },
+      { upsert: true }
+    );
+
     return updatedData;
   } catch (error) {
     console.error("Error updating response time data:", error);

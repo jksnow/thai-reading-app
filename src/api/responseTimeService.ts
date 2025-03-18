@@ -1,8 +1,9 @@
 import axios from "axios";
 
 // Define the API endpoint for the response time data
-// Ideally this would come from environment variables
-const API_URL = `${import.meta.env.VITE_API_URL}/response-times`;
+const API_URL = `${
+  import.meta.env.VITE_API_URL || "http://localhost:3000/api"
+}/response-times`;
 
 interface ResponseTimeData {
   averageTime: number;

@@ -2,7 +2,6 @@ import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 import { pingDatabase, getClient } from "./db";
-import { translateWord } from "./controllers/dictionaryController";
 import {
   getResponseTimeData,
   updateResponseTimeData,
@@ -11,6 +10,7 @@ import { fileURLToPath } from "url";
 import path from "path";
 import paymentRoutes from "./routes/paymentRoutes";
 import userRoutes from "./routes/userRoutes";
+import axios from "axios";
 
 // ES Module equivalent of __dirname
 const __filename = fileURLToPath(import.meta.url);
@@ -54,8 +54,19 @@ app.get("/api/db-ping", async (req, res) => {
   }
 });
 
-// Thai dictionary translation endpoint
-app.get("/api/translate", translateWord);
+// Thai2English proxy endpoint
+app.get("/api/translate/:word", async (req, res) => {
+  try {
+    const { word } = req.params;
+    const response = await axios.get(
+      `https://www.thai2english.com/api/search?q=${word}`
+    );
+    res.json(response.data);
+  } catch (error) {
+    console.error("Error proxying translation request:", error);
+    res.status(500).json({ error: "Failed to fetch translation" });
+  }
+});
 
 // Response times API endpoints
 app.get("/api/response-times", getResponseTimeData);

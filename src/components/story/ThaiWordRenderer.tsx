@@ -5,7 +5,7 @@ interface ThaiWordRendererProps {
   text: string;
   showWordSpacing: boolean;
   characterNames: string[];
-  onWordClick: (word: string, event: React.MouseEvent) => void;
+  onWordClick?: (word: string, event: React.MouseEvent) => void;
 }
 
 const ThaiWordRenderer: React.FC<ThaiWordRendererProps> = ({
@@ -38,28 +38,21 @@ const ThaiWordRenderer: React.FC<ThaiWordRendererProps> = ({
           return null;
         }
 
-        // Common props for both rendering modes
-        const commonProps = {
-          key: index,
-          onClick: (e: React.MouseEvent) => onWordClick(displayWord, e),
-        };
-
-        // Apply different styling based on spacing mode
-        const className = showWordSpacing
-          ? "inline-block cursor-pointer hover:bg-parchment transition-colors duration-100 rounded px-0.5 mx-0.5"
-          : "cursor-pointer hover:bg-parchment transition-colors duration-100 rounded";
-
-        // Character names get a special styling
-        const nameClassName = isName
-          ? "font-bold text-accent-tertiary special-text"
-          : "";
-
         return (
           <span
-            {...commonProps}
-            className={`${className} ${nameClassName}`}
+            key={index}
+            className={`inline-block ${
+              isName
+                ? "text-amber-700 font-bold"
+                : "text-black hover:text-blue-600 hover:underline cursor-pointer"
+            }`}
+            onClick={
+              onWordClick
+                ? (e: React.MouseEvent) => onWordClick(displayWord, e)
+                : undefined
+            }
           >
-            {word}
+            {displayWord}
           </span>
         );
       })}

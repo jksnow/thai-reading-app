@@ -7,6 +7,7 @@ import ShaderButton from "../ShaderButton";
 import ButtonOptions from "../ButtonOptions";
 import CharacterNames from "./CharacterNames";
 import ModalContainer from "../ModalContainer";
+import { getTranslation } from "../../api/thai2englishService";
 
 interface StoryDisplayProps {
   storyHistory: StorySegment[];
@@ -15,7 +16,6 @@ interface StoryDisplayProps {
   isGenerating: boolean;
   fontSizeClass: string;
   showWordSpacing: boolean;
-  onWordClick: (word: string, event: React.MouseEvent) => void;
   onShowChoices: () => void;
   onChoiceSelect: (choice: Choice) => void;
   onResetStory: () => void;
@@ -30,7 +30,6 @@ const StoryDisplay: React.FC<StoryDisplayProps> = ({
   isGenerating,
   fontSizeClass,
   showWordSpacing,
-  onWordClick,
   onShowChoices,
   onChoiceSelect,
   onResetStory,
@@ -39,6 +38,16 @@ const StoryDisplay: React.FC<StoryDisplayProps> = ({
 }) => {
   const currentStory = storyHistory[currentStoryIndex];
   const [isSummaryModalOpen, setIsSummaryModalOpen] = useState(false);
+
+  const handleWordClick = async (word: string, event: React.MouseEvent) => {
+    // Don't fetch translation if it's a character name
+    if (currentStory.characterNames?.includes(word)) {
+      return;
+    }
+
+    // Fetch translation
+    await getTranslation(word);
+  };
 
   // Animation variants for the container
   const containerVariants = {
@@ -161,7 +170,7 @@ const StoryDisplay: React.FC<StoryDisplayProps> = ({
           fontSizeClass={fontSizeClass}
           showWordSpacing={showWordSpacing}
           characterNames={currentStory.characterNames || []}
-          onWordClick={onWordClick}
+          onWordClick={handleWordClick}
         />
       </div>
 
@@ -225,7 +234,9 @@ const StoryDisplay: React.FC<StoryDisplayProps> = ({
         size="small"
       >
         <div className="p-4 text-white">
-          <h2 className="text-2xl font-bold mb-4 text-center">English Summary</h2>
+          <h2 className="text-2xl font-bold mb-4 text-center">
+            English Summary
+          </h2>
           <p className="text-lg leading-relaxed">{currentStory.summary}</p>
         </div>
       </ModalContainer>

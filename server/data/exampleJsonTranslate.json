@@ -1,0 +1,430 @@
+{
+  "preprocessedQuery": "โต๊ะ",
+  "processed": {
+    "type": "thai-word",
+    "firestoreWord": {
+      "hasSoundFile": false,
+      "t2e": "โต๊ะ",
+      "corpusScore": 4509,
+      "verified": null,
+      "exampleSentences": [
+        {
+          "engSentence": "Which table is this ?",
+          "thaiSentence": "โต๊ะไหนเนี่ย",
+          "thaiSentenceSpaced": " โต๊ะ ไหน เนี่ย ",
+          "id": 132706
+        },
+        {
+          "engSentence": "They are on your desk.",
+          "thaiSentence": "อยู่บนโต๊ะแล้วค่ะ",
+          "thaiSentenceSpaced": " อยู่ บน โต๊ะ แล้ว ค่ะ ",
+          "id": 199191
+        },
+        {
+          "engSentence": "Not at the table.",
+          "thaiSentence": "ไม่ใช่ที่โต๊ะ",
+          "thaiSentenceSpaced": " ไม่ใช่ ที่ โต๊ะ ",
+          "id": 223900
+        },
+        {
+          "engSentence": "This is your desk.",
+          "thaiSentence": "นี่โต๊ะของคุณจ๊ะ",
+          "thaiSentenceSpaced": " นี่ โต๊ะ ของคุณ จ๊ะ ",
+          "id": 384574
+        },
+        {
+          "engSentence": "The table over there.",
+          "thaiSentence": "ส่งโต๊ะตรงนั้นนะ",
+          "thaiSentenceSpaced": " ส่ง โต๊ะ ตรงนั้น นะ ",
+          "id": 411118
+        },
+        {
+          "engSentence": "Put the box on the table.",
+          "thaiSentence": "วางกล่องนั่นไว้บนโต๊ะ",
+          "thaiSentenceSpaced": " วาง กล่อง นั่น ไว้ บน โต๊ะ ",
+          "id": 524540
+        }
+      ],
+      "legacyWordId": 1463151,
+      "meanings": [
+        {
+          "components": [],
+          "isUncommon": false,
+          "examples": [
+            {
+              "hasSoundFile": false,
+              "t2e": "โต๊ะ หฺมู่",
+              "usage": "",
+              "partOfSpeech": "Noun",
+              "etymology": "",
+              "displayOrder": 0,
+              "verified": null,
+              "childId": 45042,
+              "explanation": null,
+              "parentId": 16667,
+              "meaning": "set of altar table",
+              "corpusScore": 100,
+              "legacyWordId": 1318507,
+              "id": 16667,
+              "word": "โต๊ะหมู่"
+            }
+          ],
+          "meaning": "table ; desk",
+          "usage": "",
+          "partOfSpeech": "Noun",
+          "etymology": "Thai",
+          "displayOrder": 0,
+          "id": 45042,
+          "explanation": null,
+          "word": "โต๊ะ",
+          "engTranslationWords": [
+            {
+              "isEngDictionaryWord": true,
+              "text": "table",
+              "word": "table"
+            },
+            {
+              "isEngDictionaryWord": true,
+              "text": "desk",
+              "word": "desk"
+            }
+          ]
+        }
+      ],
+      "word": "โต๊ะ"
+    },
+    "exampleSentences": [
+      {
+        "engSentence": "Which table is this ?",
+        "thaiSentence": "โต๊ะไหนเนี่ย",
+        "thaiSentenceSpaced": " โต๊ะ ไหน เนี่ย ",
+        "id": 132706,
+        "phonetic": "โต๊ะ ไหฺน เนี่ย",
+        "words": [
+          {
+            "isThai": true,
+            "word": "โต๊ะ",
+            "meanings": [
+              {
+                "meaning": "table ; desk"
+              }
+            ],
+            "phonetic": "โต๊ะ"
+          },
+          {
+            "isThai": true,
+            "word": "ไหน",
+            "meanings": [
+              {
+                "meaning": "whichever one"
+              },
+              {
+                "meaning": "which"
+              },
+              {
+                "meaning": "where ; which place \u003Ci\u003E(a shortened form of ที่ไหน)\u003C/i\u003E"
+              },
+              {
+                "meaning": "somewhere ; anywhere"
+              }
+            ],
+            "phonetic": "ไหฺน"
+          },
+          {
+            "isThai": true,
+            "word": "เนี่ย",
+            "meanings": [
+              {
+                "meaning": " \u003Ci\u003E(ending particle, sometimes showing suprise or confusion)\u003C/i\u003E"
+              }
+            ],
+            "phonetic": "เนี่ย"
+          }
+        ]
+      },
+      {
+        "engSentence": "They are on your desk.",
+        "thaiSentence": "อยู่บนโต๊ะแล้วค่ะ",
+        "thaiSentenceSpaced": " อยู่ บน โต๊ะ แล้ว ค่ะ ",
+        "id": 199191,
+        "phonetic": "หฺยู่ บน โต๊ะ แล้ว ค่ะ",
+        "words": [
+          {
+            "isThai": true,
+            "word": "อยู่",
+            "meanings": [
+              {
+                "meaning": " \u003Ci\u003E(an auxiliary used to put the verb in the present continuous tense, that shows the action of the verb is currently taking place)\u003C/i\u003E"
+              },
+              {
+                "meaning": "[to] be at ; live at ; stay"
+              }
+            ],
+            "phonetic": "หฺยู่"
+          },
+          {
+            "isThai": true,
+            "word": "บน",
+            "meanings": [
+              {
+                "meaning": "on ; upon ; above"
+              }
+            ],
+            "phonetic": "บน"
+          },
+          {
+            "isThai": true,
+            "word": "โต๊ะ",
+            "meanings": [
+              {
+                "meaning": "table ; desk"
+              }
+            ],
+            "phonetic": "โต๊ะ"
+          },
+          {
+            "isThai": true,
+            "word": "แล้ว",
+            "meanings": [
+              {
+                "meaning": "and ; and then ; and after that"
+              },
+              {
+                "meaning": "already \u003Ci\u003E(used a general marker that indicates a specified action has happened or state has been attained)\u003C/i\u003E"
+              }
+            ],
+            "phonetic": "แล้ว"
+          },
+          {
+            "isThai": true,
+            "word": "ค่ะ",
+            "meanings": [
+              {
+                "meaning": " \u003Ci\u003E(particle used by female speakers at the end of sentences to make them more polite)\u003C/i\u003E"
+              }
+            ],
+            "phonetic": "ค่ะ"
+          }
+        ]
+      },
+      {
+        "engSentence": "Not at the table.",
+        "thaiSentence": "ไม่ใช่ที่โต๊ะ",
+        "thaiSentenceSpaced": " ไม่ใช่ ที่ โต๊ะ ",
+        "id": 223900,
+        "phonetic": "ไม่ ไช่ ที่ โต๊ะ",
+        "words": [
+          {
+            "isThai": true,
+            "word": "ไม่ใช่",
+            "meanings": [
+              {
+                "meaning": "[to] be not ; no"
+              }
+            ],
+            "phonetic": "ไม่ ไช่"
+          },
+          {
+            "isThai": true,
+            "word": "ที่",
+            "meanings": [
+              {
+                "meaning": "to ; at"
+              },
+              {
+                "meaning": "that ; which ; who"
+              }
+            ],
+            "phonetic": "ที่"
+          },
+          {
+            "isThai": true,
+            "word": "โต๊ะ",
+            "meanings": [
+              {
+                "meaning": "table ; desk"
+              }
+            ],
+            "phonetic": "โต๊ะ"
+          }
+        ]
+      },
+      {
+        "engSentence": "This is your desk.",
+        "thaiSentence": "นี่โต๊ะของคุณจ๊ะ",
+        "thaiSentenceSpaced": " นี่ โต๊ะ ของคุณ จ๊ะ ",
+        "id": 384574,
+        "phonetic": "นี่ โต๊ะ ของ คุน จ๊ะ",
+        "words": [
+          {
+            "isThai": true,
+            "word": "นี่",
+            "meanings": [
+              {
+                "meaning": " \u003Ci\u003E(particle adding emphasis to a statement)\u003C/i\u003E"
+              },
+              {
+                "meaning": " \u003Ci\u003E(interjection used to make a point sound serious or important)\u003C/i\u003E"
+              },
+              {
+                "meaning": "this ; these"
+              }
+            ],
+            "phonetic": "นี่"
+          },
+          {
+            "isThai": true,
+            "word": "โต๊ะ",
+            "meanings": [
+              {
+                "meaning": "table ; desk"
+              }
+            ],
+            "phonetic": "โต๊ะ"
+          },
+          {
+            "isThai": true,
+            "word": "ของคุณ",
+            "meanings": [
+              {
+                "meaning": "your ; of you"
+              }
+            ],
+            "phonetic": "ของ คุน"
+          },
+          {
+            "isThai": true,
+            "word": "จ๊ะ",
+            "meanings": [
+              {
+                "meaning": " \u003Ci\u003E(particle used at the end of sentences to make them sound more friendly or polite)\u003C/i\u003E"
+              }
+            ],
+            "phonetic": "จ๊ะ"
+          }
+        ]
+      },
+      {
+        "engSentence": "The table over there.",
+        "thaiSentence": "ส่งโต๊ะตรงนั้นนะ",
+        "thaiSentenceSpaced": " ส่ง โต๊ะ ตรงนั้น นะ ",
+        "id": 411118,
+        "phonetic": "ส่ง โต๊ะ ตฺรง นั้น นะ",
+        "words": [
+          {
+            "isThai": true,
+            "word": "ส่ง",
+            "meanings": [
+              {
+                "meaning": "[to] send ; send something to someone"
+              }
+            ],
+            "phonetic": "ส่ง"
+          },
+          {
+            "isThai": true,
+            "word": "โต๊ะ",
+            "meanings": [
+              {
+                "meaning": "table ; desk"
+              }
+            ],
+            "phonetic": "โต๊ะ"
+          },
+          {
+            "isThai": true,
+            "word": "ตรงนั้น",
+            "meanings": [
+              {
+                "meaning": "there ; that place"
+              }
+            ],
+            "phonetic": "ตฺรง นั้น"
+          },
+          {
+            "isThai": true,
+            "word": "นะ",
+            "meanings": [
+              {
+                "meaning": " \u003Ci\u003E(particle used to make a sentence seem softer, more persuasive or less abrupt)\u003C/i\u003E"
+              }
+            ],
+            "phonetic": "นะ"
+          }
+        ]
+      },
+      {
+        "engSentence": "Put the box on the table.",
+        "thaiSentence": "วางกล่องนั่นไว้บนโต๊ะ",
+        "thaiSentenceSpaced": " วาง กล่อง นั่น ไว้ บน โต๊ะ ",
+        "id": 524540,
+        "phonetic": "วาง กฺล่อง นั่น ไว้ บน โต๊ะ",
+        "words": [
+          {
+            "isThai": true,
+            "word": "วาง",
+            "meanings": [
+              {
+                "meaning": "[to] put down ; set down ; place"
+              }
+            ],
+            "phonetic": "วาง"
+          },
+          {
+            "isThai": true,
+            "word": "กล่อง",
+            "meanings": [
+              {
+                "meaning": "box ; case ; casket"
+              }
+            ],
+            "phonetic": "กฺล่อง"
+          },
+          {
+            "isThai": true,
+            "word": "นั่น",
+            "meanings": [
+              {
+                "meaning": "that ; those"
+              }
+            ],
+            "phonetic": "นั่น"
+          },
+          {
+            "isThai": true,
+            "word": "ไว้",
+            "meanings": [
+              {
+                "meaning": "[to] keep ; save ; store"
+              }
+            ],
+            "phonetic": "ไว้"
+          },
+          {
+            "isThai": true,
+            "word": "บน",
+            "meanings": [
+              {
+                "meaning": "on ; upon ; above"
+              }
+            ],
+            "phonetic": "บน"
+          },
+          {
+            "isThai": true,
+            "word": "โต๊ะ",
+            "meanings": [
+              {
+                "meaning": "table ; desk"
+              }
+            ],
+            "phonetic": "โต๊ะ"
+          }
+        ]
+      }
+    ],
+    "greenBarCount": 4,
+    "commonessText": "Commonly",
+    "pageUrl": ""
+  }
+}

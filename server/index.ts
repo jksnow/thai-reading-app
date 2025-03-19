@@ -27,29 +27,29 @@ dotenv.config();
 const app = express();
 const port = process.env.PORT || 3000;
 
-// CORS configuration
-app.use(
-  cors({
-    origin: [
-      "https://thaitale.io",
-      "https://www.thaitale.io",
-      "thai-tale-git-master-jeffs-projects-0c0309f1.vercel.app",
-      "http://localhost:5173",
-      "http://localhost:3000",
-    ],
-    credentials: true,
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
-    allowedHeaders: ["Content-Type", "Authorization", "Accept"],
-    exposedHeaders: ["Location"],
-  })
-);
+// CORS is now handled by Vercel platform configuration
+// app.use(
+//   cors({
+//     origin: [
+//       "https://thaitale.io",
+//       "https://www.thaitale.io",
+//       "thai-tale-git-master-jeffs-projects-0c0309f1.vercel.app",
+//       "http://localhost:5173",
+//       "http://localhost:3000",
+//     ],
+//     credentials: true,
+//     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
+//     allowedHeaders: ["Content-Type", "Authorization", "Accept"],
+//     exposedHeaders: ["Location"],
+//   })
+// );
 
-// Ensure CORS headers are set even for errors
-app.use((req, res, next) => {
-  res.header("Access-Control-Allow-Origin", req.headers.origin);
-  res.header("Access-Control-Allow-Credentials", "true");
-  next();
-});
+// // Ensure CORS headers are set even for errors
+// app.use((req, res, next) => {
+//   res.header("Access-Control-Allow-Origin", req.headers.origin);
+//   res.header("Access-Control-Allow-Credentials", "true");
+//   next();
+// });
 
 // Parse JSON payloads
 app.use(express.json());

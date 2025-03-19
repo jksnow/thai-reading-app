@@ -5,12 +5,14 @@ import { useAppState } from "../context/AppStateContext";
 import ModalContainer from "./ModalContainer";
 import OptionsModalContent from "./OptionsModalContent";
 import CollectionModalContent from "./CollectionModalContent";
+import StartModalContent from "./StartModalContent";
 
 const GlobalButtonContainer: React.FC = () => {
   const { currentSection, setCurrentSection } = useAppState();
 
   const [isOptionsModalOpen, setIsOptionsModalOpen] = useState(false);
   const [isCollectionModalOpen, setIsCollectionModalOpen] = useState(false);
+  const [isStartModalOpen, setIsStartModalOpen] = useState(false);
 
   // Define positioning based on current section
   const getContainerClasses = () => {
@@ -39,6 +41,14 @@ const GlobalButtonContainer: React.FC = () => {
     setIsCollectionModalOpen(false);
   };
 
+  const openStartModal = () => {
+    setIsStartModalOpen(true);
+  };
+
+  const closeStartModal = () => {
+    setIsStartModalOpen(false);
+  };
+
   return (
     <>
       <div className={getContainerClasses()}>
@@ -46,7 +56,7 @@ const GlobalButtonContainer: React.FC = () => {
           {/* Only show START button on home screen */}
           {currentSection === "home" && (
             <ButtonOptions
-              onClick={() => setCurrentSection("modifier-selection")}
+              onClick={openStartModal}
               variant="blue"
             >
               START
@@ -60,7 +70,7 @@ const GlobalButtonContainer: React.FC = () => {
             OPTIONS
           </ButtonOptions>
 
-          <ButtonOptions 
+          <ButtonOptions
             variant="amber"
             onClick={openCollectionModal}
           >
@@ -85,6 +95,15 @@ const GlobalButtonContainer: React.FC = () => {
         size="small"
       >
         <CollectionModalContent onClose={closeCollectionModal} />
+      </ModalContainer>
+
+      {/* Start Modal */}
+      <ModalContainer
+        isOpen={isStartModalOpen}
+        onClose={closeStartModal}
+        size="small"
+      >
+        <StartModalContent onClose={closeStartModal} />
       </ModalContainer>
     </>
   );

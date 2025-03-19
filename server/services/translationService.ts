@@ -3,6 +3,23 @@ import { Translation, TRANSLATIONS_COLLECTION } from "../models/translation";
 import axios from "axios";
 import { getTransliteration } from "./transliterationService";
 
+// Ensure index exists for word field
+async function ensureIndexes() {
+  try {
+    const client = await getClient();
+    const db = client.db(DEFAULT_DB_NAME);
+    const collection = db.collection(TRANSLATIONS_COLLECTION);
+
+    await collection.createIndex({ word: 1 }, { unique: true });
+    console.log("MongoDB index on 'word' field ensured");
+  } catch (error) {
+    console.error("Error ensuring MongoDB indexes:", error);
+  }
+}
+
+// Call this when the service starts
+ensureIndexes();
+
 /**
  * Get a translation from our database
  */
@@ -10,13 +27,21 @@ export async function getTranslation(
   word: string
 ): Promise<Translation | null> {
   try {
+    console.log(
+      `Attempting to fetch translation for word "${word}" from MongoDB`
+    );
     const client = await getClient();
     const db = client.db(DEFAULT_DB_NAME);
     const collection = db.collection(TRANSLATIONS_COLLECTION);
 
-    return await collection.findOne<Translation>({ word });
+    const result = await collection.findOne<Translation>({ word });
+    console.log(
+      `MongoDB lookup result for "${word}":`,
+      result ? "Found" : "Not found"
+    );
+    return result;
   } catch (error) {
-    console.error("Error getting translation:", error);
+    console.error("Error getting translation from MongoDB:", error);
     throw error;
   }
 }
@@ -28,14 +53,20 @@ export async function storeTranslation(
   translation: Translation
 ): Promise<Translation> {
   try {
+    console.log(
+      `Attempting to store translation for word "${translation.word}" in MongoDB`
+    );
     const client = await getClient();
     const db = client.db(DEFAULT_DB_NAME);
     const collection = db.collection(TRANSLATIONS_COLLECTION);
 
     await collection.insertOne(translation);
+    console.log(
+      `Successfully stored translation for "${translation.word}" in MongoDB`
+    );
     return translation;
   } catch (error) {
-    console.error("Error storing translation:", error);
+    console.error("Error storing translation in MongoDB:", error);
     throw error;
   }
 }
@@ -47,12 +78,14 @@ export async function fetchAndStoreTranslation(
   word: string
 ): Promise<Translation | null> {
   try {
+    console.log(`Fetching translation for "${word}" from thai2english API`);
     const response = await axios.get(
       `https://www.thai2english.com/api/search?q=${word}`
     );
     const data = response.data;
 
     if (!data.processed?.firestoreWord) {
+      console.log(`No translation found on thai2english for "${word}"`);
       return null;
     }
 
@@ -70,6 +103,7 @@ export async function fetchAndStoreTranslation(
     };
 
     await storeTranslation(translation);
+    console.log(`Successfully fetched and stored translation for "${word}"`);
     return translation;
   } catch (error) {
     console.error("Error fetching translation from thai2english:", error);

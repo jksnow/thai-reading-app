@@ -1,5 +1,6 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { motion } from "framer-motion";
+import { getTransliteration } from "../api/thai2englishService";
 
 interface Meaning {
   meaning: string;
@@ -11,7 +12,6 @@ interface Translation {
   t2e: string;
   word: string;
   meanings: Meaning[];
-  transliteration?: string;
 }
 
 interface TranslationPopupProps {
@@ -27,6 +27,10 @@ const TranslationPopup: React.FC<TranslationPopupProps> = ({
   position,
   isLoading,
 }) => {
+  const [transliteration, setTransliteration] = useState<string | null>(null);
+  const [isTransliterationLoading, setIsTransliterationLoading] =
+    useState(false);
+  const popupRef = useRef<HTMLDivElement>(null);
   const [popupStyle, setPopupStyle] = useState<React.CSSProperties>({
     position: "fixed",
     top: position.y,
@@ -35,6 +39,34 @@ const TranslationPopup: React.FC<TranslationPopupProps> = ({
     maxHeight: "400px",
     zIndex: 1000,
   });
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        popupRef.current &&
+        !popupRef.current.contains(event.target as Node)
+      ) {
+        onClose();
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [onClose]);
+
+  useEffect(() => {
+    const fetchTransliteration = async () => {
+      if (translation?.word) {
+        setIsTransliterationLoading(true);
+        const result = await getTransliteration(translation.word);
+        setTransliteration(result);
+        setIsTransliterationLoading(false);
+      }
+    };
+
+    setTransliteration(null); // Reset when word changes
+    fetchTransliteration();
+  }, [translation?.word]);
 
   useEffect(() => {
     const updatePosition = () => {
@@ -68,56 +100,49 @@ const TranslationPopup: React.FC<TranslationPopupProps> = ({
 
   return (
     <motion.div
-      initial={{ opacity: 0, scale: 0.9, y: -10 }}
-      animate={{ opacity: 1, scale: 1, y: 0 }}
-      exit={{ opacity: 0, scale: 0.9, y: 10 }}
+      ref={popupRef}
+      initial={{ opacity: 0, scale: 0.9 }}
+      animate={{ opacity: 1, scale: 1 }}
+      exit={{ opacity: 0, scale: 0.9 }}
       transition={{
         type: "spring",
         stiffness: 500,
         damping: 30,
-        mass: 0.5,
       }}
-      className="bg-white shadow-lg rounded-lg p-4 border border-gray-200 overflow-auto"
+      className="bg-gray-900 shadow-2xl rounded-lg p-4 border border-gray-800 overflow-auto"
       style={popupStyle}
     >
-      {/* Header */}
-      <div className="flex justify-between items-center mb-3 border-b pb-2">
-        <div>
-          {isLoading ? (
-            <div className="animate-pulse">
-              <div className="h-6 w-24 bg-gray-200 rounded mb-1"></div>
-              <div className="h-4 w-16 bg-gray-100 rounded"></div>
-            </div>
-          ) : (
-            <>
-              <h3 className="text-xl font-bold text-gray-800">
-                {translation?.word}
-              </h3>
-              <p className="text-sm text-gray-500">{translation?.t2e}</p>
-              {translation?.transliteration && (
-                <p className="text-xs text-gray-400 italic">
-                  /{translation.transliteration}/
-                </p>
-              )}
-            </>
-          )}
-        </div>
-        <button
-          onClick={onClose}
-          className="text-gray-400 hover:text-gray-600"
-          aria-label="Close"
-        >
-          ✕
-        </button>
+      <div>
+        {isLoading ? (
+          <div className="animate-pulse">
+            <div className="h-6 w-24 bg-gray-800 rounded mb-1"></div>
+            <div className="h-4 w-16 bg-gray-800 rounded"></div>
+          </div>
+        ) : (
+          <>
+            <h3 className="text-lg font-medium text-white mb-1">
+              {translation?.word}
+            </h3>
+            <p className="text-sm text-gray-400">{translation?.t2e}</p>
+            {isTransliterationLoading ? (
+              <div className="animate-pulse">
+                <div className="h-3 w-20 bg-gray-800 rounded"></div>
+              </div>
+            ) : transliteration ? (
+              <p className="text-xs text-gray-500 italic mb-2">
+                /{transliteration}/
+              </p>
+            ) : null}
+          </>
+        )}
       </div>
 
-      {/* Meanings */}
-      <div className="space-y-2">
+      <div className="space-y-2 mt-2">
         {isLoading ? (
-          <div className="space-y-3 animate-pulse">
-            <div className="h-4 w-full bg-gray-100 rounded"></div>
-            <div className="h-4 w-3/4 bg-gray-100 rounded"></div>
-            <div className="h-4 w-5/6 bg-gray-100 rounded"></div>
+          <div className="space-y-2 animate-pulse">
+            <div className="h-4 w-full bg-gray-800 rounded"></div>
+            <div className="h-4 w-3/4 bg-gray-800 rounded"></div>
+            <div className="h-4 w-5/6 bg-gray-800 rounded"></div>
           </div>
         ) : (
           translation?.meanings
@@ -125,7 +150,7 @@ const TranslationPopup: React.FC<TranslationPopupProps> = ({
             .map((meaning, index) => (
               <div
                 key={index}
-                className="text-gray-700"
+                className="text-gray-300"
               >
                 <span className="text-xs text-gray-500 font-medium">
                   {meaning.partOfSpeech}

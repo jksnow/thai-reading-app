@@ -13,7 +13,6 @@ export interface Translation {
   word: string;
   meanings: Meaning[];
   dateAdded: string;
-  transliteration?: string;
 }
 
 /**
@@ -29,6 +28,23 @@ export const getTranslation = async (
     return response.data;
   } catch (error) {
     console.error("Error fetching translation:", error);
+    return null;
+  }
+};
+
+/**
+ * Get transliteration for a Thai word
+ */
+export const getTransliteration = async (
+  word: string
+): Promise<string | null> => {
+  try {
+    const response = await axios.get<{ transliteration: string }>(
+      `${API_URL}/transliterate/${encodeURIComponent(word)}`
+    );
+    return response.data.transliteration;
+  } catch (error) {
+    console.error("Error fetching transliteration:", error);
     return null;
   }
 };

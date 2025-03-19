@@ -77,16 +77,28 @@ app.get("/api/translate/:word", async (req, res) => {
       return;
     }
 
-    // Get transliteration on-the-fly
-    const transliteration = await getTransliteration(word);
-    if (transliteration) {
-      translation = { ...translation, transliteration };
-    }
-
     res.json(translation);
   } catch (error) {
     console.error("Error handling translation request:", error);
     res.status(500).json({ error: "Failed to fetch translation" });
+  }
+});
+
+// Dedicated transliteration endpoint
+app.get("/api/transliterate/:word", async (req, res) => {
+  try {
+    const { word } = req.params;
+    const transliteration = await getTransliteration(word);
+
+    if (!transliteration) {
+      res.status(404).json({ error: "Could not transliterate word" });
+      return;
+    }
+
+    res.json({ transliteration });
+  } catch (error) {
+    console.error("Error handling transliteration request:", error);
+    res.status(500).json({ error: "Failed to transliterate word" });
   }
 });
 

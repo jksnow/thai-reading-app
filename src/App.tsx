@@ -7,6 +7,7 @@ import SelectedModifiersModal from "./components/SelectedModifiersModal";
 import MainTitleScreen from "./components/MainTitleScreen";
 import SocialMediaButtons from "./components/SocialMediaButtons";
 import { AuthProvider, useAuth } from "./context/AuthContext";
+import { ShaderSettingsProvider } from "./context/ShaderSettingsContext";
 import AuthForm from "./components/AuthForm";
 
 // Component for the background and main content
@@ -75,14 +76,16 @@ const AppContent = () => {
   );
 };
 
-function App() {
+const App = () => {
   return (
     <AuthProvider>
       <AppStateProvider>
-        <AppContent />
+        <ShaderSettingsProvider>
+          <AppContent />
+        </ShaderSettingsProvider>
       </AppStateProvider>
     </AuthProvider>
   );
-}
+};
 
 export default App;

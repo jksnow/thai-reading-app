@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useAuth } from "../context/AuthContext";
+import thaiTaleLogo from "../assets/v1e.png";
 import ButtonOptions from "./ButtonOptions";
 
 const AuthForm = () => {
@@ -69,12 +70,17 @@ const AuthForm = () => {
 
   return (
     <div className="bg-black bg-opacity-50 rounded-lg p-6 text-white max-w-md mx-auto mt-10">
-      <div className="mx-auto h-24 w-24 overflow-hidden rounded-full flex items-center justify-center bg-gradient-to-r from-purple-500 to-green-500 mb-6">
-        <span className="text-white text-4xl font-bold">TT</span>
+      <div className="flex justify-center pb-8">
+        <img
+          src={thaiTaleLogo}
+          alt="Thai Tale Logo"
+          className="w-auto"
+          style={{ height: "10rem" }}
+        />
       </div>
 
       <h2 className="text-2xl font-bold mb-6 text-center">
-        Welcome to Thai Tale
+        Thai Tale - Practice Thai with AI
       </h2>
       <p className="text-center text-sm mb-8 text-gray-300">
         Sign in to access your personalized learning experience
@@ -95,10 +101,6 @@ const AuthForm = () => {
         >
           {loading ? "Signing in..." : "Sign in with Google"}
         </ButtonOptions>
-
-        <p className="text-center text-sm mt-4 text-gray-300">
-          By signing in, you agree to our Terms of Service and Privacy Policy
-        </p>
       </div>
     </div>
   );

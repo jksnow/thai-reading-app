@@ -47,7 +47,6 @@ export interface User {
 
 // Used when creating a new user
 export const createInitialUserData = (
-  id: string,
   email: string,
   name: string
 ): Omit<User, "_id"> => ({

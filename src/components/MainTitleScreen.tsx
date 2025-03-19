@@ -1,6 +1,5 @@
 import React from "react";
 import thaiTaleLogo from "../assets/v1e.png";
-import { useAppState } from "../context/AppStateContext";
 import GlobalButtonContainer from "./GlobalButtonContainer";
 import ChatBubble from "./ChatBubble";
 

@@ -25,7 +25,6 @@ const StoryGenerator: React.FC = () => {
 
   // State to control component visibility
   const [showControls, setShowControls] = useState(true);
-  const [showStory, setShowStory] = useState(false);
   const [isLoadingSavedStory, setIsLoadingSavedStory] = useState(true);
 
   // Story generation parameters
@@ -93,7 +92,6 @@ const StoryGenerator: React.FC = () => {
             if (parsedStory && parsedStory.text) {
               setStoryHistory([parsedStory]);
               setCurrentStoryIndex(0);
-              setShowStory(true);
               setShowControls(false);
             } else {
               console.error("Invalid story format");
@@ -200,7 +198,7 @@ const StoryGenerator: React.FC = () => {
 
         <StoryLoadingScreen
           isVisible={isGenerating}
-          onComplete={() => setShowStory(true)}
+          onComplete={() => setShowControls(false)}
         />
       </div>
     </div>

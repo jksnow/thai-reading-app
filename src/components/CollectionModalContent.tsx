@@ -2,13 +2,9 @@ import React, { useState } from "react";
 import ButtonOptions from "./ButtonOptions";
 import ModifiersModal from "./ModifiersModal";
 
-interface CollectionModalContentProps {
-  onClose: () => void;
-}
+interface CollectionModalContentProps {}
 
-const CollectionModalContent: React.FC<CollectionModalContentProps> = ({
-  onClose,
-}) => {
+const CollectionModalContent: React.FC<CollectionModalContentProps> = () => {
   const [isModifiersOpen, setIsModifiersOpen] = useState(false);
 
   const openModifiers = () => {

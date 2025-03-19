@@ -36,54 +36,6 @@ interface AppState {
   setColorScheme: (index: number) => void;
 }
 
-// Define the context interface including state and setter functions
-interface AppStateContextType {
-  state: AppState;
-  setState: React.Dispatch<React.SetStateAction<AppState>>;
-  // Helper functions for common operations
-  updateShaderProperty: (
-    key: keyof Omit<
-      AppState,
-      | "startAnimation"
-      | "selectedModifiers"
-      | "storyOptions"
-      | "isGeneratingStory"
-      | "apiResponseTimes"
-      | "estimatedResponseTime"
-    >,
-    value: number
-  ) => void;
-  toggleAnimation: () => void;
-  setStoryOptions: (options: Record<string, any>) => void;
-}
-
-// Set default values
-const defaultState: AppState = {
-  currentStory: null,
-  storyHistory: [],
-  isGeneratingStory: false,
-  apiResponseTimes: [],
-  estimatedResponseTime: 8000, // Default 8 seconds
-  selectedModifiers: [],
-  currentSection: "home", // Default to home screen
-  colorA: new THREE.Color(0.5, 0.5, 0.5),
-  colorB: new THREE.Color(0.5, 0.5, 0.5),
-  isColorTransitioning: false,
-  currentSchemeIndex: 0,
-  colorSchemeName: BALATRO_COLOR_SCHEMES[0].name,
-  colorSchemeCount: BALATRO_COLOR_SCHEMES.length,
-  setCurrentStory: () => {},
-  addStoryToHistory: () => {},
-  resetStory: () => {},
-  setIsGeneratingStory: () => {},
-  setSelectedModifiers: () => {},
-  recordApiResponseTime: () => {},
-  getEstimatedResponseTime: () => 8000,
-  setCurrentSection: () => {},
-  changeColorScheme: () => {},
-  setColorScheme: () => {},
-};
-
 // Create the context
 const AppStateContext = createContext<AppState | undefined>(undefined);
 

@@ -11,6 +11,10 @@ import path from "path";
 import paymentRoutes from "./routes/paymentRoutes";
 import userRoutes from "./routes/userRoutes";
 import axios from "axios";
+import {
+  getTranslation,
+  fetchAndStoreTranslation,
+} from "./services/translationService";
 
 // ES Module equivalent of __dirname
 const __filename = fileURLToPath(import.meta.url);
@@ -54,16 +58,27 @@ app.get("/api/db-ping", async (req, res) => {
   }
 });
 
-// Thai2English proxy endpoint
+// Thai2English proxy endpoint with database caching
 app.get("/api/translate/:word", async (req, res) => {
   try {
     const { word } = req.params;
-    const response = await axios.get(
-      `https://www.thai2english.com/api/search?q=${word}`
-    );
-    res.json(response.data);
+
+    // First try to get from our database
+    let translation = await getTranslation(word);
+
+    // If not found, fetch from thai2english and store
+    if (!translation) {
+      translation = await fetchAndStoreTranslation(word);
+    }
+
+    if (!translation) {
+      res.status(404).json({ error: "Translation not found" });
+      return;
+    }
+
+    res.json(translation);
   } catch (error) {
-    console.error("Error proxying translation request:", error);
+    console.error("Error handling translation request:", error);
     res.status(500).json({ error: "Failed to fetch translation" });
   }
 });

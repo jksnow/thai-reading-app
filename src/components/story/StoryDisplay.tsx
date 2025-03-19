@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { Choice, StorySegment } from "../../utils/storyUtils";
 import ThaiWordRenderer from "./ThaiWordRenderer";
 import AnimatedStoryText from "./AnimatedStoryText";
@@ -8,6 +8,8 @@ import ButtonOptions from "../ButtonOptions";
 import CharacterNames from "./CharacterNames";
 import ModalContainer from "../ModalContainer";
 import { getTranslation } from "../../api/thai2englishService";
+import type { Translation } from "../../api/thai2englishService";
+import TranslationPopup from "../TranslationPopup";
 
 interface StoryDisplayProps {
   storyHistory: StorySegment[];
@@ -21,6 +23,12 @@ interface StoryDisplayProps {
   onResetStory: () => void;
   onToggleWordSpacing: () => void;
   onFontSizeChange: (size: string) => void;
+}
+
+interface PopupState {
+  translation?: Translation;
+  position: { x: number; y: number };
+  isLoading: boolean;
 }
 
 const StoryDisplay: React.FC<StoryDisplayProps> = ({
@@ -38,6 +46,8 @@ const StoryDisplay: React.FC<StoryDisplayProps> = ({
 }) => {
   const currentStory = storyHistory[currentStoryIndex];
   const [isSummaryModalOpen, setIsSummaryModalOpen] = useState(false);
+  const [selectedTranslation, setSelectedTranslation] =
+    useState<PopupState | null>(null);
 
   const handleWordClick = async (word: string, event: React.MouseEvent) => {
     // Don't fetch translation if it's a character name
@@ -45,8 +55,29 @@ const StoryDisplay: React.FC<StoryDisplayProps> = ({
       return;
     }
 
+    const target = event.target as HTMLElement;
+    const rect = target.getBoundingClientRect();
+
+    // Show loading state immediately
+    setSelectedTranslation({
+      position: {
+        x: rect.left,
+        y: rect.bottom,
+      },
+      isLoading: true,
+    });
+
     // Fetch translation
-    await getTranslation(word);
+    const translation = await getTranslation(word);
+    if (translation) {
+      setSelectedTranslation((prev) => ({
+        ...prev!,
+        translation,
+        isLoading: false,
+      }));
+    } else {
+      setSelectedTranslation(null);
+    }
   };
 
   // Animation variants for the container
@@ -240,6 +271,17 @@ const StoryDisplay: React.FC<StoryDisplayProps> = ({
           <p className="text-lg leading-relaxed">{currentStory.summary}</p>
         </div>
       </ModalContainer>
+
+      <AnimatePresence>
+        {selectedTranslation && (
+          <TranslationPopup
+            translation={selectedTranslation.translation}
+            position={selectedTranslation.position}
+            isLoading={selectedTranslation.isLoading}
+            onClose={() => setSelectedTranslation(null)}
+          />
+        )}
+      </AnimatePresence>
     </motion.div>
   );
 };

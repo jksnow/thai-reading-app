@@ -6,11 +6,6 @@ import { StoryControls, StoryDisplay } from "../components/story";
 import StoryLoadingScreen from "../components/StoryLoadingScreen";
 import { useAppState } from "../context/AppStateContext";
 import GlobalButtonContainer from "../components/GlobalButtonContainer";
-import { useAuth } from "../context/AuthContext";
-import { Story } from "../types/story";
-import StoryOptions from "../components/story/StoryOptions";
-import StoryModifiers from "../components/story/StoryModifiers";
-import LoadingSpinner from "../components/LoadingSpinner";
 
 const StoryGenerator: React.FC = () => {
   // Access the app state context for selected modifiers, generation status and navigation

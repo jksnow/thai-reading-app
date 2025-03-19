@@ -94,7 +94,7 @@ const GlobalButtonContainer: React.FC = () => {
         onClose={closeCollectionModal}
         size="small"
       >
-        <CollectionModalContent onClose={closeCollectionModal} />
+        <CollectionModalContent />
       </ModalContainer>
 
       {/* Start Modal */}

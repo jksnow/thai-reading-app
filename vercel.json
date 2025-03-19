@@ -16,14 +16,14 @@
       }
     }
   ],
-  "routes": [
+  "rewrites": [
     {
-      "src": "/api/(?!.*/$)(.*)",
-      "dest": "server/index.ts"
+      "source": "/api/:path*",
+      "destination": "server/index.ts"
     },
     {
-      "src": "/(.*)",
-      "dest": "dist/$1"
+      "source": "/:path*",
+      "destination": "dist/:path*"
     }
   ],
   "trailingSlash": false

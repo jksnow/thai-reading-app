@@ -1,6 +1,7 @@
 import { getClient, DEFAULT_DB_NAME } from "../db";
 import { Translation, TRANSLATIONS_COLLECTION } from "../models/translation";
 import axios from "axios";
+import { getTransliteration } from "./transliterationService";
 
 /**
  * Get a translation from our database
@@ -56,6 +57,7 @@ export async function fetchAndStoreTranslation(
     }
 
     const firestoreWord = data.processed.firestoreWord;
+
     const translation: Translation = {
       t2e: firestoreWord.t2e,
       word: firestoreWord.word,

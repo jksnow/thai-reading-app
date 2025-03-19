@@ -15,6 +15,7 @@ import {
   getTranslation,
   fetchAndStoreTranslation,
 } from "./services/translationService";
+import { getTransliteration } from "./services/transliterationService";
 
 // ES Module equivalent of __dirname
 const __filename = fileURLToPath(import.meta.url);
@@ -74,6 +75,12 @@ app.get("/api/translate/:word", async (req, res) => {
     if (!translation) {
       res.status(404).json({ error: "Translation not found" });
       return;
+    }
+
+    // Get transliteration on-the-fly
+    const transliteration = await getTransliteration(word);
+    if (transliteration) {
+      translation = { ...translation, transliteration };
     }
 
     res.json(translation);

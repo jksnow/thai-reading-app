@@ -75,17 +75,28 @@ const StartModalContent: React.FC<StartModalContentProps> = ({ onClose }) => {
 
     try {
       const userData = await userService.getUserById(currentUser.uid);
-      if (!userData?.currentStory) return;
+      const currentStory = userData?.currentStory;
 
-      // Set the modifiers in app state
-      setSelectedModifiers(userData.currentStory.selectedModifiers);
+      if (!currentStory) return;
+
+      // Check if we have both modifiers and response
+      const hasModifiers =
+        Array.isArray(currentStory.selectedModifiers) &&
+        currentStory.selectedModifiers.length > 0;
+      const hasResponse = !!currentStory.latestResponse;
+
+      // Set the modifiers in app state if they exist
+      if (hasModifiers) {
+        setSelectedModifiers(currentStory.selectedModifiers);
+      }
 
       // Navigate to appropriate section based on story state
-      if (userData.currentStory.latestResponse) {
+      if (hasModifiers && hasResponse) {
+        // If we have both modifiers and response, go directly to story display
         setCurrentSection("story-generator");
       } else {
-        // For incomplete stories, go to story controls
-        setCurrentSection("story-generator");
+        // If we're missing either, go to modifier selection
+        setCurrentSection("modifier-selection");
       }
 
       onClose();

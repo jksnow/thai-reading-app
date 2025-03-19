@@ -11,6 +11,7 @@ interface Translation {
   t2e: string;
   word: string;
   meanings: Meaning[];
+  transliteration?: string;
 }
 
 interface TranslationPopupProps {
@@ -26,40 +27,43 @@ const TranslationPopup: React.FC<TranslationPopupProps> = ({
   position,
   isLoading,
 }) => {
-  const [popupStyle, setPopupStyle] = useState<React.CSSProperties>({});
+  const [popupStyle, setPopupStyle] = useState<React.CSSProperties>({
+    position: "fixed",
+    top: position.y,
+    left: position.x,
+    maxWidth: "300px",
+    maxHeight: "400px",
+    zIndex: 1000,
+  });
 
-  // Calculate position to ensure popup stays within viewport
   useEffect(() => {
-    const padding = 8; // Reduced padding for closer positioning
-    const maxWidth = 300;
-    const maxHeight = 300;
-    const viewportWidth = window.innerWidth;
-    const viewportHeight = window.innerHeight;
+    const updatePosition = () => {
+      const viewportWidth = window.innerWidth;
+      const viewportHeight = window.innerHeight;
+      const popupWidth = 300; // max-width from style
+      const popupHeight = 400; // max-height from style
 
-    let x = position.x - maxWidth / 3; // Position popup slightly to the left of click
-    let y = position.y + padding;
+      let left = position.x;
+      let top = position.y;
 
-    // Try to position popup above click if not enough space below
-    if (y + maxHeight > viewportHeight - padding) {
-      y = position.y - maxHeight - padding;
-    }
+      // Adjust horizontal position if popup would go off screen
+      if (left + popupWidth > viewportWidth) {
+        left = viewportWidth - popupWidth - 10;
+      }
 
-    // Ensure x position keeps popup within viewport
-    if (x + maxWidth > viewportWidth - padding) {
-      x = viewportWidth - maxWidth - padding;
-    }
-    if (x < padding) {
-      x = padding;
-    }
+      // Adjust vertical position if popup would go off screen
+      if (top + popupHeight > viewportHeight) {
+        top = viewportHeight - popupHeight - 10;
+      }
 
-    setPopupStyle({
-      position: "fixed",
-      left: x,
-      top: y,
-      maxWidth: `${maxWidth}px`,
-      maxHeight: `${maxHeight}px`,
-      zIndex: 50,
-    });
+      setPopupStyle((prev) => ({
+        ...prev,
+        top,
+        left,
+      }));
+    };
+
+    updatePosition();
   }, [position]);
 
   return (
@@ -90,6 +94,11 @@ const TranslationPopup: React.FC<TranslationPopupProps> = ({
                 {translation?.word}
               </h3>
               <p className="text-sm text-gray-500">{translation?.t2e}</p>
+              {translation?.transliteration && (
+                <p className="text-xs text-gray-400 italic">
+                  /{translation.transliteration}/
+                </p>
+              )}
             </>
           )}
         </div>

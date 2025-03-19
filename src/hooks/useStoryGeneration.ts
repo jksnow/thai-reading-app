@@ -25,14 +25,17 @@ export function useStoryGeneration() {
   /**
    * Save the current story state to MongoDB
    */
-  const saveStoryProgress = async (story: StorySegment) => {
+  const saveStoryProgress = async (
+    rawResponse: string,
+    modifiers: string[]
+  ) => {
     if (!currentUser) return;
 
     try {
       await userService.updateUser(currentUser.uid, {
         currentStory: {
-          selectedModifiers: activeModifiers,
-          latestResponse: JSON.stringify(story),
+          selectedModifiers: modifiers,
+          latestResponse: rawResponse,
           promptVersion: CURRENT_PROMPT_VERSION,
         },
       });
@@ -63,8 +66,8 @@ export function useStoryGeneration() {
       setCurrentStoryIndex(0);
       setShowChoices(false);
 
-      // Save initial story
-      await saveStoryProgress(parsedStory);
+      // Save initial story with the selected modifiers
+      await saveStoryProgress(response, selectedModifiers);
     } catch (error: any) {
       if (error.message.includes("API key")) {
         setErrorMessage(
@@ -111,8 +114,8 @@ export function useStoryGeneration() {
       setStoryHistory(newHistory);
       setCurrentStoryIndex(previousStories.length);
 
-      // Save continued story
-      await saveStoryProgress(parsedStory);
+      // Save continued story with current active modifiers
+      await saveStoryProgress(response, activeModifiers);
     } catch (error: any) {
       setErrorMessage(`Error: ${error.message}`);
     } finally {
@@ -157,11 +160,11 @@ export function useStoryGeneration() {
 
   return {
     isGenerating,
+    errorMessage,
     storyHistory,
     currentStoryIndex,
     showChoices,
     generateInitialStory,
-    continueStory,
     handleShowChoices,
     handleChoiceSelect,
     resetStory,

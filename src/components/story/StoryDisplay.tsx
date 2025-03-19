@@ -50,6 +50,11 @@ const StoryDisplay: React.FC<StoryDisplayProps> = ({
     useState<PopupState | null>(null);
   const [showCharacters, setShowCharacters] = useState(false);
 
+  // Guard against undefined story
+  if (!currentStory) {
+    return null;
+  }
+
   const handleWordClick = async (word: string, event: React.MouseEvent) => {
     const target = event.target as HTMLElement;
     const rect = target.getBoundingClientRect();

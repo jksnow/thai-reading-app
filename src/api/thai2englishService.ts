@@ -13,6 +13,7 @@ export interface Translation {
   word: string;
   meanings: Meaning[];
   dateAdded: string;
+  transliteration?: string;
 }
 
 /**

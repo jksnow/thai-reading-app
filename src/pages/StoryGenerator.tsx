@@ -86,13 +86,23 @@ const StoryGenerator: React.FC = () => {
           return;
         }
 
-        // Load complete story
+        // Load complete story - parse the raw response just like we do with API responses
         if (currentStory.latestResponse) {
-          const parsedStory = parseStoryResponse(currentStory.latestResponse);
-          setStoryHistory([parsedStory]);
-          setCurrentStoryIndex(0);
-          setShowStory(true);
-          setShowControls(false);
+          try {
+            const parsedStory = parseStoryResponse(currentStory.latestResponse);
+            if (parsedStory && parsedStory.text) {
+              setStoryHistory([parsedStory]);
+              setCurrentStoryIndex(0);
+              setShowStory(true);
+              setShowControls(false);
+            } else {
+              console.error("Invalid story format");
+              await resetStory();
+            }
+          } catch (parseError) {
+            console.error("Error parsing saved story:", parseError);
+            await resetStory();
+          }
         }
       } catch (error) {
         console.error("Error loading saved story:", error);
@@ -119,36 +129,6 @@ const StoryGenerator: React.FC = () => {
     }
   }, [isGenerating, setIsGeneratingStory]);
 
-  // Save story response to MongoDB
-  useEffect(() => {
-    const saveStoryResponse = async () => {
-      if (!currentUser || storyHistory.length === 0) return;
-
-      try {
-        const currentStorySegment = storyHistory[currentStoryIndex];
-        await userService.updateUser(currentUser.uid, {
-          currentStory: {
-            selectedModifiers,
-            latestResponse: JSON.stringify(currentStorySegment),
-            promptVersion: 1,
-          },
-        });
-      } catch (error) {
-        console.error("Error saving story response:", error);
-      }
-    };
-
-    if (!isGenerating && storyHistory.length > 0) {
-      saveStoryResponse();
-    }
-  }, [
-    currentUser,
-    storyHistory,
-    currentStoryIndex,
-    isGenerating,
-    selectedModifiers,
-  ]);
-
   // Handle story parameter changes
   const handleParamsChange = (params: Partial<StoryParams>) => {
     setStoryParams({ ...storyParams, ...params });
@@ -170,67 +150,17 @@ const StoryGenerator: React.FC = () => {
     }, 300);
   };
 
-  // Reset everything when starting a new story
-  const handleResetStory = () => {
-    // First hide the story display
-    setShowStory(false);
-
-    // Then wait for animations to complete before resetting story state
-    setTimeout(() => {
-      resetStory();
-      // Finally, show controls after state is reset
-      setTimeout(() => {
-        setShowControls(true);
-      }, 100);
-    }, 300);
-  };
-
-  // Decide what to display based on state
-  const renderContent = () => {
-    if (isLoadingSavedStory) {
-      return (
-        <StoryLoadingScreen
-          isVisible={true}
-          onComplete={() => {}}
-        />
-      );
-    }
-
-    // Show loading screen when generating and not showing story yet
-    if (isGenerating) {
-      return (
-        <StoryLoadingScreen
-          isVisible={true}
-          onComplete={() => {
-            if (!isGenerating && storyHistory.length > 0) {
-              setShowStory(true);
-            }
-          }}
-        />
-      );
-    }
-
-    // Show the loading screen after generation is complete but story isn't visible yet
-    if (storyHistory.length > 0 && !showStory && !isGenerating) {
-      return (
-        <StoryLoadingScreen
-          isVisible={true}
-          onComplete={() => setShowStory(true)}
-        />
-      );
-    }
-
-    // Show story controls when no story or story is reset
-    if (storyHistory.length === 0) {
-      return (
-        <AnimatePresence>
+  return (
+    <div className="flex flex-col items-center justify-start min-h-screen py-8 px-4 sm:px-6 lg:px-8 text-white">
+      <div className="w-full max-w-4xl">
+        <AnimatePresence mode="wait">
           {showControls && (
             <motion.div
-              initial={{ opacity: 1 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
+              key="controls"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
               transition={{ duration: 0.3 }}
-              className="w-full"
             >
               <StoryControls
                 params={storyParams}
@@ -240,46 +170,39 @@ const StoryGenerator: React.FC = () => {
               />
             </motion.div>
           )}
+
+          {!showControls && !isLoadingSavedStory && storyHistory.length > 0 && (
+            <motion.div
+              key="story-display"
+              initial={{ opacity: 0, y: 50 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -50 }}
+              transition={{ duration: 0.5, ease: "easeOut" }}
+            >
+              <StoryDisplay
+                storyHistory={storyHistory}
+                currentStoryIndex={currentStoryIndex}
+                showChoices={showChoices}
+                isGenerating={isGenerating}
+                fontSizeClass={getFontSizeClass(fontSize)}
+                showWordSpacing={showWordSpacing}
+                onShowChoices={handleShowChoices}
+                onChoiceSelect={handleChoiceSelect}
+                onResetStory={resetStory}
+                onToggleWordSpacing={toggleWordSpacing}
+                onFontSizeChange={setFontSize}
+              />
+            </motion.div>
+          )}
         </AnimatePresence>
-      );
-    }
 
-    // If we have a story and we're ready to show it
-    return (
-      <AnimatePresence>
-        {showStory && storyHistory.length > 0 && (
-          <motion.div
-            key="story-display"
-            initial={{ opacity: 0, y: 50 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -50 }}
-            transition={{ duration: 0.5, ease: "easeOut" }}
-            className="w-full"
-          >
-            <StoryDisplay
-              storyHistory={storyHistory}
-              currentStoryIndex={currentStoryIndex}
-              showChoices={showChoices}
-              isGenerating={isGenerating}
-              fontSizeClass={getFontSizeClass(fontSize)}
-              showWordSpacing={showWordSpacing}
-              onShowChoices={handleShowChoices}
-              onChoiceSelect={handleChoiceSelect}
-              onResetStory={handleResetStory}
-              onToggleWordSpacing={toggleWordSpacing}
-              onFontSizeChange={setFontSize}
-            />
-          </motion.div>
-        )}
-      </AnimatePresence>
-    );
-  };
+        <GlobalButtonContainer />
 
-  return (
-    <div className="flex flex-col items-center justify-start min-h-screen py-8 px-4 sm:px-6 lg:px-8 text-white">
-      <div className="w-full max-w-4xl">{renderContent()}</div>
-
-      <GlobalButtonContainer />
+        <StoryLoadingScreen
+          isVisible={isGenerating}
+          onComplete={() => setShowStory(true)}
+        />
+      </div>
     </div>
   );
 };

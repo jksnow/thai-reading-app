@@ -12,6 +12,7 @@ export interface Translation {
   word: string;
   meanings: Meaning[];
   dateAdded: string;
+  transliteration?: string;
 }
 
 export const TRANSLATIONS_COLLECTION = "translations";

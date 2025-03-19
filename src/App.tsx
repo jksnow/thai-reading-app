@@ -10,6 +10,8 @@ import { AuthProvider, useAuth } from "./context/AuthContext";
 import { ShaderSettingsProvider } from "./context/ShaderSettingsContext";
 import AuthForm from "./components/AuthForm";
 
+const APP_VERSION = "0.8.15"; // Beta version
+
 // Component for the background and main content
 const AppContent = () => {
   // Get colors from context
@@ -51,6 +53,11 @@ const AppContent = () => {
 
   return (
     <div className="fixed inset-0 w-full h-full overflow-auto">
+      {/* Version number */}
+      <div className="fixed top-2 right-4 text-white text-xs opacity-30 z-50 font-mono">
+        v{APP_VERSION}
+      </div>
+
       {/* Shader Background */}
       <div className="fixed inset-0 w-full h-full">
         <Canvas

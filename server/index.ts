@@ -27,99 +27,75 @@ dotenv.config();
 const app = express();
 const port = process.env.PORT || 3000;
 
-// Log Stripe environment variables to ensure they're loaded
-// (Remove in production)
-console.log(
-  "Stripe Secret Key available:",
-  !!process.env.VITE_STRIPE_SECRET_KEY
-);
-console.log(
-  "Stripe Publishable Key available:",
-  !!process.env.VITE_STRIPE_PUBLISHABLE_KEY
+// CORS configuration
+app.use(
+  cors({
+    origin: [
+      "https://thaitale.io",
+      "https://www.thaitale.io",
+      "http://localhost:5173",
+    ],
+    credentials: true,
+  })
 );
 
-app.use(cors());
+// Parse JSON payloads
 app.use(express.json());
+
+// Serve static files from the dist directory
+app.use(express.static(path.join(__dirname, "../dist")));
+
+// API Routes
+app.use("/api/users", userRoutes);
+app.use("/api/payments", paymentRoutes);
+app.use("/api/stripe", stripeRoutes);
+
+// Special route configuration for Stripe webhooks
+app.use("/api/payments/webhook", express.raw({ type: "application/json" }));
 
 // Basic health check endpoint
 app.get("/api/health", (req, res) => {
   res.json({ status: "ok" });
 });
 
-// MongoDB connection test endpoint
-app.get("/api/db-ping", async (req, res) => {
-  try {
-    const result = await pingDatabase();
-    res.json(result);
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: "Error pinging database",
-      error: error instanceof Error ? error.message : String(error),
-    });
-  }
-});
-
-// Thai2English proxy endpoint with database caching
-app.get("/api/translate/:word", async (req, res) => {
-  try {
-    const { word } = req.params;
-
-    // First try to get from our database
-    let translation = await getTranslation(word);
-
-    // If not found, fetch from thai2english and store
-    if (!translation) {
-      translation = await fetchAndStoreTranslation(word);
-    }
-
-    if (!translation) {
-      res.status(404).json({ error: "Translation not found" });
-      return;
-    }
-
-    res.json(translation);
-  } catch (error) {
-    console.error("Error handling translation request:", error);
-    res.status(500).json({ error: "Failed to fetch translation" });
-  }
-});
-
-// Dedicated transliteration endpoint
-app.get("/api/transliterate/:word", async (req, res) => {
-  try {
-    const { word } = req.params;
-    const transliteration = await getTransliteration(word);
-
-    if (!transliteration) {
-      res.status(404).json({ error: "Could not transliterate word" });
-      return;
-    }
-
-    res.json({ transliteration });
-  } catch (error) {
-    console.error("Error handling transliteration request:", error);
-    res.status(500).json({ error: "Failed to transliterate word" });
-  }
-});
-
-// Response times API endpoints
+// Response times endpoint
 app.get("/api/response-times", getResponseTimeData);
 app.post("/api/response-times", updateResponseTimeData);
 
-// User routes
-app.use("/api/users", userRoutes);
+// Translation endpoints
+app.get("/api/translate/:text", async (req, res) => {
+  try {
+    const translation = await getTranslation(req.params.text);
+    res.json(translation);
+  } catch (error) {
+    res.status(500).json({ error: "Translation failed" });
+  }
+});
 
-// Payment routes
-app.use("/api/payments", paymentRoutes);
+app.post("/api/translate", async (req, res) => {
+  try {
+    const { text } = req.body;
+    const translation = await fetchAndStoreTranslation(text);
+    res.json(translation);
+  } catch (error) {
+    res.status(500).json({ error: "Translation failed" });
+  }
+});
 
-// Special route configuration for Stripe webhooks
-// This must come after the express.json() middleware but only for non-webhook routes
-// For webhook routes, we need the raw body
-app.use("/api/payments/webhook", express.raw({ type: "application/json" }));
+// Transliteration endpoint
+app.get("/api/transliterate/:text", async (req, res) => {
+  try {
+    const transliteration = await getTransliteration(req.params.text);
+    res.json(transliteration);
+  } catch (error) {
+    res.status(500).json({ error: "Transliteration failed" });
+  }
+});
 
-// Stripe routes
-app.use("/api/stripe", stripeRoutes);
+// Serve index.html for all other routes (SPA support)
+app.get("*", (req, res) => {
+  res.sendFile(path.join(__dirname, "../dist/index.html"));
+});
 
 // Initialize MongoDB connection and start server
 async function startServer() {

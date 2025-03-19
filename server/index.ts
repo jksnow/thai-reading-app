@@ -1,22 +1,22 @@
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
-import { pingDatabase, getClient } from "./db";
+import { pingDatabase, getClient } from "./db.js";
 import {
   getResponseTimeData,
   updateResponseTimeData,
-} from "./controllers/responseTimeController";
+} from "./controllers/responseTimeController.js";
 import { fileURLToPath } from "url";
 import path from "path";
-import paymentRoutes from "./routes/paymentRoutes";
-import userRoutes from "./routes/userRoutes";
+import paymentRoutes from "./routes/paymentRoutes.js";
+import userRoutes from "./routes/userRoutes.js";
 import axios from "axios";
 import {
   getTranslation,
   fetchAndStoreTranslation,
-} from "./services/translationService";
-import { getTransliteration } from "./services/transliterationService";
-import stripeRoutes from "./routes/stripeRoutes";
+} from "./services/translationService.js";
+import { getTransliteration } from "./services/transliterationService.js";
+import stripeRoutes from "./routes/stripeRoutes.js";
 
 // ES Module equivalent of __dirname
 const __filename = fileURLToPath(import.meta.url);

@@ -4,11 +4,10 @@ import { User, createInitialUserData } from "../types/user";
 export const userService = {
   /**
    * Create a new user in MongoDB
-   * async createUser(userId: string, email: string, name: string):
    */
-  async createUser(userId: string, email: string): Promise<User> {
+  async createUser(userId: string, email: string, name: string): Promise<User> {
     try {
-      const userData = createInitialUserData(userId, email);
+      const userData = createInitialUserData(email, name);
       const response = await axios.post(`/api/users`, {
         _id: userId,
         ...userData,

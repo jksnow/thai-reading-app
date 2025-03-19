@@ -3,7 +3,7 @@ import axios from "axios";
 // Define the API endpoint for the response time data
 const API_URL = `${
   import.meta.env.VITE_API_URL?.replace(/\/$/, "") || "http://localhost:3000"
-}/api/response-times`;
+}/response-times`;
 
 interface ResponseTimeData {
   averageTime: number;

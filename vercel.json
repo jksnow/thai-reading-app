@@ -18,12 +18,13 @@
   ],
   "routes": [
     {
-      "src": "/api/(.*)",
+      "src": "/api/(?!.*/$)(.*)",
       "dest": "server/index.ts"
     },
     {
       "src": "/(.*)",
       "dest": "dist/$1"
     }
-  ]
+  ],
+  "trailingSlash": false
 }

@@ -1,5 +1,5 @@
 import React from "react";
-import thaiTaleLogo from "../assets/ThaiTaleLogo.png";
+import thaiTaleLogo from "../assets/v1e.png";
 import { useAppState } from "../context/AppStateContext";
 import GlobalButtonContainer from "./GlobalButtonContainer";
 

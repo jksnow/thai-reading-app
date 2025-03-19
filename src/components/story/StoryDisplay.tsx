@@ -49,6 +49,7 @@ const StoryDisplay: React.FC<StoryDisplayProps> = ({
   const [selectedTranslation, setSelectedTranslation] =
     useState<PopupState | null>(null);
   const [showCharacters, setShowCharacters] = useState(false);
+  const [selectedChoice, setSelectedChoice] = useState<Choice | null>(null);
 
   // Guard against undefined story
   if (!currentStory) {
@@ -128,6 +129,13 @@ const StoryDisplay: React.FC<StoryDisplayProps> = ({
         },
         isLoading: false,
       });
+    }
+  };
+
+  const handleSubmitChoice = () => {
+    if (selectedChoice && !isGenerating) {
+      onChoiceSelect(selectedChoice);
+      setSelectedChoice(null);
     }
   };
 
@@ -267,7 +275,7 @@ const StoryDisplay: React.FC<StoryDisplayProps> = ({
         />
       </div>
 
-      {currentStory.choices.length > 0 && !currentStory.isEnding && (
+      {!currentStory.isEnding && (
         <motion.div
           className="choices mb-6"
           variants={buttonVariants}
@@ -275,20 +283,71 @@ const StoryDisplay: React.FC<StoryDisplayProps> = ({
           {showChoices ? (
             <>
               <h2 className="text-lg font-semibold mb-2">Choose your path:</h2>
-              <div className="space-y-2">
+              <div className="space-y-3">
                 {currentStory.choices.map((choice, index) => (
-                  <motion.button
+                  <motion.div
                     key={choice.id}
-                    onClick={() => onChoiceSelect(choice)}
-                    disabled={isGenerating}
-                    className="block w-full px-4 py-2 bg-amber-50 hover:bg-amber-100 text-left rounded transition-colors duration-200 border border-amber-200"
+                    onClick={() => !isGenerating && setSelectedChoice(choice)}
+                    className={`flex items-center p-4 rounded-lg transition-all duration-300 shadow-sm cursor-pointer
+                      ${
+                        selectedChoice?.id === choice.id
+                          ? "bg-amber-100 border-2 border-amber-500 shadow-amber-200/50"
+                          : "bg-white hover:bg-amber-50 border border-amber-200"
+                      }
+                    `}
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: 0.1 * index }}
                   >
-                    {choice.text}
-                  </motion.button>
+                    <div className="relative flex items-center">
+                      <input
+                        type="radio"
+                        id={`choice-${choice.id}`}
+                        name="story-choice"
+                        className="peer sr-only"
+                        checked={selectedChoice?.id === choice.id}
+                        onChange={() => setSelectedChoice(choice)}
+                        disabled={isGenerating}
+                      />
+                      <div
+                        className={`w-5 h-5 border-2 rounded-full mr-4 flex items-center justify-center
+                        ${
+                          selectedChoice?.id === choice.id
+                            ? "border-amber-500 bg-amber-500"
+                            : "border-gray-300 bg-white"
+                        }
+                      `}
+                      >
+                        {selectedChoice?.id === choice.id && (
+                          <div className="w-2 h-2 bg-white rounded-full" />
+                        )}
+                      </div>
+                    </div>
+                    <div className="flex-grow">
+                      <AnimatedStoryText
+                        text={`${index + 1}. ${choice.text}`}
+                        fontSizeClass={fontSizeClass}
+                        showWordSpacing={showWordSpacing}
+                        characterNames={currentStory.characterNames || []}
+                        onWordClick={(word, event) => {
+                          // Stop the click from triggering the choice selection
+                          event.stopPropagation();
+                          handleWordClick(word, event);
+                        }}
+                      />
+                    </div>
+                  </motion.div>
                 ))}
+              </div>
+              <div className="mt-6 flex justify-center">
+                <ButtonOptions
+                  onClick={handleSubmitChoice}
+                  variant="amber"
+                  padding="py-3 px-10"
+                  disabled={!selectedChoice || isGenerating}
+                >
+                  {isGenerating ? "Processing..." : "Submit Choice"}
+                </ButtonOptions>
               </div>
             </>
           ) : (
@@ -326,11 +385,13 @@ const StoryDisplay: React.FC<StoryDisplayProps> = ({
         onClose={() => setIsSummaryModalOpen(false)}
         size="small"
       >
-        <div className="p-4 text-white">
+        <div className="p-4 text-white max-h-[80vh] flex flex-col">
           <h2 className="text-2xl font-bold mb-4 text-center">
             English Summary
           </h2>
-          <p className="text-lg leading-relaxed">{currentStory.summary}</p>
+          <div className="overflow-y-auto flex-grow pr-2 scrollbar-thin scrollbar-track-white/10 scrollbar-thumb-white/30 hover:scrollbar-thumb-white/40 scrollbar-track-rounded-lg scrollbar-thumb-rounded-lg">
+            <p className="text-lg leading-relaxed">{currentStory.summary}</p>
+          </div>
         </div>
       </ModalContainer>
 

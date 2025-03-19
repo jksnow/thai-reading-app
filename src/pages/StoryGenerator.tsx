@@ -52,7 +52,7 @@ const StoryGenerator: React.FC = () => {
     resetStory,
     setStoryHistory,
     setCurrentStoryIndex,
-  } = useStoryGeneration();
+  } = useStoryGeneration(storyParams);
 
   // Load saved story if exists
   useEffect(() => {

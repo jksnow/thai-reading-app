@@ -48,10 +48,14 @@ interface StoryOptions {
 }
 
 interface ContinueStoryOptions {
-  storyContext: string;
+  storySummary: string;
   storyGoal: string;
-  summary: string;
   userChoice: string;
+  genre: string;
+  parentalRating: string;
+  readingLevel: string;
+  paragraphs: number;
+  summary: string;
 }
 
 const temperature: number = 1.5;
@@ -71,7 +75,7 @@ if (!API_KEY) {
   );
 }
 
-const systemPrompt = (
+const formatPrompt = (
   storyOptions: StoryOptions,
   selectedModifierIds: string[] = []
 ): string => {
@@ -90,32 +94,6 @@ const systemPrompt = (
           )
           .join("\n")}`
       : "";
-
-  // return `
-  // You are a professional creative story writer. You write stories in the thai language. You understand how to make a captivating story for all age levels to enjoy..
-  // Create a "choose your own adventure" story in the Thai language. You will write the story in parts and then create options for the user to continue the story.
-
-  // - Genre/Theme: ${storyOptions.genre}
-  // - Parental Rating: ${storyOptions.parentalRating}
-  // - Reading Level: ${storyOptions.readingLevel}
-  // - Number of paragraphs: ${storyOptions.paragraphs}${modifiersText}
-
-  // Format and extra instructions:
-  // Write [GOAL] and then write a story conclusion goal. Think of what would make a good ending to the story.
-  // Write [STORY] and then write the story in thai based on the story criteria above. The story should build to the goal but not too quickly or forced. Don't be too predictable.
-  // Write [SUMMARY] and then write a story summary in english: summarize the important beats of the story. No more than 1 paragraph.
-  // If the story has reached the goal, write THE END
-  // If the story has not reached the goal write [CHOICES] and then write 3 numbered choices to continue the story.
-  // example format:
-  // 1. choice 1
-  // 2. choice 2
-  // 3. choice 3
-
-  // Format requirements:
-  // Put a space between each Thai word. Period (.) at each sentence end.
-  // Before the name of a character add [name] to indicate that it is a name with no space between [name] and the name written.
-  // example: [name]เจฟฟ์
-  // do not add [name] before name descriptors like คุณ or น้องหญิง. only before the actual name.
   return `You are a professional creative writer specializing in Thai language stories. You craft captivating "choose your own adventure" stories suitable for all age levels. Your task is to generate a story part based on the provided criteria and return the response in a structured JSON format.
 
 Story Criteria:
@@ -176,35 +154,6 @@ Now, generate the JSON response based on the criteria above.
 `;
 };
 
-// Helper function to format the initial story prompt
-const formatPrompt = (
-  storyOptions: StoryOptions,
-  selectedModifierIds: string[] = []
-): string => {
-  // Get the full modifier objects from their IDs
-  const modifiers = selectedModifierIds
-    .map((id) => storyModifiers.find((mod) => mod.id === id))
-    .filter(Boolean);
-
-  // Format the modifiers for the prompt
-  const modifiersText =
-    modifiers.length > 0
-      ? `\nSelected Modifiers:\n${modifiers
-          .map(
-            (mod) =>
-              `- ${mod?.category}: ${mod?.modifier} (${mod?.description})`
-          )
-          .join("\n")}`
-      : "";
-
-  return `
-    - Genre/Theme: ${storyOptions.genre}
-    - Parental Rating: ${storyOptions.parentalRating}
-    - Reading Level: ${storyOptions.readingLevel}
-    - Number of paragraphs: ${storyOptions.paragraphs}${modifiersText}
-  `;
-};
-
 // Helper function to format the continue story prompt
 const formatContinuePrompt = (
   options: ContinueStoryOptions,
@@ -218,7 +167,7 @@ const formatContinuePrompt = (
   // Format the modifiers for the prompt
   const modifiersText =
     modifiers.length > 0
-      ? `\nThe story should continue to include the following modifiers:\n${modifiers
+      ? `\nThe story should continue to include the following creative writing modifiers:\n${modifiers
           .map(
             (mod) =>
               `- ${mod?.category}: ${mod?.modifier} (${mod?.description})`
@@ -226,37 +175,71 @@ const formatContinuePrompt = (
           .join("\n")}`
       : "";
 
-  return `
-    Continue the story based on the user's choice.
-    
-    Story goal:
-    ${options.storyGoal}
+  return `You are a professional creative writer specializing in Thai language stories. You craft captivating "choose your own adventure" stories suitable for all age levels. Your task is to continue an existing story part based on the user's selected choice, building toward the provided story goal, and return the response in a structured JSON format.
 
-    Previous story summary:
-    ${options.summary}
-    
-    Previous story context:
-    ${options.storyContext}
-    
-    User selected:
-    ${options.userChoice}${modifiersText}
-    
-    Continue the story in the same Thai style, using the same formatting requirements as before.
-    
-    Remember to:
-    1. Use the same story goal
-    2. Put a space between each Thai word and end each sentence with a period (.)
-    3. Before a character's name, add [name] with no space (e.g., [name]เจฟฟ์)
-    4. Build naturally toward the goal without rushing
-    
-    Return the response as a JSON object with these fields:
-    - "goal": The same story conclusion goal in English
-    - "summary": An updated English summary of the story so far
-    - "story": The continued Thai story text with proper formatting
-    - "is_complete": A boolean indicating if the story has reached the goal (true) or not (false)
-    - "character_names": An array of strings containing all character names in Thai
-    - "choices": An array of 3 strings (choices) if not complete, empty array if complete
-  `;
+Story Continuation Criteria:
+- Story Goal: ${options.storyGoal}
+- Previous Story Summary (English): ${options.storySummary}
+- User's Selected Choice: ${options.userChoice}
+- Genre/Theme: ${options.genre || "Continue in the established style"}
+- Parental Rating: ${options.parentalRating || "Match previous rating"}
+- Reading Level: ${options.readingLevel || "Match previous level"}
+- Number of Paragraphs: ${
+    options.paragraphs || "Match previous length"
+  }${modifiersText}
+
+Instructions:
+1. Use the provided story goal as the ultimate conclusion to work toward.
+2. Continue the story from the previous context in Thai, incorporating the user's selected choice naturally and advancing the narrative toward the goal without rushing or being too predictable. Use ${
+    options.paragraphs || "the same number of"
+  } paragraphs as the previous part unless specified otherwise.
+3. Provide an updated summary of the entire story so far in English, including key events from the previous part and this continuation, in no more than one paragraph.
+4. If the story reaches the goal, indicate it has ended. If not, provide 3 numbered choices for the user to continue the story.
+
+Formatting Requirements:
+- In the Thai story text, put a space between each complete word (not between individual letters or syllables within a word) and end each sentence with a period (.). For example: "คุณ เดิน เข้า ไป ใน ป่า" (correct), NOT "ค ุ ณ เ ดิ น" (incorrect).
+- Write character names naturally in Thai without adding any special tags (e.g., just "สมชาย", not "[name]สมชาย").
+- Ensure if a word is made of multiple word sections (e.g., นักท่องเที่ยว), write it together without spacing each section.
+
+Response Format:
+Return the entire response as a single JSON object with the following structure:
+- "goal": A string with the same story conclusion goal in English as provided.
+- "story": A string containing the continued Thai story text with specified formatting.
+- "summary": A string with the updated English summary of the story so far, using the same character names as listed in "character_names" (e.g., "สมชาย" in story = "Somchai" in summary).
+- "is_complete": A boolean indicating if the story has reached the goal (true) or not (false).
+- "character_names": An array of strings containing the exact Thai names of characters as they appear in the story (e.g., "สมชาย").
+- "choices": An array of 3 strings (each a numbered choice like "1. choice text") if is_complete is false; an empty array if true. Choices should use character names consistently with "character_names".
+
+Example JSON Response:
+{
+  "goal": "Our characters must find the hidden treasure in the ancient temple.",
+  "story": "คุณ เดิน ไป ยัง แสง สว่าง ตาม ที่ เลือก . สมชาย ชี้ ไป ที่ ถ้ำ ข้าง หน้า . คุณ ทั้ง สอง เข้า ไป และ พบ กล่อง ไม้ เก่า ๆ .",
+  "summary": "You and Somchai follow the faint light into a cave, where you discover an old wooden box.",
+  "is_complete": false,
+  "character_names": ["สมชาย"],
+  "choices": [
+    "1. เปิด กล่อง ไม้",
+    "2. ตรวจ สอบ ถ้ำ ให้ ละเอียด",
+    "3. เรียก สมชาย ให้ ช่วย ยก กล่อง"
+  ]
+}
+OR
+{
+  "goal": "Escape the haunted house.",
+  "story": "คุณ วิ่ง ออก มา จาก ห้อง มืด ตาม ทาง ที่ เลือก . อรุณ รอ อยู่ ที่ ประตู หน้า . คุณ ทั้ง สอง ปลอดภัย แล้ว .",
+  "summary": "You escape the dark room and meet Arun at the front door, safely leaving the haunted house.",
+  "is_complete": true,
+  "character_names": ["อรุณ"],
+  "choices": []
+}
+
+Key Clarifications:
+- Maintain the same tone, style, and formatting as the previous story part, adapting naturally to the user's choice.
+- Use the exact names from "character_names" in both the story (written naturally in Thai) and summary (transliterated to English), ensuring consistency (e.g., "สมชาย" in story = "Somchai" in summary).
+- Do not add any tags like [name] before character names in the story text; write them as plain Thai names.
+
+Now, generate the JSON response based on the criteria above.
+`;
 };
 
 // Function to generate initial story
@@ -269,10 +252,6 @@ const generateInitialStory = async (
   }
 
   const messages = [
-    {
-      role: "system",
-      content: systemPrompt(storyOptions, selectedModifiers),
-    },
     {
       role: "user",
       content: formatPrompt(storyOptions, selectedModifiers),
@@ -316,13 +295,6 @@ const continueStory = async (
   }
 
   const messages = [
-    {
-      role: "system",
-      content: systemPrompt(
-        { genre: "", parentalRating: "", readingLevel: "", paragraphs: 0 },
-        selectedModifiers
-      ),
-    },
     {
       role: "user",
       content: formatContinuePrompt(options, selectedModifiers),

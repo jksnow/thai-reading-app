@@ -10,14 +10,14 @@ export interface NamedColorScheme {
 // Authentic Balatro color schemes with names
 export const BALATRO_COLOR_SCHEMES: NamedColorScheme[] = [
   {
-    name: "Purple & Green",
-    colorA: new THREE.Color(0.5, 0.1, 0.5), // Dark purple
-    colorB: new THREE.Color(0.15, 0.6, 0.18), // Dark green
-  },
-  {
     name: "Gold & Forest",
     colorA: new THREE.Color(0.3, 0.2, 0.05), // Gold
     colorB: new THREE.Color(0.19, 0.4, 0.19), // Forest green
+  },
+  {
+    name: "Purple & Green",
+    colorA: new THREE.Color(0.5, 0.1, 0.5), // Dark purple
+    colorB: new THREE.Color(0.15, 0.6, 0.18), // Dark green
   },
   {
     name: "Red & Blue",

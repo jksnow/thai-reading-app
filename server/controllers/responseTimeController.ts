@@ -1,5 +1,8 @@
 import { Request, Response } from "express";
-import { getResponseTime, updateResponseTime } from "../services/responseTime";
+import {
+  getResponseTime,
+  updateResponseTime,
+} from "../services/responseTime.js";
 
 /**
  * Get the current response time data

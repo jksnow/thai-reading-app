@@ -1,5 +1,5 @@
 import { ObjectId } from "mongodb";
-import { getClient, DEFAULT_DB_NAME } from "../db";
+import { getClient, DEFAULT_DB_NAME } from "../db.js";
 
 export interface User {
   _id: string; // Firebase UID for unique identification

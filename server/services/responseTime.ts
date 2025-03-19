@@ -1,8 +1,8 @@
-import { getClient, DEFAULT_DB_NAME } from "../db";
+import { getClient, DEFAULT_DB_NAME } from "../db.js";
 import {
   ResponseTime,
   RESPONSE_TIMES_COLLECTION,
-} from "../models/responseTime";
+} from "../models/responseTime.js";
 
 /**
  * Get the response time data from MongoDB

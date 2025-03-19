@@ -1,6 +1,6 @@
 import express, { Request, Response } from "express";
-import { paymentService } from "../services/paymentService";
-import stripe from "../config/stripe";
+import { paymentService } from "../services/paymentService.js";
+import stripe from "../config/stripe.js";
 
 const router = express.Router();
 

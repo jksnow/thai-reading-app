@@ -1,7 +1,7 @@
-import { getClient, DEFAULT_DB_NAME } from "../db";
-import { Translation, TRANSLATIONS_COLLECTION } from "../models/translation";
+import { getClient, DEFAULT_DB_NAME } from "../db.js";
+import { Translation, TRANSLATIONS_COLLECTION } from "../models/translation.js";
 import axios from "axios";
-import { getTransliteration } from "./transliterationService";
+import { getTransliteration } from "./transliterationService.js";
 
 // Ensure index exists for word field
 async function ensureIndexes() {

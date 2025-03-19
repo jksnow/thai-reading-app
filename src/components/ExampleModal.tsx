@@ -12,7 +12,7 @@ const ExampleModal: React.FC = () => {
     <div>
       <ButtonOptions
         onClick={openModal}
-        variant="primary"
+        variant="blue"
       >
         Open Example Modal
       </ButtonOptions>
@@ -28,6 +28,12 @@ const ExampleModal: React.FC = () => {
           <p className="mt-4">
             The modal has a consistent style with a BACK button at the bottom.
           </p>
+          <ButtonOptions
+            variant="blue"
+            onClick={closeModal}
+          >
+            Close
+          </ButtonOptions>
         </div>
       </ModalContainer>
     </div>

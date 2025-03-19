@@ -2,7 +2,6 @@ import React, { ReactNode } from "react";
 
 interface ButtonOptionsProps {
   children: ReactNode;
-  to?: string; // Keep for backward compatibility
   variant?: "blue" | "green" | "amber" | "red" | "purple";
   backgroundColor?: string;
   fontSize?: string;
@@ -13,7 +12,6 @@ interface ButtonOptionsProps {
 
 const ButtonOptions: React.FC<ButtonOptionsProps> = ({
   children,
-  to,
   variant = "blue",
   backgroundColor = "bg-gray-800",
   fontSize = "text-lg",

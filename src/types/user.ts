@@ -31,7 +31,6 @@ export interface CurrentStory {
 export const CURRENT_PROMPT_VERSION = 1;
 
 export interface User {
-  _id: string;
   name: string;
   email: string;
   settings: UserSettings;

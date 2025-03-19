@@ -34,10 +34,6 @@ const vertexShader = `
   }
 `;
 
-interface LogoMaterialProps {
-  time: { value: number };
-}
-
 // A simplified version of the IntroAnimation that doesn't depend on context
 export const IntroAnimation: React.FC = () => {
   const [showIntro, setShowIntro] = useState(true);

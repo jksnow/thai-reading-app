@@ -54,4 +54,4 @@ const CollectionModalContent: React.FC<CollectionModalContentProps> = ({
   );
 };
 
-export default CollectionModalContent; 
+export default CollectionModalContent;

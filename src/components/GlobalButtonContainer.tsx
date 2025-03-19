@@ -8,7 +8,7 @@ import CollectionModalContent from "./CollectionModalContent";
 import StartModalContent from "./StartModalContent";
 
 const GlobalButtonContainer: React.FC = () => {
-  const { currentSection, setCurrentSection } = useAppState();
+  const { currentSection } = useAppState();
 
   const [isOptionsModalOpen, setIsOptionsModalOpen] = useState(false);
   const [isCollectionModalOpen, setIsCollectionModalOpen] = useState(false);

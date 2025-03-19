@@ -1,8 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
-import {
-  StorySegment as Story,
-  Choice as StoryChoice,
-} from "../utils/storyUtils";
+import { StorySegment as Story } from "../utils/storyUtils";
 import { setApiResponseTimeCallback } from "../api/deepseekService";
 import responseTimeService from "../api/responseTimeService";
 import { useColorTransition } from "../utils/useColorTransition";

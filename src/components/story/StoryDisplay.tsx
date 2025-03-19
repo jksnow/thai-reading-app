@@ -1,9 +1,7 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Choice, StorySegment } from "../../utils/storyUtils";
-import ThaiWordRenderer from "./ThaiWordRenderer";
 import AnimatedStoryText from "./AnimatedStoryText";
-import ShaderButton from "../ShaderButton";
 import ButtonOptions from "../ButtonOptions";
 import CharacterNames from "./CharacterNames";
 import ModalContainer from "../ModalContainer";

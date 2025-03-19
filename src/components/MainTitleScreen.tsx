@@ -5,8 +5,6 @@ import GlobalButtonContainer from "./GlobalButtonContainer";
 import ChatBubble from "./ChatBubble";
 
 const MainTitleScreen: React.FC = () => {
-  const { setCurrentSection } = useAppState();
-
   return (
     <div className="container mx-auto p-4 flex flex-col items-center justify-center min-h-screen">
       {/* Logo and Title - Large, taking significant screen real estate */}

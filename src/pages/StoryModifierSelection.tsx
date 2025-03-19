@@ -1,4 +1,5 @@
-import { useState, useEffect, useRef, useMemo } from "react";
+import React from "react";
+import { useState, useEffect, useMemo } from "react";
 import storyModifiers, {
   StoryModifier,
   ModifierCategory,

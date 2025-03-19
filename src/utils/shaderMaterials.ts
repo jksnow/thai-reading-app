@@ -25,11 +25,11 @@ export const BalatroPaintShaderMaterial = shaderMaterial(
     colorA: new THREE.Color(0.1, 0.1, 0.1), // Primary color (dark blue in Balatro)
     colorB: new THREE.Color(0.1, 0.1, 0.1), // Secondary color (darker blue in Balatro)
     colorC: new THREE.Color(0.05, 0.05, 0.05), // Background color (very dark in Balatro)
-    spinRotationSpeed: 0.5, // 0.5 default
-    moveSpeed: 3.0, // 3.0 default
+    spinRotationSpeed: 0.3, // 0.3 default
+    moveSpeed: 2.0, // 3.0 default
     contrast: 2.5, // 2.5 default
     lighting: 0.4, // 0.4 default
-    spinAmount: 0.25, // 0.25 default
+    spinAmount: 0.1, // 0.25 default
     pixelFilter: 1300.0, // 1300.0 default
   },
   // Vertex shader

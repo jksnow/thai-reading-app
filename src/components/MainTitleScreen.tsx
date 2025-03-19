@@ -2,14 +2,15 @@ import React from "react";
 import thaiTaleLogo from "../assets/v1e.png";
 import { useAppState } from "../context/AppStateContext";
 import GlobalButtonContainer from "./GlobalButtonContainer";
+import ChatBubble from "./ChatBubble";
 
 const MainTitleScreen: React.FC = () => {
   const { setCurrentSection } = useAppState();
 
   return (
-    <div className="container mx-auto p-4 flex flex-col items-center justify-center h-[calc(100vh-8rem)]">
+    <div className="container mx-auto p-4 flex flex-col items-center justify-center min-h-screen">
       {/* Logo and Title - Large, taking significant screen real estate */}
-      <div className="flex items-center justify-center mb-16 mt-[-2rem]">
+      <div className="flex items-center justify-center mb-16 relative">
         <h1
           className="special-text text-white inline-flex items-center"
           style={{
@@ -18,12 +19,15 @@ const MainTitleScreen: React.FC = () => {
           }}
         >
           Thai
-          <img
-            src={thaiTaleLogo}
-            alt="Thai Tale Logo"
-            className="mx-6 w-auto"
-            style={{ height: "20rem" }}
-          />
+          <div className="relative">
+            <img
+              src={thaiTaleLogo}
+              alt="Thai Tale Logo"
+              className="mx-6 w-auto"
+              style={{ height: "20rem" }}
+            />
+            <ChatBubble />
+          </div>
           Tale
         </h1>
       </div>

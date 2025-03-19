@@ -6,7 +6,7 @@ import * as THREE from "three";
 import "../utils/shaderMaterials";
 // Then import the type
 import type { BalatroPaintShaderMaterialImpl } from "../utils/shaderMaterials";
-import { useAppState } from "../context/AppStateContext";
+import { useShaderSettings } from "../context/ShaderSettingsContext";
 
 interface ShaderBackgroundProps {
   colorA: THREE.Color;
@@ -15,20 +15,18 @@ interface ShaderBackgroundProps {
 
 export function ShaderBackground({ colorA, colorB }: ShaderBackgroundProps) {
   const materialRef = useRef<BalatroPaintShaderMaterialImpl>(null);
+  const { settings } = useShaderSettings();
 
-  // For now, we'll use default shader properties since they're no longer in the AppContext
+  // Use settings from context
   const shaderProps = {
-    startAnimation: true,
-    spinRotationSpeed: 0.5,
-    moveSpeed: 3.0,
-    spinAmount: 0.25,
+    ...settings,
     pixelFilter: 1500.0,
   };
 
   // Update shader uniforms on each frame
   useFrame((frameState) => {
     if (materialRef.current) {
-      // Always update time (using fixed values since startAnimation is removed from context)
+      // Always update time
       materialRef.current.uniforms.time.value =
         frameState.clock.getElapsedTime();
 
@@ -42,7 +40,7 @@ export function ShaderBackground({ colorA, colorB }: ShaderBackgroundProps) {
       materialRef.current.uniforms.colorA.value.copy(colorA);
       materialRef.current.uniforms.colorB.value.copy(colorB);
 
-      // Update shader properties from fixed values
+      // Update shader properties from settings context
       materialRef.current.uniforms.spinRotationSpeed.value =
         shaderProps.spinRotationSpeed;
       materialRef.current.uniforms.moveSpeed.value = shaderProps.moveSpeed;

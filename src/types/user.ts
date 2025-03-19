@@ -1,5 +1,8 @@
 export interface UserSettings {
   preferredThemeColorScheme?: string;
+  spinRotationSpeed?: number;
+  moveSpeed?: number;
+  spinAmount?: number;
 }
 
 export interface UserCollections {

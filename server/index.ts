@@ -16,6 +16,7 @@ import {
   fetchAndStoreTranslation,
 } from "./services/translationService";
 import { getTransliteration } from "./services/transliterationService";
+import stripeRoutes from "./routes/stripeRoutes";
 
 // ES Module equivalent of __dirname
 const __filename = fileURLToPath(import.meta.url);
@@ -116,6 +117,9 @@ app.use("/api/payments", paymentRoutes);
 // This must come after the express.json() middleware but only for non-webhook routes
 // For webhook routes, we need the raw body
 app.use("/api/payments/webhook", express.raw({ type: "application/json" }));
+
+// Stripe routes
+app.use("/api/stripe", stripeRoutes);
 
 // Initialize MongoDB connection and start server
 async function startServer() {

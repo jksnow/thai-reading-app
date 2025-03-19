@@ -1,17 +1,104 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import ButtonOptions from "./ButtonOptions";
 import { useAppState } from "../context/AppStateContext";
+import { useAuth } from "../context/AuthContext";
+import { userService } from "../services/userService";
+import { CURRENT_PROMPT_VERSION } from "../types/user";
 
 interface StartModalContentProps {
   onClose: () => void;
 }
 
 const StartModalContent: React.FC<StartModalContentProps> = ({ onClose }) => {
-  const { setCurrentSection } = useAppState();
+  const { setCurrentSection, setSelectedModifiers } = useAppState();
+  const { currentUser } = useAuth();
+  const [hasCurrentStory, setHasCurrentStory] = useState<boolean>(false);
+  const [isOutdatedVersion, setIsOutdatedVersion] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isIncompleteStory, setIsIncompleteStory] = useState<boolean>(false);
 
-  const handleNewStory = () => {
+  // Check for existing story on mount
+  useEffect(() => {
+    const checkCurrentStory = async () => {
+      if (!currentUser) {
+        setIsLoading(false);
+        return;
+      }
+
+      try {
+        const userData = await userService.getUserById(currentUser.uid);
+        const currentStory = userData?.currentStory;
+
+        if (currentStory) {
+          setHasCurrentStory(true);
+          setIsOutdatedVersion(
+            currentStory.promptVersion !== CURRENT_PROMPT_VERSION
+          );
+
+          // Check if story is incomplete (has modifiers but no response)
+          setIsIncompleteStory(
+            !!currentStory.selectedModifiers && !currentStory.latestResponse
+          );
+        }
+      } catch (error) {
+        console.error("Error checking current story:", error);
+      }
+
+      setIsLoading(false);
+    };
+
+    checkCurrentStory();
+  }, [currentUser]);
+
+  const handleNewStory = async () => {
+    // Clear modifiers from app state
+    setSelectedModifiers([]);
+
+    // Clear currentStory in MongoDB if user is logged in
+    if (currentUser) {
+      try {
+        await userService.updateUser(currentUser.uid, {
+          currentStory: undefined,
+        });
+      } catch (error) {
+        console.error("Error clearing story data:", error);
+      }
+    }
+
+    // Navigate to modifier selection
     setCurrentSection("modifier-selection");
     onClose();
+  };
+
+  const handleContinueStory = async () => {
+    if (!currentUser || !hasCurrentStory) return;
+
+    try {
+      const userData = await userService.getUserById(currentUser.uid);
+      if (!userData?.currentStory) return;
+
+      // Set the modifiers in app state
+      setSelectedModifiers(userData.currentStory.selectedModifiers);
+
+      // Navigate to appropriate section based on story state
+      if (userData.currentStory.latestResponse) {
+        setCurrentSection("story-generator");
+      } else {
+        // For incomplete stories, go to story controls
+        setCurrentSection("story-generator");
+      }
+
+      onClose();
+    } catch (error) {
+      console.error("Error continuing story:", error);
+    }
+  };
+
+  const getContinueButtonText = () => {
+    if (isLoading) return "Loading...";
+    if (isOutdatedVersion) return "Story from older version";
+    if (isIncompleteStory) return "Continue Incomplete Story";
+    return "Continue Story";
   };
 
   return (
@@ -28,11 +115,26 @@ const StartModalContent: React.FC<StartModalContentProps> = ({ onClose }) => {
         </ButtonOptions>
 
         <ButtonOptions
+          onClick={handleContinueStory}
           variant="blue"
           padding="py-2"
+          disabled={isLoading || !hasCurrentStory || isOutdatedVersion}
         >
-          Continue Story
+          {getContinueButtonText()}
         </ButtonOptions>
+
+        {isOutdatedVersion && (
+          <p className="text-sm text-yellow-400 text-center">
+            This story was created with an older version of the app. Please
+            start a new story.
+          </p>
+        )}
+
+        {isIncompleteStory && (
+          <p className="text-sm text-blue-400 text-center">
+            You have an unfinished story. Continue to complete it!
+          </p>
+        )}
       </div>
     </div>
   );

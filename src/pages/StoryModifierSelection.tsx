@@ -3,9 +3,12 @@ import storyModifiers, {
   StoryModifier,
   ModifierCategory,
 } from "../data/storyModifiers";
-import ShaderButton from "../components/ShaderButton";
+import ButtonOptions from "../components/ButtonOptions";
 import { useAppState } from "../context/AppStateContext";
 import GlobalButtonContainer from "../components/GlobalButtonContainer";
+import { useAuth } from "../context/AuthContext";
+import { userService } from "../services/userService";
+import { CURRENT_PROMPT_VERSION } from "../types/user";
 
 // Add global styles
 const globalStyles = `
@@ -223,10 +226,14 @@ const getCategoryStyles = (category: string) => {
 };
 
 const StoryModifierSelection = () => {
-  const { selectedModifiers, setSelectedModifiers, setCurrentSection } =
-    useAppState();
+  const { setSelectedModifiers, setCurrentSection } = useAppState();
+  const { currentUser } = useAuth();
+  const [localSelectedModifiers, setLocalSelectedModifiers] = useState<
+    string[]
+  >([]);
   const [randomModifiers, setRandomModifiers] = useState<StoryModifier[]>([]);
   const [animationComplete, setAnimationComplete] = useState(false);
+  const [isNavigating, setIsNavigating] = useState(false);
 
   // Get 5 random modifiers on component mount
   useEffect(() => {
@@ -256,24 +263,51 @@ const StoryModifierSelection = () => {
   }, []);
 
   const toggleModifier = (id: string) => {
-    const currentModifiers = [...selectedModifiers];
-
-    // If already selected, remove it
-    if (currentModifiers.includes(id)) {
-      setSelectedModifiers(currentModifiers.filter((modId) => modId !== id));
-    }
-    // If already have 3 selections, don't allow more
-    else if (currentModifiers.length < 3) {
-      // Add new selection
-      setSelectedModifiers([...currentModifiers, id]);
-    }
+    setLocalSelectedModifiers((current) => {
+      // If already selected, remove it
+      if (current.includes(id)) {
+        return current.filter((modId) => modId !== id);
+      }
+      // If already have 3 selections, don't allow more
+      if (current.length < 3) {
+        return [...current, id];
+      }
+      return current;
+    });
   };
 
-  const isSelected = (id: string) => selectedModifiers.includes(id);
+  const isSelected = (id: string) => localSelectedModifiers.includes(id);
 
-  const handleContinue = () => {
-    // Navigate to story generator, the selected modifiers are now in context
-    setCurrentSection("story-generator");
+  const handleContinue = async () => {
+    if (localSelectedModifiers.length !== 3 || isNavigating) return;
+
+    setIsNavigating(true);
+
+    try {
+      // Save to global state
+      setSelectedModifiers(localSelectedModifiers);
+
+      // Save to MongoDB
+      if (currentUser) {
+        try {
+          await userService.updateUser(currentUser.uid, {
+            currentStory: {
+              selectedModifiers: localSelectedModifiers,
+              promptVersion: CURRENT_PROMPT_VERSION,
+            },
+          });
+        } catch (error) {
+          console.error("Error saving modifiers to database:", error);
+          // Continue anyway since the app state is updated
+        }
+      }
+
+      // Navigate to story generator
+      setCurrentSection("story-generator");
+    } catch (error) {
+      console.error("Error during navigation:", error);
+      setIsNavigating(false);
+    }
   };
 
   // Create stars component - memoized to prevent recreation on every render
@@ -297,106 +331,104 @@ const StoryModifierSelection = () => {
   }, []);
 
   return (
-    <div className="container mx-auto px-4 flex flex-col items-center justify-center h-[calc(100vh-8rem)]">
-      <h1 className="text-4xl font-bold mb-10 text-white">
-        Choose 3 Modifiers
-      </h1>
+    <div className="min-h-screen flex items-center justify-center">
+      <div className="container mx-auto px-4 flex flex-col items-center">
+        <h1 className="text-4xl font-bold mb-10 text-white">
+          Choose 3 Modifiers
+        </h1>
 
-      <div className="flex flex-wrap justify-center gap-6 mb-10 perspective-1000">
-        {randomModifiers.map((modifier, index) => {
-          // Create unique animation delay for floating effect based on index
-          const floatDelay = `${(index * 0.4) % 2}s`;
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-8 mb-10">
+          {randomModifiers.map((modifier, index) => {
+            // Create unique animation delay for floating effect based on index
+            const floatDelay = `${(index * 0.4) % 2}s`;
 
-          // Get styling based on category
-          const styles = getCategoryStyles(modifier.category);
+            // Get styling based on category
+            const styles = getCategoryStyles(modifier.category);
 
-          return (
-            <div
-              key={modifier.id}
-              onClick={() => toggleModifier(modifier.id)}
-              className={`card-container relative w-56 h-80 cursor-pointer transition-all duration-300 
-              ${animationComplete ? "animate-float" : ""}
-              ${isSelected(modifier.id) ? "z-20" : "z-10 hover:z-20"}
-              ${animationComplete ? "" : "fly-in"}`}
-              style={{
-                animationDelay: animationComplete
-                  ? floatDelay
-                  : `${index * 150}ms`,
-                animationFillMode: "forwards",
-              }}
-            >
-              {/* Card */}
+            return (
               <div
-                className={`card bg-gradient-to-br ${
-                  styles.background
-                } rounded-xl shadow-xl w-full h-full
-                  transform preserve-3d relative drop-shadow-[7px_7px_5px_rgba(10,10,10,0.8)]
-                  ${
-                    isSelected(modifier.id)
-                      ? "translate-y-[-15px] rotate-y-0 rotate-x-0 scale-105 border-2 border-yellow-400"
-                      : `hover:translate-y-[-10px] hover:rotate-y-neg5 hover:rotate-x-5 border ${styles.border}`
-                  }
-                  ${animationComplete ? "shadow-2xl shadow-indigo-900/20" : ""} 
-                  transition-all duration-300 ease-out`}
+                key={modifier.id}
+                onClick={() => toggleModifier(modifier.id)}
+                className={`card-container relative w-56 h-80 cursor-pointer transition-all duration-300 
+                ${animationComplete ? "animate-float" : ""}
+                ${isSelected(modifier.id) ? "z-20" : "z-10 hover:z-20"}
+                ${animationComplete ? "" : "fly-in"}`}
+                style={{
+                  animationDelay: animationComplete
+                    ? floatDelay
+                    : `${index * 150}ms`,
+                  animationFillMode: "forwards",
+                }}
               >
-                <div className="p-4 flex flex-col h-full w-full relative">
-                  {/* Card Header */}
-                  <div
-                    className={`text-center mb-3 pb-2 border-b ${styles.border}`}
-                  >
-                    <span
-                      className={`text-xs ${styles.categoryText} uppercase tracking-widest font-semibold`}
+                <div
+                  className={`card bg-gradient-to-br ${
+                    styles.background
+                  } rounded-xl shadow-xl w-full h-full
+                    transform preserve-3d relative drop-shadow-[7px_7px_5px_rgba(10,10,10,0.8)]
+                    ${
+                      isSelected(modifier.id)
+                        ? "translate-y-[-15px] rotate-y-0 rotate-x-0 scale-105 border-2 border-yellow-400"
+                        : `hover:translate-y-[-10px] hover:rotate-y-neg5 hover:rotate-x-5 border ${styles.border}`
+                    }
+                    ${
+                      animationComplete ? "shadow-2xl shadow-indigo-900/20" : ""
+                    } 
+                    transition-all duration-300 ease-out`}
+                >
+                  <div className="p-4 flex flex-col h-full w-full relative">
+                    <div
+                      className={`text-center mb-3 pb-2 border-b ${styles.border}`}
                     >
-                      {modifier.category}
-                    </span>
-                    <h3
-                      className={`text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r ${styles.titleGradient} mt-1`}
-                    >
-                      {modifier.modifier}
-                    </h3>
+                      <span
+                        className={`text-xs ${styles.categoryText} uppercase tracking-widest font-semibold`}
+                      >
+                        {modifier.category}
+                      </span>
+                      <h3
+                        className={`text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r ${styles.titleGradient} mt-1`}
+                      >
+                        {modifier.modifier}
+                      </h3>
+                    </div>
+
+                    <div className="flex-grow flex items-center justify-center p-3 relative">
+                      {StarField}
+                      <p
+                        className={`${styles.bodyText} text-center relative z-10`}
+                      >
+                        {modifier.description}
+                      </p>
+                    </div>
+
+                    <div
+                      className={`absolute -inset-1 rounded-xl ${
+                        isSelected(modifier.id) ? "bg-indigo-500/20" : ""
+                      } blur-md opacity-0 group-hover:opacity-100 transition-opacity duration-300`}
+                    ></div>
                   </div>
 
-                  {/* Card Body */}
-                  <div className="flex-grow flex items-center justify-center p-3 relative">
-                    {StarField}
-                    <p
-                      className={`${styles.bodyText} text-center relative z-10`}
-                    >
-                      {modifier.description}
-                    </p>
-                  </div>
-
-                  {/* Magic glow effect */}
-                  <div
-                    className={`absolute -inset-1 rounded-xl ${
-                      isSelected(modifier.id) ? "bg-indigo-500/20" : ""
-                    } blur-md opacity-0 group-hover:opacity-100 transition-opacity duration-300`}
-                  ></div>
+                  {isSelected(modifier.id) && (
+                    <div className="absolute -top-3 -right-3 bg-gradient-to-br from-yellow-300 to-yellow-500 text-gray-900 w-9 h-9 rounded-full flex items-center justify-center font-bold animate-pulse shadow-lg shadow-yellow-400/50 z-30">
+                      {localSelectedModifiers.indexOf(modifier.id) + 1}
+                    </div>
+                  )}
                 </div>
-
-                {/* Selection Indicator */}
-                {isSelected(modifier.id) && (
-                  <div className="absolute -top-3 -right-3 bg-gradient-to-br from-yellow-300 to-yellow-500 text-gray-900 w-9 h-9 rounded-full flex items-center justify-center font-bold animate-pulse shadow-lg shadow-yellow-400/50 z-30">
-                    {selectedModifiers.indexOf(modifier.id) + 1}
-                  </div>
-                )}
               </div>
-            </div>
-          );
-        })}
+            );
+          })}
+        </div>
+
+        <ButtonOptions
+          onClick={handleContinue}
+          variant="blue"
+          disabled={localSelectedModifiers.length !== 3 || isNavigating}
+          padding="py-3 px-10"
+        >
+          {isNavigating ? "Loading..." : "Continue to Story Generator"}
+        </ButtonOptions>
+
+        <GlobalButtonContainer />
       </div>
-
-      <ShaderButton
-        onClick={handleContinue}
-        disabled={selectedModifiers.length !== 3}
-        className={`px-10 py-3 ${
-          selectedModifiers.length !== 3 ? "opacity-50 cursor-not-allowed" : ""
-        }`}
-      >
-        Continue to Story Generator
-      </ShaderButton>
-
-      <GlobalButtonContainer />
     </div>
   );
 };

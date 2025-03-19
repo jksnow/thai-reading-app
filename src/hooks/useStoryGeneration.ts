@@ -6,6 +6,9 @@ import {
   StorySegment,
   parseStoryResponse,
 } from "../utils/storyUtils";
+import { useAuth } from "../context/AuthContext";
+import { userService } from "../services/userService";
+import { CURRENT_PROMPT_VERSION } from "../types/user";
 
 // example response from deepseekService.generateInitialStory
 // "[GOAL]  \nThe protagonist must uncover the truth behind the haunted house and escape before the malevolent spirit claims their soul.\n\n[STORY]  \n[name]อ๊อด เดิน เข้า ไป ใน บ้าน เก่า แห่ง หนึ่ง ที่ เพื่อน บอก ว่า มี ผี สิง. ทุก อย่าง ดู เงียบ เกิน ไป. [name]อ๊อด เห็น เงา หนึ่ง เคลื่อน ไหว ที่ มุม ห้อง. เขา รู้สึก หนาว สั้น. ตรง กำแพง มี รูป วาด เก่า ๆ ที่ ตา ใน รูป ดู เหมือน จะ มอง มา ที่ เขา.  \n\n[name]อ๊อด ได้ยิน เสียง หัวเราะ เบา ๆ จาก ห้อง ข้าง บน. เสียง นั้น ทำให้ เขา รู้สึก กลัว. เขา เริ่ม เดิน ไป ที่ บันได เพื่อ ขึ้น ไป ดู ที่ ห้อง ข้าง บน. แต่ ขณะ เดิน ขึ้น บันได เขา เห็น รอย เลือด ที่ ไหล ลง มา จาก ขั้น บันได.  \n\n[SUMMARY]  \nAod explores an old, supposedly haunted house. He notices eerie shadows, unsettling paintings, and hears faint laughter. As he climbs the stairs to investigate, he sees blood dripping down the steps, heightening the tension and mystery.  \n\n[CHOICES]  \n1. เดิน ขึ้น ไป ต่อ ที่ ห้อง ข้าง บน.  \n2. วิ่ง กลับ ออก ไป จาก บ้าน ทันที.  \n3. เปิด ประตู ห้อง ที่ อยู่ ข้าง ๆ เพื่อ ดู ว่า มี อะไร อยู่."
@@ -17,6 +20,26 @@ export function useStoryGeneration() {
   const [currentStoryIndex, setCurrentStoryIndex] = useState(0);
   const [showChoices, setShowChoices] = useState(false);
   const [activeModifiers, setActiveModifiers] = useState<string[]>([]);
+  const { currentUser } = useAuth();
+
+  /**
+   * Save the current story state to MongoDB
+   */
+  const saveStoryProgress = async (story: StorySegment) => {
+    if (!currentUser) return;
+
+    try {
+      await userService.updateUser(currentUser.uid, {
+        currentStory: {
+          selectedModifiers: activeModifiers,
+          latestResponse: JSON.stringify(story),
+          promptVersion: CURRENT_PROMPT_VERSION,
+        },
+      });
+    } catch (error) {
+      console.error("Error saving story progress:", error);
+    }
+  };
 
   /**
    * Generate the initial story based on the provided parameters
@@ -27,7 +50,7 @@ export function useStoryGeneration() {
   ) => {
     setIsGenerating(true);
     setErrorMessage("");
-    setActiveModifiers(selectedModifiers); // Store the modifiers for later use
+    setActiveModifiers(selectedModifiers);
 
     try {
       const response = await deepseekService.generateInitialStory(
@@ -39,6 +62,9 @@ export function useStoryGeneration() {
       setStoryHistory([parsedStory]);
       setCurrentStoryIndex(0);
       setShowChoices(false);
+
+      // Save initial story
+      await saveStoryProgress(parsedStory);
     } catch (error: any) {
       if (error.message.includes("API key")) {
         setErrorMessage(
@@ -68,8 +94,6 @@ export function useStoryGeneration() {
       const currentStory = storyHistory[currentStoryIndex];
       const storyContext = previousStories.map((s) => s.text).join("\n");
 
-      // We'll use the stored modifiers here
-      // This way, the same modifiers are used throughout the story
       const response = await deepseekService.continueStory(
         {
           storyGoal: currentStory.goal,
@@ -83,8 +107,12 @@ export function useStoryGeneration() {
       const parsedStory = parseStoryResponse(response);
 
       // Update the story history
-      setStoryHistory([...previousStories, parsedStory]);
+      const newHistory = [...previousStories, parsedStory];
+      setStoryHistory(newHistory);
       setCurrentStoryIndex(previousStories.length);
+
+      // Save continued story
+      await saveStoryProgress(parsedStory);
     } catch (error: any) {
       setErrorMessage(`Error: ${error.message}`);
     } finally {
@@ -109,11 +137,22 @@ export function useStoryGeneration() {
   /**
    * Reset the story state
    */
-  const resetStory = () => {
+  const resetStory = async () => {
     setStoryHistory([]);
     setCurrentStoryIndex(0);
     setShowChoices(false);
     setErrorMessage("");
+
+    // Clear story in MongoDB
+    if (currentUser) {
+      try {
+        await userService.updateUser(currentUser.uid, {
+          currentStory: undefined,
+        });
+      } catch (error) {
+        console.error("Error clearing story:", error);
+      }
+    }
   };
 
   return {
@@ -126,5 +165,7 @@ export function useStoryGeneration() {
     handleShowChoices,
     handleChoiceSelect,
     resetStory,
+    setStoryHistory,
+    setCurrentStoryIndex,
   };
 }

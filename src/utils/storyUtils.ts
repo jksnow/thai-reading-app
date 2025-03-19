@@ -25,12 +25,32 @@ export interface StoryParams {
 }
 
 /**
+ * Clean markdown-formatted JSON responses
+ * Handles cases where the AI returns JSON wrapped in markdown code blocks
+ */
+export const cleanMarkdownJSON = (response: string): string => {
+  // Remove markdown code block syntax if present
+  const cleanedResponse = response.replace(/^```json\n|\n```$/g, "");
+
+  // Try to parse and re-stringify to ensure valid JSON
+  try {
+    return JSON.stringify(JSON.parse(cleanedResponse));
+  } catch (error) {
+    // If parsing fails, return the cleaned response as is
+    return cleanedResponse;
+  }
+};
+
+/**
  * Parse the raw response from the AI service into a structured StorySegment
  */
 export const parseStoryResponse = (response: string): StorySegment => {
   try {
+    // Clean the response of any markdown formatting
+    const cleanedResponse = cleanMarkdownJSON(response);
+
     // Try to parse the response as JSON
-    const parsedResponse = JSON.parse(response);
+    const parsedResponse = JSON.parse(cleanedResponse);
 
     // If successfully parsed as JSON, extract the fields directly
     const goal = parsedResponse.goal || "";

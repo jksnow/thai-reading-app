@@ -1,5 +1,5 @@
 import { ObjectId } from "mongodb";
-import { getClient } from "../db";
+import { getClient, DEFAULT_DB_NAME } from "../db";
 
 export interface User {
   _id: string; // Firebase UID for unique identification
@@ -25,7 +25,7 @@ export const UserModel = {
   // Get user by Firebase UID
   async findById(userId: string): Promise<User | null> {
     const client = await getClient();
-    const db = client.db();
+    const db = client.db(DEFAULT_DB_NAME);
 
     return db.collection<User>(USERS_COLLECTION).findOne({ _id: userId });
   },
@@ -33,7 +33,7 @@ export const UserModel = {
   // Create a new user
   async create(userData: Omit<User, "createdAt" | "updatedAt">): Promise<User> {
     const client = await getClient();
-    const db = client.db();
+    const db = client.db(DEFAULT_DB_NAME);
 
     const now = new Date();
     const newUser: User = {
@@ -49,7 +49,7 @@ export const UserModel = {
   // Update user data
   async update(userId: string, userData: Partial<User>): Promise<User | null> {
     const client = await getClient();
-    const db = client.db();
+    const db = client.db(DEFAULT_DB_NAME);
 
     const updateData = {
       ...userData,
@@ -64,13 +64,13 @@ export const UserModel = {
         { returnDocument: "after" }
       );
 
-    return result;
+    return result || null;
   },
 
   // Delete a user
   async delete(userId: string): Promise<boolean> {
     const client = await getClient();
-    const db = client.db();
+    const db = client.db(DEFAULT_DB_NAME);
 
     const result = await db
       .collection<User>(USERS_COLLECTION)

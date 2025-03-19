@@ -1,5 +1,6 @@
 import axios from "axios";
 import storyModifiers from "../data/storyModifiers";
+import { cleanMarkdownJSON } from "../utils/storyUtils";
 
 // Track API response time events
 type ResponseTimeCallback = (timeInMs: number) => void;
@@ -264,31 +265,27 @@ const generateInitialStory = async (
   selectedModifiers: string[] = []
 ): Promise<string> => {
   if (!API_KEY) {
-    throw new Error(
-      "Deepseek API key is missing. Please add VITE_DEEPSEEK_API_KEY to your .env file and restart the application."
-    );
+    throw new Error("API key not found");
   }
+
+  const messages = [
+    {
+      role: "system",
+      content: systemPrompt(storyOptions, selectedModifiers),
+    },
+    {
+      role: "user",
+      content: formatPrompt(storyOptions, selectedModifiers),
+    },
+  ];
 
   return measureApiDuration(async () => {
     try {
-      // Use the system prompt with modifiers included
-      const prompt = systemPrompt(storyOptions, selectedModifiers);
-
-      // Updating to match the exact endpoint from documentation
       const response = await axios.post(
         `${BASE_URL}/chat/completions`,
         {
-          // "deepseek-chat" is the default model
-          // "deepseek-reasoner" is the model for reasoning tasks
-          // reasoner is 2x more expensive during standard hours（UTC 00:30-16:30）
-          // but reasoner is the same price (75% off) as the chat model during（UTC 16:30-00:30）
-          model: "deepseek-reasoner",
-          messages: [
-            {
-              role: "user",
-              content: prompt,
-            },
-          ],
+          model: "deepseek-chat",
+          messages,
           temperature,
           max_tokens,
         },
@@ -300,28 +297,11 @@ const generateInitialStory = async (
         }
       );
 
-      return response.data.choices[0].message.content;
-    } catch (error: any) {
-      // Enhanced error handling
-      if (axios.isAxiosError(error)) {
-        if (error.response?.status === 401) {
-          throw new Error(
-            "Authentication failed: Your Deepseek API key is invalid or expired. Please check and update your API key."
-          );
-        } else if (error.response) {
-          throw new Error(
-            `API error (${error.response.status}): ${
-              error.response.data?.error?.message || error.message
-            }`
-          );
-        } else if (error.request) {
-          throw new Error(
-            "Network error: Could not connect to Deepseek API. Please check your internet connection."
-          );
-        }
-      }
-      console.error("Error generating story:", error);
-      throw new Error(`Failed to generate story: ${error.message}`);
+      // Clean any markdown formatting from the response
+      return cleanMarkdownJSON(response.data.choices[0].message.content);
+    } catch (error) {
+      console.error("Error generating initial story:", error);
+      throw error;
     }
   });
 };
@@ -332,38 +312,30 @@ const continueStory = async (
   selectedModifiers: string[] = []
 ): Promise<string> => {
   if (!API_KEY) {
-    throw new Error(
-      "Deepseek API key is missing. Please add VITE_DEEPSEEK_API_KEY to your .env file and restart the application."
-    );
+    throw new Error("API key not found");
   }
+
+  const messages = [
+    {
+      role: "system",
+      content: systemPrompt(
+        { genre: "", parentalRating: "", readingLevel: "", paragraphs: 0 },
+        selectedModifiers
+      ),
+    },
+    {
+      role: "user",
+      content: formatContinuePrompt(options, selectedModifiers),
+    },
+  ];
 
   return measureApiDuration(async () => {
     try {
-      const prompt = formatContinuePrompt(options, selectedModifiers);
-
-      // Updating to match the exact endpoint from documentation
       const response = await axios.post(
         `${BASE_URL}/chat/completions`,
         {
-          model: "deepseek-reasoner",
-          messages: [
-            {
-              role: "system",
-              content: systemPrompt(
-                {
-                  genre: "Follow previous context",
-                  parentalRating: "Follow previous context",
-                  readingLevel: "Follow previous context",
-                  paragraphs: 3,
-                },
-                selectedModifiers
-              ),
-            },
-            {
-              role: "user",
-              content: prompt,
-            },
-          ],
+          model: "deepseek-chat",
+          messages,
           temperature,
           max_tokens,
         },
@@ -375,28 +347,11 @@ const continueStory = async (
         }
       );
 
-      return response.data.choices[0].message.content;
-    } catch (error: any) {
-      // Enhanced error handling
-      if (axios.isAxiosError(error)) {
-        if (error.response?.status === 401) {
-          throw new Error(
-            "Authentication failed: Your Deepseek API key is invalid or expired. Please check and update your API key."
-          );
-        } else if (error.response) {
-          throw new Error(
-            `API error (${error.response.status}): ${
-              error.response.data?.error?.message || error.message
-            }`
-          );
-        } else if (error.request) {
-          throw new Error(
-            "Network error: Could not connect to Deepseek API. Please check your internet connection."
-          );
-        }
-      }
+      // Clean any markdown formatting from the response
+      return cleanMarkdownJSON(response.data.choices[0].message.content);
+    } catch (error) {
       console.error("Error continuing story:", error);
-      throw new Error(`Failed to continue story: ${error.message}`);
+      throw error;
     }
   });
 };

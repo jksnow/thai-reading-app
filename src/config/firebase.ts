@@ -2,8 +2,6 @@
 import { initializeApp } from "firebase/app";
 import { getAnalytics } from "firebase/analytics";
 import { getAuth } from "firebase/auth";
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
 
 // Your web app's Firebase configuration
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
@@ -22,10 +20,13 @@ const app = initializeApp(firebaseConfig);
 const analytics = getAnalytics(app);
 const auth = getAuth(app);
 
-// Log that Firebase is initialized
-console.log(
-  "Firebase initialized with API key:",
-  import.meta.env.VITE_FIREBASE_API_KEY ? "Key exists" : "Key missing"
-);
+// Log initialization status
+if (import.meta.env.DEV) {
+  console.log(
+    "Firebase initialized with:",
+    "API Key exists:",
+    !!import.meta.env.VITE_FIREBASE_API_KEY
+  );
+}
 
-export { app, analytics, auth };
+export { app, auth };

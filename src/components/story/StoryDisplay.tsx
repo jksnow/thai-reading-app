@@ -48,15 +48,14 @@ const StoryDisplay: React.FC<StoryDisplayProps> = ({
   const [isSummaryModalOpen, setIsSummaryModalOpen] = useState(false);
   const [selectedTranslation, setSelectedTranslation] =
     useState<PopupState | null>(null);
+  const [showCharacters, setShowCharacters] = useState(false);
 
   const handleWordClick = async (word: string, event: React.MouseEvent) => {
-    // Don't fetch translation if it's a character name
-    if (currentStory.characterNames?.includes(word)) {
-      return;
-    }
-
     const target = event.target as HTMLElement;
     const rect = target.getBoundingClientRect();
+
+    // Clean quotes from word
+    const cleanedWord = word.replace(/['"]/g, "");
 
     // Show loading state immediately
     setSelectedTranslation({
@@ -67,16 +66,63 @@ const StoryDisplay: React.FC<StoryDisplayProps> = ({
       isLoading: true,
     });
 
-    // Fetch translation
-    const translation = await getTranslation(word);
+    // If it's a character name, show special modal
+    if (currentStory.characterNames?.includes(cleanedWord)) {
+      setSelectedTranslation({
+        position: {
+          x: rect.left,
+          y: rect.bottom,
+        },
+        translation: {
+          word: cleanedWord,
+          t2e: "Character Name",
+          meanings: [
+            {
+              meaning: "This is a character in the story",
+              partOfSpeech: "name",
+              displayOrder: 1,
+            },
+          ],
+          dateAdded: new Date().toISOString(),
+        },
+        isLoading: false,
+      });
+      return;
+    }
+
+    // Fetch translation for non-character words
+    const translation = await getTranslation(cleanedWord);
     if (translation) {
-      setSelectedTranslation((prev) => ({
-        ...prev!,
+      setSelectedTranslation({
+        position: {
+          x: rect.left,
+          y: rect.bottom,
+        },
         translation,
         isLoading: false,
-      }));
+      });
     } else {
-      setSelectedTranslation(null);
+      // Create a fallback translation for potential names
+      setSelectedTranslation({
+        position: {
+          x: rect.left,
+          y: rect.bottom,
+        },
+        translation: {
+          word: cleanedWord,
+          t2e: "No translation found - this might be a name",
+          meanings: [
+            {
+              meaning:
+                "This word was not found in our dictionary. If this is a name, it does not need translation.",
+              partOfSpeech: "unknown",
+              displayOrder: 1,
+            },
+          ],
+          dateAdded: new Date().toISOString(),
+        },
+        isLoading: false,
+      });
     }
   };
 
@@ -173,7 +219,7 @@ const StoryDisplay: React.FC<StoryDisplayProps> = ({
       </div>
 
       <motion.div
-        className="mb-4"
+        className="mb-4 flex gap-2"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.5 }}
@@ -188,9 +234,20 @@ const StoryDisplay: React.FC<StoryDisplayProps> = ({
         >
           {showWordSpacing ? "Spaced Words" : "Connected Words"}
         </button>
+        <button
+          onClick={() => setShowCharacters(!showCharacters)}
+          className={`px-3 py-2 rounded text-sm ${
+            showCharacters
+              ? "bg-amber-700 text-white"
+              : "bg-amber-100 text-amber-800"
+          }`}
+        >
+          {showCharacters ? "Hide Characters" : "Show Characters"}
+        </button>
       </motion.div>
 
-      {currentStory.characterNames &&
+      {showCharacters &&
+        currentStory.characterNames &&
         currentStory.characterNames.length > 0 && (
           <CharacterNames characterNames={currentStory.characterNames} />
         )}

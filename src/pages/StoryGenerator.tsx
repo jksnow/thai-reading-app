@@ -1,16 +1,24 @@
 import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useStoryGeneration } from "../hooks/useStoryGeneration";
-import { getFontSizeClass, StoryParams } from "../utils/storyUtils";
+import {
+  getFontSizeClass,
+  StoryParams,
+  parseStoryResponse,
+} from "../utils/storyUtils";
 import { StoryControls, StoryDisplay } from "../components/story";
 import StoryLoadingScreen from "../components/StoryLoadingScreen";
 import { useAppState } from "../context/AppStateContext";
 import GlobalButtonContainer from "../components/GlobalButtonContainer";
+import { useAuth } from "../context/AuthContext";
+import { userService } from "../services/userService";
+import { CURRENT_PROMPT_VERSION } from "../types/user";
 
 const StoryGenerator: React.FC = () => {
   // Access the app state context for selected modifiers, generation status and navigation
   const { selectedModifiers, setIsGeneratingStory, setCurrentSection } =
     useAppState();
+  const { currentUser } = useAuth();
 
   // Use a ref to track previous generation state
   const prevIsGeneratingRef = useRef<boolean | null>(null);
@@ -18,6 +26,7 @@ const StoryGenerator: React.FC = () => {
   // State to control component visibility
   const [showControls, setShowControls] = useState(true);
   const [showStory, setShowStory] = useState(false);
+  const [isLoadingSavedStory, setIsLoadingSavedStory] = useState(true);
 
   // Story generation parameters
   const [storyParams, setStoryParams] = useState<StoryParams>({
@@ -41,7 +50,59 @@ const StoryGenerator: React.FC = () => {
     handleShowChoices,
     handleChoiceSelect,
     resetStory,
+    setStoryHistory,
+    setCurrentStoryIndex,
   } = useStoryGeneration();
+
+  // Load saved story if exists
+  useEffect(() => {
+    const loadSavedStory = async () => {
+      if (!currentUser) {
+        setIsLoadingSavedStory(false);
+        return;
+      }
+
+      try {
+        const userData = await userService.getUserById(currentUser.uid);
+        const currentStory = userData?.currentStory;
+
+        if (!currentStory) {
+          setIsLoadingSavedStory(false);
+          return;
+        }
+
+        // Check if story is using an outdated prompt version
+        if (currentStory.promptVersion !== CURRENT_PROMPT_VERSION) {
+          console.log("Story using outdated prompt version, resetting...");
+          await resetStory();
+          setIsLoadingSavedStory(false);
+          return;
+        }
+
+        // Handle story with modifiers but no response (incomplete story)
+        if (currentStory.selectedModifiers && !currentStory.latestResponse) {
+          setShowControls(true);
+          setIsLoadingSavedStory(false);
+          return;
+        }
+
+        // Load complete story
+        if (currentStory.latestResponse) {
+          const parsedStory = parseStoryResponse(currentStory.latestResponse);
+          setStoryHistory([parsedStory]);
+          setCurrentStoryIndex(0);
+          setShowStory(true);
+          setShowControls(false);
+        }
+      } catch (error) {
+        console.error("Error loading saved story:", error);
+      }
+
+      setIsLoadingSavedStory(false);
+    };
+
+    loadSavedStory();
+  }, [currentUser]);
 
   // Redirect to modifier selection if no modifiers are selected
   useEffect(() => {
@@ -58,19 +119,35 @@ const StoryGenerator: React.FC = () => {
     }
   }, [isGenerating, setIsGeneratingStory]);
 
-  // Initialize component state on mount
+  // Save story response to MongoDB
   useEffect(() => {
-    // Reset all state on component mount
-    setShowControls(true);
-    setShowStory(false);
-    setIsGeneratingStory(false);
-    prevIsGeneratingRef.current = false;
+    const saveStoryResponse = async () => {
+      if (!currentUser || storyHistory.length === 0) return;
 
-    return () => {
-      // Clean up on unmount
-      setIsGeneratingStory(false);
+      try {
+        const currentStorySegment = storyHistory[currentStoryIndex];
+        await userService.updateUser(currentUser.uid, {
+          currentStory: {
+            selectedModifiers,
+            latestResponse: JSON.stringify(currentStorySegment),
+            promptVersion: 1,
+          },
+        });
+      } catch (error) {
+        console.error("Error saving story response:", error);
+      }
     };
-  }, [setIsGeneratingStory]);
+
+    if (!isGenerating && storyHistory.length > 0) {
+      saveStoryResponse();
+    }
+  }, [
+    currentUser,
+    storyHistory,
+    currentStoryIndex,
+    isGenerating,
+    selectedModifiers,
+  ]);
 
   // Handle story parameter changes
   const handleParamsChange = (params: Partial<StoryParams>) => {
@@ -93,11 +170,6 @@ const StoryGenerator: React.FC = () => {
     }, 300);
   };
 
-  // Handle loading completion
-  const handleLoadingComplete = () => {
-    setShowStory(true);
-  };
-
   // Reset everything when starting a new story
   const handleResetStory = () => {
     // First hide the story display
@@ -115,6 +187,15 @@ const StoryGenerator: React.FC = () => {
 
   // Decide what to display based on state
   const renderContent = () => {
+    if (isLoadingSavedStory) {
+      return (
+        <StoryLoadingScreen
+          isVisible={true}
+          onComplete={() => {}}
+        />
+      );
+    }
+
     // Show loading screen when generating and not showing story yet
     if (isGenerating) {
       return (

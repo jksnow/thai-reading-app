@@ -16,23 +16,9 @@ import {
   signInWithPopup,
 } from "firebase/auth";
 import { auth } from "../config/firebase";
+import { User } from "../types/user";
+import { userService } from "../services/userService";
 import axios from "axios";
-
-interface User {
-  _id: string;
-  name: string;
-  email: string;
-  settings: {
-    preferredThemeColorScheme: string;
-  };
-  payment: {
-    stripeCustomerId?: string;
-    hasPremium: boolean;
-    subscriptionEndsAt?: Date;
-  };
-  createdAt: Date;
-  updatedAt: Date;
-}
 
 interface AuthContextType {
   currentUser: FirebaseUser | null;
@@ -61,34 +47,39 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const fetchUserData = async (user: FirebaseUser) => {
     try {
-      const response = await axios.get(`/api/users/${user.uid}`);
-      setUserData(response.data);
-      return response.data;
+      console.log("Fetching user data for:", user.uid);
+      const userData = await userService.getUserById(user.uid);
+      console.log("Fetched user data:", userData);
+      setUserData(userData);
+      return userData;
     } catch (error) {
       console.error("Error fetching user data:", error);
+      if (axios.isAxiosError(error)) {
+        console.log("Response status:", error.response?.status);
+        console.log("Response data:", error.response?.data);
+      }
       return null;
     }
   };
 
   const createUserInDB = async (user: FirebaseUser, name: string) => {
     try {
-      const newUser = {
-        _id: user.uid,
-        name,
+      console.log("Creating user in DB:", {
+        uid: user.uid,
         email: user.email,
-        settings: {
-          preferredThemeColorScheme: "Purple & Green",
-        },
-        payment: {
-          hasPremium: false,
-        },
-      };
-
-      const response = await axios.post("/api/users", newUser);
-      setUserData(response.data);
-      return response.data;
+        name,
+      });
+      await userService.createUser(user.uid, user.email!, name);
+      console.log("Successfully created user in DB");
+      const userData = await userService.getUserById(user.uid);
+      setUserData(userData);
+      return userData;
     } catch (error) {
       console.error("Error creating user in database:", error);
+      if (axios.isAxiosError(error)) {
+        console.log("Response status:", error.response?.status);
+        console.log("Response data:", error.response?.data);
+      }
       throw error;
     }
   };
@@ -97,15 +88,23 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     console.log("Setting up auth state listener");
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       setCurrentUser(user);
-      console.log("Auth state changed:", user ? "User logged in" : "No user");
+      console.log(
+        "Auth state changed:",
+        user ? `User logged in: ${user.uid}` : "No user"
+      );
 
       if (user) {
         try {
           // Try to fetch user data from MongoDB
           const existingUser = await fetchUserData(user);
+          console.log(
+            "Existing user check result:",
+            existingUser ? "Found" : "Not found"
+          );
 
           // If user doesn't exist in MongoDB, create a new user record
           if (!existingUser) {
+            console.log("User not found in DB, creating new user");
             // Use the Firebase display name or email as fallback
             const name =
               user.displayName || user.email?.split("@")[0] || "User";
@@ -145,7 +144,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const signInWithGoogle = async () => {
     console.log("Attempting Google sign in");
     const provider = new GoogleAuthProvider();
-    // Add scopes if needed
     provider.addScope("email");
     provider.addScope("profile");
 

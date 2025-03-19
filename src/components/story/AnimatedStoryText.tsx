@@ -71,13 +71,7 @@ const AnimatedStoryText: React.FC<AnimatedStoryTextProps> = ({
 
   const handleWordClick = (word: string, e: React.MouseEvent) => {
     if (!onWordClick) return;
-
-    // If word is a character name, provide "character_name" instead
-    if (isCharacterName(word)) {
-      onWordClick("character_name", e);
-    } else {
-      onWordClick(word, e);
-    }
+    onWordClick(word, e);
   };
 
   return (

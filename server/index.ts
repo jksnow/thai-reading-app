@@ -97,19 +97,36 @@ app.get("*", (req, res) => {
   res.sendFile(path.join(__dirname, "../dist/index.html"));
 });
 
-// Initialize MongoDB connection and start server
-async function startServer() {
+// Initialize MongoDB connection
+async function initMongoDB() {
   try {
-    // Connect to MongoDB at startup
     await getClient();
-
-    app.listen(port, () => {
-      console.log(`Server running on port ${port}`);
-    });
+    console.log("MongoDB connected");
   } catch (error) {
-    console.error("Failed to start server:", error);
-    process.exit(1);
+    console.error("Failed to connect to MongoDB:", error);
+    throw error;
   }
 }
 
-startServer();
+// For local development
+if (process.env.NODE_ENV !== "production") {
+  const startServer = async () => {
+    try {
+      await initMongoDB();
+      app.listen(port, () => {
+        console.log(`Server running on port ${port}`);
+      });
+    } catch (error) {
+      console.error("Failed to start server:", error);
+      process.exit(1);
+    }
+  };
+
+  startServer();
+}
+
+// Initialize MongoDB connection at the module level for serverless
+initMongoDB().catch(console.error);
+
+// Export the Express app for Vercel
+export default app;

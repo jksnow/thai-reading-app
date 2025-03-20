@@ -9,12 +9,17 @@ const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
 
 const SocialMediaButtons: React.FC = () => {
   const [isDonateModalOpen, setIsDonateModalOpen] = useState(false);
+  const [donationAmount, setDonationAmount] = useState(5);
 
   // Links to social media - replace with actual URLs
   const discordUrl = "https://discord.gg/dgHtquGA";
 
   const handleDiscordClick = () => {
     window.open(discordUrl, "_blank");
+  };
+
+  const handleDonationAmountChange = (amount: number) => {
+    setDonationAmount(amount);
   };
 
   return (
@@ -40,10 +45,27 @@ const SocialMediaButtons: React.FC = () => {
       </div>
 
       {isDonateModalOpen && (
-        <Elements stripe={stripePromise}>
+        <Elements
+          stripe={stripePromise}
+          options={{
+            appearance: {
+              theme: "night",
+              variables: {
+                colorPrimary: "#f59e0b",
+                colorBackground: "#374151",
+                colorText: "#ffffff",
+              },
+            },
+            mode: "payment",
+            amount: donationAmount * 100, // Convert dollars to cents
+            currency: "usd",
+          }}
+        >
           <DonateModal
             isOpen={isDonateModalOpen}
             onClose={() => setIsDonateModalOpen(false)}
+            onAmountChange={handleDonationAmountChange}
+            initialAmount={donationAmount}
           />
         </Elements>
       )}

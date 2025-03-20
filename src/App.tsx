@@ -10,7 +10,7 @@ import { AuthProvider, useAuth } from "./context/AuthContext";
 import { ShaderSettingsProvider } from "./context/ShaderSettingsContext";
 import AuthForm from "./components/AuthForm";
 
-const APP_VERSION = "0.8.34"; // Beta version
+const APP_VERSION = "0.8.35"; // Beta version
 
 // Component for the background and main content
 const AppContent = () => {

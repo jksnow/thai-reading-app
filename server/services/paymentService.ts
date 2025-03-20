@@ -15,7 +15,7 @@ export const paymentService = {
   }: CreatePaymentIntentParams) => {
     try {
       const paymentIntent = await stripe.paymentIntents.create({
-        amount, // Amount in cents (e.g., 2000 for $20.00)
+        amount: Math.round(amount * 100), // Convert dollars to cents
         currency,
         metadata,
         automatic_payment_methods: {

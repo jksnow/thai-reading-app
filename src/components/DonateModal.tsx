@@ -1,5 +1,9 @@
 import React, { useState } from "react";
-import { CardElement, useStripe, useElements } from "@stripe/react-stripe-js";
+import {
+  PaymentElement,
+  useStripe,
+  useElements,
+} from "@stripe/react-stripe-js";
 import ModalContainer from "./ModalContainer";
 import ButtonOptions from "./ButtonOptions";
 import axios from "axios";
@@ -7,14 +11,26 @@ import axios from "axios";
 interface DonateModalProps {
   isOpen: boolean;
   onClose: () => void;
+  onAmountChange: (amount: number) => void;
+  initialAmount: number;
 }
 
-const DonateModal: React.FC<DonateModalProps> = ({ isOpen, onClose }) => {
+const DonateModal: React.FC<DonateModalProps> = ({
+  isOpen,
+  onClose,
+  onAmountChange,
+  initialAmount,
+}) => {
   const stripe = useStripe();
   const elements = useElements();
-  const [amount, setAmount] = useState<number>(5);
+  const [amount, setAmount] = useState<number>(initialAmount);
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const handleAmountChange = (newAmount: number) => {
+    setAmount(newAmount);
+    onAmountChange(newAmount);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -33,7 +49,14 @@ const DonateModal: React.FC<DonateModalProps> = ({ isOpen, onClose }) => {
         },
       });
 
-      // Confirm payment
+      // Submit the form first
+      const { error: submitError } = await elements.submit();
+      if (submitError) {
+        setError(submitError.message || "An error occurred");
+        return;
+      }
+
+      // Then confirm payment
       const { error: stripeError } = await stripe.confirmPayment({
         elements,
         clientSecret: data.clientSecret,
@@ -61,9 +84,9 @@ const DonateModal: React.FC<DonateModalProps> = ({ isOpen, onClose }) => {
     <ModalContainer
       isOpen={isOpen}
       onClose={onClose}
-      size="small"
+      size="large"
     >
-      <div className="p-6 text-white">
+      <div className="p-6 text-white max-h-[90vh] overflow-y-auto">
         <h2 className="text-2xl font-bold mb-6 text-center">
           Support ThaiTale
         </h2>
@@ -82,7 +105,7 @@ const DonateModal: React.FC<DonateModalProps> = ({ isOpen, onClose }) => {
                 <button
                   key={amt}
                   type="button"
-                  onClick={() => setAmount(amt)}
+                  onClick={() => handleAmountChange(amt)}
                   className={`py-2 px-4 rounded-lg transition-colors ${
                     amount === amt
                       ? "bg-amber-500 text-white"
@@ -95,26 +118,15 @@ const DonateModal: React.FC<DonateModalProps> = ({ isOpen, onClose }) => {
             </div>
           </div>
 
-          {/* Card Element */}
+          {/* Payment Element */}
           <div>
             <label className="block text-sm font-medium mb-2">
-              Card Details
+              Payment Details
             </label>
             <div className="bg-gray-700 p-4 rounded-lg">
-              <CardElement
+              <PaymentElement
                 options={{
-                  style: {
-                    base: {
-                      fontSize: "16px",
-                      color: "#ffffff",
-                      "::placeholder": {
-                        color: "#aab7c4",
-                      },
-                    },
-                    invalid: {
-                      color: "#fa755a",
-                    },
-                  },
+                  layout: { type: "tabs" },
                 }}
               />
             </div>
@@ -125,19 +137,21 @@ const DonateModal: React.FC<DonateModalProps> = ({ isOpen, onClose }) => {
           )}
 
           <div>
-            <ButtonOptions
-              onClick={() => {
-                const fakeEvent = {
-                  preventDefault: () => {},
-                } as React.FormEvent;
-                handleSubmit(fakeEvent);
-              }}
+            <button
+              type="submit"
               disabled={isProcessing || !stripe}
-              variant="amber"
-              padding="py-3"
+              className={`w-full py-3 px-6 rounded-lg font-bold text-white transition-colors ${
+                isProcessing || !stripe
+                  ? "bg-green-700 opacity-50 cursor-not-allowed"
+                  : "bg-green-700 hover:bg-green-800"
+              }`}
+              style={{
+                boxShadow: "2px 3px 0 rgba(0, 0, 0, 0.9)",
+                textShadow: "0px 2px 0px rgba(0,0,0,1)",
+              }}
             >
               {isProcessing ? "Processing..." : `Donate $${amount}`}
-            </ButtonOptions>
+            </button>
           </div>
         </form>
       </div>

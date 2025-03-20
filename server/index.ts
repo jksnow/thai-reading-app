@@ -15,11 +15,9 @@ import {
   getTranslation,
   fetchAndStoreTranslation,
 } from "./services/translationService.js";
-import { getTransliteration } from "./services/transliterationService.js";
 import stripeRoutes from "./routes/stripeRoutes.js";
 import { deepseekService } from "./services/deepseekService.js";
 import authRoutes from "./routes/authRoutes.js";
-import { romanize } from "../src/utils/romanize";
 
 // ES Module equivalent of __dirname
 const __filename = fileURLToPath(import.meta.url);
@@ -70,20 +68,14 @@ app.get("/api/response-times", getResponseTimeData);
 app.post("/api/response-times", updateResponseTimeData);
 
 // Translation endpoints
-app.get("/api/translate/:text", async (req: Request, res: Response) => {
+app.get("/api/translate/:word", async (req, res) => {
   try {
-    // First try to get from MongoDB
-    let translation = await getTranslation(req.params.text);
-
-    // If not found in MongoDB, fetch from thai2english and store
-    if (!translation) {
-      translation = await fetchAndStoreTranslation(req.params.text);
-    }
-
+    const word = decodeURIComponent(req.params.word);
+    const translation = await getTranslation(word);
     res.json(translation);
   } catch (error) {
-    console.error("Error in translation endpoint:", error);
-    res.status(500).json({ error: "Translation failed" });
+    console.error("Error in translation route:", error);
+    res.status(500).json({ error: "Internal server error" });
   }
 });
 
@@ -94,18 +86,6 @@ app.post("/api/translate", async (req: Request, res: Response) => {
     res.json(translation);
   } catch (error) {
     res.status(500).json({ error: "Translation failed" });
-  }
-});
-
-// Transliteration endpoint
-app.get("/api/transliterate/:text", (req, res) => {
-  try {
-    const text = decodeURIComponent(req.params.text);
-    const transliteration = romanize(text);
-    res.json({ transliteration });
-  } catch (error) {
-    console.error("Error transliterating text:", error);
-    res.status(500).json({ error: "Failed to transliterate text" });
   }
 });
 

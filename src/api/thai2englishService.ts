@@ -40,7 +40,7 @@ export const getTransliteration = (word: string): string | null => {
   try {
     return romanize(word);
   } catch (error) {
-    console.error("Error transliterating:", error);
+    console.error("Error transliterating word:", error);
     return null;
   }
 };

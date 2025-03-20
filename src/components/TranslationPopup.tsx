@@ -55,17 +55,14 @@ const TranslationPopup: React.FC<TranslationPopupProps> = ({
   }, [onClose]);
 
   useEffect(() => {
-    const fetchTransliteration = async () => {
-      if (translation?.word) {
-        setIsTransliterationLoading(true);
-        const result = await getTransliteration(translation.word);
-        setTransliteration(result);
-        setIsTransliterationLoading(false);
-      }
-    };
-
-    setTransliteration(null); // Reset when word changes
-    fetchTransliteration();
+    if (translation?.word) {
+      setIsTransliterationLoading(true);
+      const result = getTransliteration(translation.word);
+      setTransliteration(result);
+      setIsTransliterationLoading(false);
+    } else {
+      setTransliteration(null);
+    }
   }, [translation?.word]);
 
   useEffect(() => {

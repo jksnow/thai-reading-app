@@ -1,4 +1,5 @@
 import axios from "axios";
+import { romanize } from "../utils/romanize";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -35,16 +36,11 @@ export const getTranslation = async (
 /**
  * Get transliteration for a Thai word
  */
-export const getTransliteration = async (
-  word: string
-): Promise<string | null> => {
+export const getTransliteration = (word: string): string | null => {
   try {
-    const response = await axios.get<{ transliteration: string }>(
-      `${API_URL}/transliterate/${encodeURIComponent(word)}`
-    );
-    return response.data.transliteration;
+    return romanize(word);
   } catch (error) {
-    console.error("Error fetching transliteration:", error);
+    console.error("Error transliterating:", error);
     return null;
   }
 };

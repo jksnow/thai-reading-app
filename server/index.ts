@@ -19,6 +19,7 @@ import { getTransliteration } from "./services/transliterationService.js";
 import stripeRoutes from "./routes/stripeRoutes.js";
 import { deepseekService } from "./services/deepseekService.js";
 import authRoutes from "./routes/authRoutes.js";
+import { romanize } from "../src/utils/romanize";
 
 // ES Module equivalent of __dirname
 const __filename = fileURLToPath(import.meta.url);
@@ -97,12 +98,14 @@ app.post("/api/translate", async (req: Request, res: Response) => {
 });
 
 // Transliteration endpoint
-app.get("/api/transliterate/:text", async (req: Request, res: Response) => {
+app.get("/api/transliterate/:text", (req, res) => {
   try {
-    const transliteration = await getTransliteration(req.params.text);
+    const text = decodeURIComponent(req.params.text);
+    const transliteration = romanize(text);
     res.json({ transliteration });
   } catch (error) {
-    res.status(500).json({ error: "Transliteration failed" });
+    console.error("Error transliterating text:", error);
+    res.status(500).json({ error: "Failed to transliterate text" });
   }
 });
 

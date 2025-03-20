@@ -24,7 +24,7 @@ export const getTranslation = async (
 ): Promise<Translation | null> => {
   try {
     const response = await axios.get<Translation>(
-      `${API_URL}/api/translate/${encodeURIComponent(word)}`
+      `/api/translate/${encodeURIComponent(word)}`
     );
     return response.data;
   } catch (error) {
@@ -41,7 +41,7 @@ export const getTransliteration = async (
 ): Promise<string | null> => {
   try {
     const response = await axios.get<{ transliteration: string }>(
-      `${API_URL}/api/transliterate/${encodeURIComponent(word)}`
+      `/api/transliterate/${encodeURIComponent(word)}`
     );
     return response.data.transliteration;
   } catch (error) {

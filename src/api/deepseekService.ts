@@ -3,6 +3,8 @@ import storyModifiers from "../data/storyModifiers";
 import { cleanMarkdownJSON } from "../utils/storyUtils";
 
 const API_URL = import.meta.env.VITE_API_URL;
+const POLL_INTERVAL = 1000; // Poll every second
+const MAX_POLL_TIME = 120000; // Maximum 2 minutes of polling
 
 // Track API response time events
 type ResponseTimeCallback = (timeInMs: number) => void;
@@ -227,23 +229,43 @@ Now, generate the JSON response based on the criteria above.
 `;
 };
 
+const pollForCompletion = async (requestId: string): Promise<string> => {
+  const startTime = Date.now();
+
+  while (Date.now() - startTime < MAX_POLL_TIME) {
+    const response = await axios.get(
+      `${API_URL}/deepseek/completion/${requestId}`
+    );
+    const status = response.data;
+
+    if (status.status === "completed") {
+      if (apiResponseTimeCallback) {
+        apiResponseTimeCallback(Date.now() - startTime);
+      }
+      return status.result;
+    }
+
+    if (status.status === "error") {
+      throw new Error(status.error || "Unknown error");
+    }
+
+    // Wait before polling again
+    await new Promise((resolve) => setTimeout(resolve, POLL_INTERVAL));
+  }
+
+  throw new Error("Request timed out");
+};
+
 // Function to generate initial story
 export const generateInitialStory = async (
   storyOptions: StoryOptions,
   selectedModifiers: string[] = []
 ): Promise<string> => {
   const prompt = formatPrompt(storyOptions, selectedModifiers);
-  return await measureApiDuration(async () => {
-    try {
-      const response = await axios.post(`${API_URL}/deepseek/completion`, {
-        prompt,
-      });
-      return cleanMarkdownJSON(response.data);
-    } catch (error) {
-      console.error("Error generating initial story:", error);
-      throw error;
-    }
+  const response = await axios.post(`${API_URL}/deepseek/completion`, {
+    prompt,
   });
+  return pollForCompletion(response.data.requestId);
 };
 
 // Function to continue the story
@@ -252,15 +274,8 @@ export const continueStory = async (
   selectedModifiers: string[] = []
 ): Promise<string> => {
   const prompt = formatContinuePrompt(options, selectedModifiers);
-  return await measureApiDuration(async () => {
-    try {
-      const response = await axios.post(`${API_URL}/deepseek/completion`, {
-        prompt,
-      });
-      return cleanMarkdownJSON(response.data);
-    } catch (error) {
-      console.error("Error continuing story:", error);
-      throw error;
-    }
+  const response = await axios.post(`${API_URL}/deepseek/completion`, {
+    prompt,
   });
+  return pollForCompletion(response.data.requestId);
 };

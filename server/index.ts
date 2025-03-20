@@ -7,7 +7,7 @@ import {
   updateResponseTimeData,
 } from "./controllers/responseTimeController.js";
 import { fileURLToPath } from "url";
-import path from "path";
+import { dirname, join } from "path";
 import paymentRoutes from "./routes/paymentRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
 import axios from "axios";
@@ -17,12 +17,12 @@ import {
 } from "./services/translationService.js";
 import { getTransliteration } from "./services/transliterationService.js";
 import stripeRoutes from "./routes/stripeRoutes.js";
-import { generateCompletion } from "./services/deepseekService.js";
+import { deepseekService } from "./services/deepseekService.js";
 import authRoutes from "./routes/authRoutes.js";
 
 // ES Module equivalent of __dirname
 const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+const __dirname = dirname(__filename);
 
 dotenv.config();
 
@@ -48,7 +48,7 @@ app.use(
 app.use(express.json());
 
 // Serve static files from the dist directory
-app.use(express.static(path.join(__dirname, "../dist")));
+app.use(express.static(join(__dirname, "../dist")));
 
 // API Routes
 app.use("/api/users", userRoutes);
@@ -107,25 +107,49 @@ app.get("/api/transliterate/:text", async (req: Request, res: Response) => {
 });
 
 // DeepSeek completion endpoint
-app.post("/api/deepseek/completion", async (req: Request, res: Response) => {
-  try {
-    const { prompt } = req.body;
-    if (!prompt) {
-      res.status(400).json({ error: "Prompt is required" });
-      return;
-    }
+app.post(
+  "/api/deepseek/completion",
+  async (req: Request, res: Response): Promise<void> => {
+    try {
+      const { prompt } = req.body;
+      if (!prompt) {
+        res.status(400).json({ error: "Prompt is required" });
+        return;
+      }
 
-    const completion = await generateCompletion(prompt);
-    res.json(completion);
-  } catch (error) {
-    console.error("Error in DeepSeek completion:", error);
-    res.status(500).json({ error: "Failed to generate completion" });
+      const requestId = await deepseekService.startCompletion(prompt);
+      res.json({ requestId });
+    } catch (error) {
+      console.error("Error starting completion:", error);
+      res.status(500).json({ error: "Failed to start completion" });
+    }
   }
-});
+);
+
+// DeepSeek completion status endpoint
+app.get(
+  "/api/deepseek/completion/:requestId",
+  (req: Request, res: Response): void => {
+    try {
+      const { requestId } = req.params;
+      const status = deepseekService.getCompletionStatus(requestId);
+
+      if (!status) {
+        res.status(404).json({ error: "Request not found" });
+        return;
+      }
+
+      res.json(status);
+    } catch (error) {
+      console.error("Error getting completion status:", error);
+      res.status(500).json({ error: "Failed to get completion status" });
+    }
+  }
+);
 
 // Serve index.html for all other routes (SPA support)
 app.get("*", (_req: Request, res: Response) => {
-  res.sendFile(path.join(__dirname, "../dist/index.html"));
+  res.sendFile(join(__dirname, "../dist/index.html"));
 });
 
 // Initialize MongoDB connection

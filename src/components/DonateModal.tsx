@@ -5,7 +5,7 @@ import {
   useElements,
 } from "@stripe/react-stripe-js";
 import ModalContainer from "./ModalContainer";
-import ButtonOptions from "./ButtonOptions";
+
 import axios from "axios";
 
 interface DonateModalProps {

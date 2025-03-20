@@ -23,7 +23,7 @@
         { "key": "Access-Control-Allow-Credentials", "value": "true" },
         {
           "key": "Access-Control-Allow-Origin",
-          "value": "https://thaitale.io"
+          "value": "https://www.thaitale.io"
         },
         {
           "key": "Access-Control-Allow-Methods",
@@ -37,6 +37,10 @@
     }
   ],
   "rewrites": [
+    {
+      "source": "/api/api/:path*",
+      "destination": "/api/:path*"
+    },
     {
       "source": "/api/:path*",
       "destination": "server/index.ts"

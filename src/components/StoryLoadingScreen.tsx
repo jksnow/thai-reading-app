@@ -28,15 +28,18 @@ const StoryLoadingScreen: React.FC<StoryLoadingScreenProps> = ({
       intervalRef.current = null;
     }
 
-    setProgress(100);
-    setHasCompleted(true);
+    // Only complete if we haven't already
+    if (!hasCompleted) {
+      setProgress(100);
+      setHasCompleted(true);
 
-    // Wait for animation to finish before calling onComplete
-    setTimeout(() => {
-      onComplete();
-      setProgress(0);
-      setHasCompleted(false);
-    }, 300);
+      // Wait for animation to finish before calling onComplete
+      setTimeout(() => {
+        onComplete();
+        setProgress(0);
+        setHasCompleted(false);
+      }, 300);
+    }
   };
 
   // Handle API completion
@@ -64,32 +67,35 @@ const StoryLoadingScreen: React.FC<StoryLoadingScreenProps> = ({
       const updateInterval = 100;
 
       // Calculate how much to increment per interval
-      // We'll go to 95% in the estimated time, leaving 5% buffer
-      const incrementPerInterval = (95 / estimatedTimeMs) * updateInterval;
+      // We'll go to 90% in the estimated time, leaving 10% buffer
+      const incrementPerInterval = (90 / estimatedTimeMs) * updateInterval;
 
       // Start interval
       intervalRef.current = setInterval(() => {
         setProgress((prev) => {
+          if (hasCompleted) return prev;
           const newProgress = prev + incrementPerInterval;
-
-          // Cap at 95% until API returns
-          return newProgress > 95 ? 95 : newProgress;
+          // Cap at 90% until API returns
+          return newProgress > 90 ? 90 : newProgress;
         });
       }, updateInterval);
-
-      // Fallback: Force completion after 2x the estimated time
-      setTimeout(() => {
-        if (!hasCompleted && isVisible) {
-          console.warn("Maximum wait time exceeded, forcing completion");
-          completeLoading();
-        }
-      }, estimatedTimeMs * 2);
 
       return cleanup;
     } else if (!isVisible) {
       cleanup();
+      setProgress(0);
+      setHasCompleted(false);
     }
   }, [isVisible, hasCompleted, estimatedTimeMs]);
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
+    };
+  }, []);
 
   if (!isVisible) return null;
 
@@ -124,7 +130,7 @@ const StoryLoadingScreen: React.FC<StoryLoadingScreenProps> = ({
         </div>
 
         <p className="text-sm text-slate-400 text-center italic">
-          {progress < 95
+          {progress < 90
             ? "Crafting a narrative just for you..."
             : "Almost there...finalizing your story!"}
         </p>

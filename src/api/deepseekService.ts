@@ -17,33 +17,6 @@ export const setApiResponseTimeCallback = (
   apiResponseTimeCallback = callback;
 };
 
-// Helper function to measure API call duration
-const measureApiDuration = async <T>(apiCall: () => Promise<T>): Promise<T> => {
-  const startTime = Date.now();
-  try {
-    console.log("Starting API call timing measurement...");
-    const result = await apiCall();
-    const duration = Date.now() - startTime;
-
-    // Call the callback if it's set
-    if (apiResponseTimeCallback) {
-      console.log(`API call took ${duration}ms, recording measurement`);
-      apiResponseTimeCallback(duration);
-    } else {
-      console.log(
-        `API call took ${duration}ms, but no callback registered to record it`
-      );
-    }
-
-    return result;
-  } catch (error) {
-    // Still record the time even if there's an error
-    const duration = Date.now() - startTime;
-    console.error(`API call failed after ${duration}ms`);
-    throw error;
-  }
-};
-
 interface StoryOptions {
   genre: string;
   parentalRating: string;
@@ -242,7 +215,7 @@ const pollForCompletion = async (requestId: string): Promise<string> => {
       if (apiResponseTimeCallback) {
         apiResponseTimeCallback(Date.now() - startTime);
       }
-      return status.result;
+      return cleanMarkdownJSON(status.result);
     }
 
     if (status.status === "error") {
@@ -261,11 +234,16 @@ export const generateInitialStory = async (
   storyOptions: StoryOptions,
   selectedModifiers: string[] = []
 ): Promise<string> => {
-  const prompt = formatPrompt(storyOptions, selectedModifiers);
-  const response = await axios.post(`${API_URL}/deepseek/completion`, {
-    prompt,
-  });
-  return pollForCompletion(response.data.requestId);
+  try {
+    const prompt = formatPrompt(storyOptions, selectedModifiers);
+    const response = await axios.post(`${API_URL}/deepseek/completion`, {
+      prompt,
+    });
+    return pollForCompletion(response.data.requestId);
+  } catch (error) {
+    console.error("Error generating initial story:", error);
+    throw error;
+  }
 };
 
 // Function to continue the story
@@ -273,9 +251,14 @@ export const continueStory = async (
   options: ContinueStoryOptions,
   selectedModifiers: string[] = []
 ): Promise<string> => {
-  const prompt = formatContinuePrompt(options, selectedModifiers);
-  const response = await axios.post(`${API_URL}/deepseek/completion`, {
-    prompt,
-  });
-  return pollForCompletion(response.data.requestId);
+  try {
+    const prompt = formatContinuePrompt(options, selectedModifiers);
+    const response = await axios.post(`${API_URL}/deepseek/completion`, {
+      prompt,
+    });
+    return pollForCompletion(response.data.requestId);
+  } catch (error) {
+    console.error("Error continuing story:", error);
+    throw error;
+  }
 };

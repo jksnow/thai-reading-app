@@ -107,29 +107,26 @@ app.get("/api/transliterate/:text", async (req: Request, res: Response) => {
 });
 
 // DeepSeek completion endpoint
-app.post(
-  "/api/deepseek/completion",
-  async (req: Request, res: Response): Promise<void> => {
-    try {
-      const { prompt } = req.body;
-      if (!prompt) {
-        res.status(400).json({ error: "Prompt is required" });
-        return;
-      }
-
-      const requestId = await deepseekService.startCompletion(prompt);
-      res.json({ requestId });
-    } catch (error) {
-      console.error("Error starting completion:", error);
-      res.status(500).json({ error: "Failed to start completion" });
+app.post("/api/deepseek/completion", async (req: Request, res: Response) => {
+  try {
+    const { prompt } = req.body;
+    if (!prompt) {
+      res.status(400).json({ error: "Prompt is required" });
+      return;
     }
+
+    const requestId = await deepseekService.startCompletion(prompt);
+    res.json({ requestId });
+  } catch (error) {
+    console.error("Error starting completion:", error);
+    res.status(500).json({ error: "Failed to start completion" });
   }
-);
+});
 
 // DeepSeek completion status endpoint
 app.get(
   "/api/deepseek/completion/:requestId",
-  (req: Request, res: Response): void => {
+  (req: Request, res: Response) => {
     try {
       const { requestId } = req.params;
       const status = deepseekService.getCompletionStatus(requestId);

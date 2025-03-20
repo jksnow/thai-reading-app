@@ -9,7 +9,7 @@
   },
   "scripts": {
     "dev:frontend": "vite",
-    "dev:backend": "NODE_OPTIONS='--experimental-specifier-resolution=node' tsx watch server/index.ts",
+    "dev:backend": "cross-env NODE_OPTIONS=--experimental-specifier-resolution=node tsx watch server/index.ts",
     "dev": "concurrently \"npm run dev:frontend\" \"npm run dev:backend\"",
     "build": "tsc && vite build",
     "vercel-build": "tsc && vite build",
@@ -49,6 +49,7 @@
     "@vitejs/plugin-react": "^4.3.4",
     "autoprefixer": "^10.4.21",
     "concurrently": "^9.1.2",
+    "cross-env": "^7.0.3",
     "eslint": "^9.21.0",
     "eslint-plugin-react-hooks": "^5.1.0",
     "eslint-plugin-react-refresh": "^0.4.19",

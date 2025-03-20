@@ -27,29 +27,20 @@ dotenv.config();
 const app = express();
 const port = process.env.PORT || 3000;
 
-// CORS is now handled by Vercel platform configuration
-// app.use(
-//   cors({
-//     origin: [
-//       "https://thaitale.io",
-//       "https://www.thaitale.io",
-//       "thai-tale-git-master-jeffs-projects-0c0309f1.vercel.app",
-//       "http://localhost:5173",
-//       "http://localhost:3000",
-//     ],
-//     credentials: true,
-//     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
-//     allowedHeaders: ["Content-Type", "Authorization", "Accept"],
-//     exposedHeaders: ["Location"],
-//   })
-// );
-
-// // Ensure CORS headers are set even for errors
-// app.use((req, res, next) => {
-//   res.header("Access-Control-Allow-Origin", req.headers.origin);
-//   res.header("Access-Control-Allow-Credentials", "true");
-//   next();
-// });
+// CORS configuration
+app.use(
+  cors({
+    origin: [
+      "https://thaitale.io",
+      "https://www.thaitale.io",
+      "http://localhost:5173",
+      "http://127.0.0.1:5173",
+    ],
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
+    allowedHeaders: ["Content-Type", "Authorization", "Accept"],
+  })
+);
 
 // Parse JSON payloads
 app.use(express.json());
@@ -77,9 +68,17 @@ app.post("/api/response-times", updateResponseTimeData);
 // Translation endpoints
 app.get("/api/translate/:text", async (req, res) => {
   try {
-    const translation = await getTranslation(req.params.text);
+    // First try to get from MongoDB
+    let translation = await getTranslation(req.params.text);
+
+    // If not found in MongoDB, fetch from thai2english and store
+    if (!translation) {
+      translation = await fetchAndStoreTranslation(req.params.text);
+    }
+
     res.json(translation);
   } catch (error) {
+    console.error("Error in translation endpoint:", error);
     res.status(500).json({ error: "Translation failed" });
   }
 });

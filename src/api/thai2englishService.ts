@@ -1,7 +1,6 @@
 import axios from "axios";
 
-// const API_URL =
-//   import.meta.env.VITE_API_URL?.replace(/\/$/, "") || "http://localhost:3000";
+const API_URL = import.meta.env.VITE_API_URL;
 
 interface Meaning {
   meaning: string;
@@ -24,7 +23,7 @@ export const getTranslation = async (
 ): Promise<Translation | null> => {
   try {
     const response = await axios.get<Translation>(
-      `/api/translate/${encodeURIComponent(word)}`
+      `${API_URL}/translate/${encodeURIComponent(word)}`
     );
     return response.data;
   } catch (error) {
@@ -41,7 +40,7 @@ export const getTransliteration = async (
 ): Promise<string | null> => {
   try {
     const response = await axios.get<{ transliteration: string }>(
-      `/api/transliterate/${encodeURIComponent(word)}`
+      `${API_URL}/transliterate/${encodeURIComponent(word)}`
     );
     return response.data.transliteration;
   } catch (error) {

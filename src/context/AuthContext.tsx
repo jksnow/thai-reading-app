@@ -1,4 +1,4 @@
-import React, {
+import {
   createContext,
   useContext,
   useState,
@@ -16,8 +16,6 @@ import {
   signInWithPopup,
 } from "firebase/auth";
 import { auth } from "../config/firebase";
-import { User } from "../types/user";
-import { userService } from "../services/userService";
 import axios from "axios";
 
 const API_URL = import.meta.env.VITE_API_URL;
@@ -26,6 +24,11 @@ interface UserData {
   displayName?: string;
   email?: string;
   photoURL?: string;
+  settings?: {
+    spinRotationSpeed?: number;
+    moveSpeed?: number;
+    spinAmount?: number;
+  };
   // Add other user data fields as needed
 }
 
@@ -34,7 +37,7 @@ interface AuthContextType {
   userData: UserData | null;
   loading: boolean;
   signIn: (email: string, password: string) => Promise<UserCredential>;
-  signUp: (email: string, password: string, name: string) => Promise<void>;
+  signUp: (email: string, password: string) => Promise<void>;
   signInWithGoogle: () => Promise<void>;
   signOut: () => Promise<void>;
 }
@@ -119,7 +122,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     return signInWithEmailAndPassword(auth, email, password);
   };
 
-  const signUp = async (email: string, password: string, name: string) => {
+  const signUp = async (email: string, password: string) => {
     try {
       const userCredential = await createUserWithEmailAndPassword(
         auth,

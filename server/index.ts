@@ -1,4 +1,4 @@
-import express from "express";
+import express, { Request, Response } from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 import { pingDatabase, getClient } from "./db.js";
@@ -17,6 +17,8 @@ import {
 } from "./services/translationService.js";
 import { getTransliteration } from "./services/transliterationService.js";
 import stripeRoutes from "./routes/stripeRoutes.js";
+import { generateCompletion } from "./services/deepseekService.js";
+import authRoutes from "./routes/authRoutes.js";
 
 // ES Module equivalent of __dirname
 const __filename = fileURLToPath(import.meta.url);
@@ -52,12 +54,13 @@ app.use(express.static(path.join(__dirname, "../dist")));
 app.use("/api/users", userRoutes);
 app.use("/api/payments", paymentRoutes);
 app.use("/api/stripe", stripeRoutes);
+app.use("/api/auth", authRoutes);
 
 // Special route configuration for Stripe webhooks
 app.use("/api/payments/webhook", express.raw({ type: "application/json" }));
 
 // Basic health check endpoint
-app.get("/api/health", (req, res) => {
+app.get("/api/health", (_req: Request, res: Response) => {
   res.json({ status: "ok" });
 });
 
@@ -66,7 +69,7 @@ app.get("/api/response-times", getResponseTimeData);
 app.post("/api/response-times", updateResponseTimeData);
 
 // Translation endpoints
-app.get("/api/translate/:text", async (req, res) => {
+app.get("/api/translate/:text", async (req: Request, res: Response) => {
   try {
     // First try to get from MongoDB
     let translation = await getTranslation(req.params.text);
@@ -83,7 +86,7 @@ app.get("/api/translate/:text", async (req, res) => {
   }
 });
 
-app.post("/api/translate", async (req, res) => {
+app.post("/api/translate", async (req: Request, res: Response) => {
   try {
     const { text } = req.body;
     const translation = await fetchAndStoreTranslation(text);
@@ -94,17 +97,34 @@ app.post("/api/translate", async (req, res) => {
 });
 
 // Transliteration endpoint
-app.get("/api/transliterate/:text", async (req, res) => {
+app.get("/api/transliterate/:text", async (req: Request, res: Response) => {
   try {
     const transliteration = await getTransliteration(req.params.text);
-    res.json(transliteration);
+    res.json({ transliteration });
   } catch (error) {
     res.status(500).json({ error: "Transliteration failed" });
   }
 });
 
+// DeepSeek completion endpoint
+app.post("/api/deepseek/completion", async (req: Request, res: Response) => {
+  try {
+    const { prompt } = req.body;
+    if (!prompt) {
+      res.status(400).json({ error: "Prompt is required" });
+      return;
+    }
+
+    const completion = await generateCompletion(prompt);
+    res.json(completion);
+  } catch (error) {
+    console.error("Error in DeepSeek completion:", error);
+    res.status(500).json({ error: "Failed to generate completion" });
+  }
+});
+
 // Serve index.html for all other routes (SPA support)
-app.get("*", (req, res) => {
+app.get("*", (_req: Request, res: Response) => {
   res.sendFile(path.join(__dirname, "../dist/index.html"));
 });
 

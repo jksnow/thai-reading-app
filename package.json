@@ -31,6 +31,7 @@
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
     "firebase": "^11.4.0",
+    "firebase-admin": "^13.2.0",
     "framer-motion": "^12.5.0",
     "mongodb": "^6.14.2",
     "python-bridge": "^1.1.0",

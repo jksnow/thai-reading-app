@@ -2,6 +2,8 @@ import axios from "axios";
 import storyModifiers from "../data/storyModifiers";
 import { cleanMarkdownJSON } from "../utils/storyUtils";
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 // Track API response time events
 type ResponseTimeCallback = (timeInMs: number) => void;
 let apiResponseTimeCallback: ResponseTimeCallback | null = null;
@@ -56,23 +58,6 @@ interface ContinueStoryOptions {
   readingLevel: string;
   paragraphs: number;
   summary: string;
-}
-
-const temperature: number = 1.5;
-const max_tokens: number = 3000;
-
-// Configuration
-// Vite uses import.meta.env instead of process.env
-const API_KEY = import.meta.env.VITE_DEEPSEEK_API_KEY || "";
-// Based on official documentation at https://api-docs.deepseek.com/
-const BASE_URL =
-  import.meta.env.VITE_DEEPSEEK_BASE_URL || "https://api.deepseek.com/v1";
-
-// Check API key and display developer-friendly message
-if (!API_KEY) {
-  console.error(
-    "⚠️ VITE_DEEPSEEK_API_KEY is not set. Please add it to your .env file."
-  );
 }
 
 const formatPrompt = (
@@ -243,41 +228,17 @@ Now, generate the JSON response based on the criteria above.
 };
 
 // Function to generate initial story
-const generateInitialStory = async (
+export const generateInitialStory = async (
   storyOptions: StoryOptions,
   selectedModifiers: string[] = []
 ): Promise<string> => {
-  if (!API_KEY) {
-    throw new Error("API key not found");
-  }
-
-  const messages = [
-    {
-      role: "user",
-      content: formatPrompt(storyOptions, selectedModifiers),
-    },
-  ];
-
-  return measureApiDuration(async () => {
+  const prompt = formatPrompt(storyOptions, selectedModifiers);
+  return await measureApiDuration(async () => {
     try {
-      const response = await axios.post(
-        `${BASE_URL}/chat/completions`,
-        {
-          model: "deepseek-chat",
-          messages,
-          temperature,
-          max_tokens,
-        },
-        {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${API_KEY}`,
-          },
-        }
-      );
-
-      // Clean any markdown formatting from the response
-      return cleanMarkdownJSON(response.data.choices[0].message.content);
+      const response = await axios.post(`${API_URL}/deepseek/completion`, {
+        prompt,
+      });
+      return cleanMarkdownJSON(response.data);
     } catch (error) {
       console.error("Error generating initial story:", error);
       throw error;
@@ -285,53 +246,21 @@ const generateInitialStory = async (
   });
 };
 
-// Function to continue the story based on user choice
-const continueStory = async (
+// Function to continue the story
+export const continueStory = async (
   options: ContinueStoryOptions,
   selectedModifiers: string[] = []
 ): Promise<string> => {
-  if (!API_KEY) {
-    throw new Error("API key not found");
-  }
-
-  const messages = [
-    {
-      role: "user",
-      content: formatContinuePrompt(options, selectedModifiers),
-    },
-  ];
-
-  return measureApiDuration(async () => {
+  const prompt = formatContinuePrompt(options, selectedModifiers);
+  return await measureApiDuration(async () => {
     try {
-      const response = await axios.post(
-        `${BASE_URL}/chat/completions`,
-        {
-          model: "deepseek-chat",
-          messages,
-          temperature,
-          max_tokens,
-        },
-        {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${API_KEY}`,
-          },
-        }
-      );
-
-      // Clean any markdown formatting from the response
-      return cleanMarkdownJSON(response.data.choices[0].message.content);
+      const response = await axios.post(`${API_URL}/deepseek/completion`, {
+        prompt,
+      });
+      return cleanMarkdownJSON(response.data);
     } catch (error) {
       console.error("Error continuing story:", error);
       throw error;
     }
   });
 };
-
-// Export the functions to be used by other components
-const deepseekService = {
-  generateInitialStory,
-  continueStory,
-};
-
-export default deepseekService;

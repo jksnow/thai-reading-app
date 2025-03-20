@@ -1,5 +1,8 @@
 import { useState, useEffect } from "react";
-import deepseekService from "../api/deepseekService";
+import {
+  generateInitialStory as generateStory,
+  continueStory as continueStoryAPI,
+} from "../api/deepseekService";
 import {
   Choice,
   StoryParams,
@@ -56,7 +59,7 @@ export function useStoryGeneration(params: StoryParams) {
    * Generate the initial story based on the provided parameters
    */
   const generateInitialStory = async (
-    params: StoryParams,
+    storyParams: StoryParams,
     selectedModifiers: string[] = []
   ) => {
     setIsGenerating(true);
@@ -64,10 +67,7 @@ export function useStoryGeneration(params: StoryParams) {
     setActiveModifiers(selectedModifiers);
 
     try {
-      const response = await deepseekService.generateInitialStory(
-        params,
-        selectedModifiers
-      );
+      const response = await generateStory(storyParams, selectedModifiers);
       const parsedStory = parseStoryResponse(response);
 
       setStoryHistory([parsedStory]);
@@ -93,7 +93,7 @@ export function useStoryGeneration(params: StoryParams) {
    * Continue the story based on the selected choice
    */
   const continueStory = async (choiceText: string) => {
-    if (isGenerating) return;
+    if (isGenerating || !choiceText) return;
 
     setIsGenerating(true);
     setErrorMessage("");
@@ -104,7 +104,7 @@ export function useStoryGeneration(params: StoryParams) {
       const previousStories = storyHistory.slice(0, currentStoryIndex + 1);
       const currentStory = storyHistory[currentStoryIndex];
 
-      const response = await deepseekService.continueStory(
+      const response = await continueStoryAPI(
         {
           storyGoal: currentStory.goal,
           storySummary: currentStory.summary,
@@ -146,7 +146,9 @@ export function useStoryGeneration(params: StoryParams) {
    * Handle selection of a choice
    */
   const handleChoiceSelect = (choice: Choice) => {
-    continueStory(choice.text);
+    if (choice && choice.text) {
+      continueStory(choice.text);
+    }
   };
 
   /**

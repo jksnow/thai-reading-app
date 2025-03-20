@@ -1,4 +1,4 @@
-import {
+import React, {
   createContext,
   useContext,
   useState,
@@ -20,13 +20,22 @@ import { User } from "../types/user";
 import { userService } from "../services/userService";
 import axios from "axios";
 
+const API_URL = import.meta.env.VITE_API_URL;
+
+interface UserData {
+  displayName?: string;
+  email?: string;
+  photoURL?: string;
+  // Add other user data fields as needed
+}
+
 interface AuthContextType {
   currentUser: FirebaseUser | null;
-  userData: User | null;
+  userData: UserData | null;
   loading: boolean;
   signIn: (email: string, password: string) => Promise<UserCredential>;
   signUp: (email: string, password: string, name: string) => Promise<void>;
-  signInWithGoogle: () => Promise<UserCredential>;
+  signInWithGoogle: () => Promise<void>;
   signOut: () => Promise<void>;
 }
 
@@ -42,85 +51,68 @@ export const useAuth = () => {
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [currentUser, setCurrentUser] = useState<FirebaseUser | null>(null);
-  const [userData, setUserData] = useState<User | null>(null);
+  const [userData, setUserData] = useState<UserData | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const fetchUserData = async (user: FirebaseUser) => {
-    try {
-      console.log("Fetching user data for:", user.uid);
-      const userData = await userService.getUserById(user.uid);
-      console.log("Fetched user data:", userData);
-      setUserData(userData);
-      return userData;
-    } catch (error) {
-      console.error("Error fetching user data:", error);
-      if (axios.isAxiosError(error)) {
-        console.log("Response status:", error.response?.status);
-        console.log("Response data:", error.response?.data);
+  // Set up axios interceptor for auth token
+  useEffect(() => {
+    const interceptor = axios.interceptors.request.use(async (config) => {
+      if (currentUser) {
+        const token = await currentUser.getIdToken();
+        config.headers.Authorization = `Bearer ${token}`;
       }
-      return null;
+      return config;
+    });
+
+    return () => {
+      axios.interceptors.request.eject(interceptor);
+    };
+  }, [currentUser]);
+
+  // Verify token and get user data from server
+  const verifyAndGetUserData = async (user: FirebaseUser) => {
+    try {
+      const token = await user.getIdToken();
+      const response = await axios.get(`${API_URL}/auth/verify`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setUserData(response.data.userData);
+    } catch (error) {
+      console.error("Error verifying token:", error);
+      await signOut();
     }
   };
 
-  const createUserInDB = async (user: FirebaseUser, name: string) => {
+  // Update user data on server
+  const updateUserData = async (user: FirebaseUser) => {
     try {
-      console.log("Creating user in DB:", {
-        uid: user.uid,
+      await axios.post(`${API_URL}/auth/user`, {
+        displayName: user.displayName,
         email: user.email,
-        name,
+        photoURL: user.photoURL,
       });
-      await userService.createUser(user.uid, user.email!, name);
-      console.log("Successfully created user in DB");
-      const userData = await userService.getUserById(user.uid);
-      setUserData(userData);
-      return userData;
     } catch (error) {
-      console.error("Error creating user in database:", error);
-      if (axios.isAxiosError(error)) {
-        console.log("Response status:", error.response?.status);
-        console.log("Response data:", error.response?.data);
-      }
-      throw error;
+      console.error("Error updating user data:", error);
     }
   };
 
   useEffect(() => {
-    console.log("Setting up auth state listener");
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      setCurrentUser(user);
-      console.log(
-        "Auth state changed:",
-        user ? `User logged in: ${user.uid}` : "No user"
-      );
+      console.log("Auth state changed:", user?.email);
 
       if (user) {
-        try {
-          // Try to fetch user data from MongoDB
-          const existingUser = await fetchUserData(user);
-          console.log(
-            "Existing user check result:",
-            existingUser ? "Found" : "Not found"
-          );
-
-          // If user doesn't exist in MongoDB, create a new user record
-          if (!existingUser) {
-            console.log("User not found in DB, creating new user");
-            // Use the Firebase display name or email as fallback
-            const name =
-              user.displayName || user.email?.split("@")[0] || "User";
-            await createUserInDB(user, name);
-          }
-        } catch (error) {
-          console.error("Error handling user authentication:", error);
-        }
+        setCurrentUser(user);
+        await verifyAndGetUserData(user);
+        await updateUserData(user);
       } else {
+        setCurrentUser(null);
         setUserData(null);
       }
 
       setLoading(false);
     });
 
-    return () => unsubscribe();
+    return unsubscribe;
   }, []);
 
   const signIn = (email: string, password: string) => {
@@ -134,7 +126,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         email,
         password
       );
-      await createUserInDB(userCredential.user, name);
+      await verifyAndGetUserData(userCredential.user);
     } catch (error) {
       console.error("Error during sign up:", error);
       throw error;
@@ -142,22 +134,24 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const signInWithGoogle = async () => {
-    console.log("Attempting Google sign in");
-    const provider = new GoogleAuthProvider();
-    provider.addScope("email");
-    provider.addScope("profile");
-
     try {
-      return await signInWithPopup(auth, provider);
+      const provider = new GoogleAuthProvider();
+      await signInWithPopup(auth, provider);
     } catch (error) {
-      console.error("Google sign in error:", error);
+      console.error("Error signing in with Google:", error);
       throw error;
     }
   };
 
   const signOut = async () => {
-    await firebaseSignOut(auth);
-    setUserData(null);
+    try {
+      await firebaseSignOut(auth);
+      setCurrentUser(null);
+      setUserData(null);
+    } catch (error) {
+      console.error("Error signing out:", error);
+      throw error;
+    }
   };
 
   const value = {

@@ -1,14 +1,15 @@
 import express from "express";
-import Stripe from "stripe";
+import stripe from "../config/stripe.js";
 
 const router = express.Router();
-const stripe = new Stripe(process.env.VITE_STRIPE_SECRET_KEY!, {
-  apiVersion: "2025-02-24.acacia",
-});
 
 router.post("/create-payment-intent", async (req, res) => {
   try {
     const { amount } = req.body;
+
+    if (!amount || typeof amount !== "number") {
+      return res.status(400).json({ error: "Invalid amount provided" });
+    }
 
     // Create a PaymentIntent with the specified amount
     const paymentIntent = await stripe.paymentIntents.create({
@@ -26,6 +27,7 @@ router.post("/create-payment-intent", async (req, res) => {
     console.error("Error creating payment intent:", error);
     res.status(500).json({
       error: "Failed to create payment intent",
+      details: error instanceof Error ? error.message : "Unknown error",
     });
   }
 });

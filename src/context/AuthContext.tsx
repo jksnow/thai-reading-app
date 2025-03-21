@@ -118,6 +118,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         // Process pending redirects as soon as the component mounts
         // Always pass browserPopupRedirectResolver
         console.log("Checking for redirect results...");
+
+        // First check if we already have a user (in case redirect already completed)
+        const currentAuthUser = auth.currentUser;
+        if (currentAuthUser) {
+          console.log("User already signed in:", currentAuthUser.email);
+          return;
+        }
+
+        // Otherwise try to get the redirect result
         const result = await getRedirectResult(
           auth,
           browserPopupRedirectResolver
@@ -181,6 +190,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const signInWithGoogle = async () => {
     try {
       const provider = new GoogleAuthProvider();
+
+      // Add scopes to ensure we get email and profile
+      provider.addScope("email");
+      provider.addScope("profile");
+
+      // Use setCustomParameters to bypass some of the Firebase auth issues
+      provider.setCustomParameters({
+        prompt: "select_account",
+      });
 
       // Choose the appropriate persistence method
       // This ensures auth state is maintained across page redirects

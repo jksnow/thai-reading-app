@@ -16,10 +16,11 @@ const firebaseConfig = {
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
-// Initialize Auth with explicit redirect resolver for better mobile support
-const auth = getAuth(app);
 
-// Connect to auth emulator in development if VITE_USE_FIREBASE_EMULATOR is set
+// Create auth instance with explicit config for better compatibility
+const auth = getAuth();
+
+// Only set up emulator for development
 if (import.meta.env.DEV && import.meta.env.VITE_USE_FIREBASE_EMULATOR) {
   // Use emulator on localhost:9099
   connectAuthEmulator(auth, "http://localhost:9099", { disableWarnings: true });

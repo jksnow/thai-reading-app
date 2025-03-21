@@ -4,126 +4,12 @@
     <meta charset="UTF-8" />
     <meta
       name="viewport"
-      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+      content="width=device-width, initial-scale=1.0"
     />
     <title>Thai Tale - Practice Thai with AI</title>
-    <link
-      rel="manifest"
-      href="/manifest.json"
-    />
-    <link
-      rel="icon"
-      href="/favicon.ico"
-    />
-    <link
-      rel="apple-touch-icon"
-      href="/apple-touch-icon.png"
-    />
-    <meta
-      name="theme-color"
-      content="#000000"
-    />
-    <!-- Meta tags for better mobile browser handling -->
-    <meta
-      name="mobile-web-app-capable"
-      content="yes"
-    />
-    <meta
-      name="apple-mobile-web-app-capable"
-      content="yes"
-    />
-    <meta
-      name="application-name"
-      content="Thai Tale"
-    />
-    <meta
-      name="apple-mobile-web-app-title"
-      content="Thai Tale"
-    />
-    <meta
-      name="apple-mobile-web-app-status-bar-style"
-      content="black-translucent"
-    />
-    <!-- Firebase Auth redirect handling with improved compatibility -->
-    <script>
-      // Immediate execution before page starts loading
-      (function () {
-        // Always check URL parameters first (highest priority)
-        const urlParams = new URLSearchParams(window.location.search);
-        const hasAuthParams =
-          urlParams.has("code") ||
-          urlParams.has("state") ||
-          urlParams.has("error");
-
-        if (hasAuthParams) {
-          console.log("Auth parameters detected in URL");
-          localStorage.setItem("firebase_auth_redirect_in_progress", "true");
-          localStorage.setItem(
-            "firebase_auth_redirect_start_time",
-            Date.now().toString()
-          );
-        }
-
-        // Check localStorage next (already set by our handler.html or previous visit)
-        const redirectInProgress =
-          localStorage.getItem("firebase_auth_redirect_in_progress") === "true";
-        const redirectStartTime = localStorage.getItem(
-          "firebase_auth_redirect_start_time"
-        );
-
-        if (redirectInProgress) {
-          console.log(
-            "Firebase Auth redirect detected, preparing to process auth result"
-          );
-
-          // Check for timeout (5 minutes)
-          if (redirectStartTime) {
-            const startTime = parseInt(redirectStartTime, 10);
-            const elapsed = Date.now() - startTime;
-
-            if (elapsed > 5 * 60 * 1000) {
-              console.warn(
-                "Redirect timeout exceeded, cleaning up stale state"
-              );
-              localStorage.removeItem("firebase_auth_redirect_in_progress");
-              localStorage.removeItem("firebase_auth_redirect_start_time");
-            }
-          }
-
-          // Add an early indicator for the user (optional)
-          document.addEventListener("DOMContentLoaded", function () {
-            const root = document.getElementById("root");
-            if (root) {
-              const loadingEl = document.createElement("div");
-              loadingEl.style.position = "fixed";
-              loadingEl.style.top = "0";
-              loadingEl.style.left = "0";
-              loadingEl.style.width = "100%";
-              loadingEl.style.height = "100%";
-              loadingEl.style.backgroundColor = "#f5f5f5";
-              loadingEl.style.display = "flex";
-              loadingEl.style.justifyContent = "center";
-              loadingEl.style.alignItems = "center";
-              loadingEl.style.fontSize = "18px";
-              loadingEl.style.zIndex = "1000";
-              loadingEl.textContent = "Completing sign-in...";
-              root.appendChild(loadingEl);
-
-              // Remove this element when auth is complete or times out
-              setTimeout(() => {
-                if (root.contains(loadingEl)) {
-                  root.removeChild(loadingEl);
-                }
-              }, 5000);
-            }
-          });
-        }
-      })();
-    </script>
   </head>
   <body>
     <div id="root"></div>
-    <noscript>You need to enable JavaScript to run this app.</noscript>
     <script
       type="module"
       src="/src/main.tsx"

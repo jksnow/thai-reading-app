@@ -2,67 +2,101 @@ import { useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import thaiTaleLogo from "../assets/v1e.png";
 import ButtonOptions from "./ButtonOptions";
+import { isMobileDevice } from "../utils/deviceDetection";
+
+interface AuthError {
+  message: string;
+  isWarning?: boolean; // For non-critical errors that don't prevent sign-in
+}
 
 const AuthForm = () => {
-  const [error, setError] = useState("");
+  const [error, setError] = useState<AuthError | null>(null);
   const [loading, setLoading] = useState(false);
   const { signInWithGoogle } = useAuth();
 
+  /**
+   * Maps Firebase auth error codes to user-friendly messages
+   * @param code Firebase auth error code
+   * @param message Original error message
+   * @returns Formatted error message and severity
+   */
+  const getErrorMessage = (code: string, message: string): AuthError => {
+    const errorMap: { [key: string]: AuthError } = {
+      "auth/popup-closed-by-user": {
+        message: "Sign-in was cancelled. Please try again.",
+        isWarning: true,
+      },
+      "auth/popup-blocked": {
+        message:
+          "Sign-in popup was blocked. We'll try a different method automatically.",
+        isWarning: true,
+      },
+      "auth/cancelled-popup-request": {
+        message: "Sign-in was cancelled. Please try again.",
+        isWarning: true,
+      },
+      "auth/network-request-failed": {
+        message:
+          "Network error. Please check your internet connection and try again.",
+      },
+      "auth/invalid-api-key": {
+        message: "Authentication service unavailable. Please contact support.",
+      },
+      "auth/operation-not-allowed": {
+        message:
+          "Google sign-in is not enabled for this project. Please contact the administrator.",
+      },
+      "auth/internal-error": {
+        message:
+          "Authentication service error. Please try again in a few moments.",
+      },
+      "auth/configuration-not-found": {
+        message:
+          "Authentication configuration error. Please contact the administrator.",
+      },
+      "auth/timeout": {
+        message: "The request timed out. Please try again.",
+      },
+      "auth/web-storage-unsupported": {
+        message:
+          "Sign-in requires browser storage to be enabled. Please enable cookies and try again.",
+      },
+    };
+
+    return (
+      errorMap[code] || {
+        message: message || "An unexpected error occurred. Please try again.",
+      }
+    );
+  };
+
   const handleGoogleSignIn = async () => {
-    setError("");
+    setError(null);
     setLoading(true);
 
     try {
-      console.log("Starting Google sign-in process");
+      // Show a message for mobile users about the redirect
+      if (isMobileDevice()) {
+        setError({
+          message: "You'll be redirected to Google to sign in...",
+          isWarning: true,
+        });
+      }
+
       await signInWithGoogle();
-      console.log("Google sign-in completed successfully");
-      // Authentication state will be handled by the onAuthStateChanged listener in AuthContext
     } catch (err: any) {
       console.error("Google sign-in error:", err);
 
-      // Format error message for better user understanding
-      let errorMessage = "An error occurred during Google authentication";
-
+      // Handle specific error cases
       if (err.code) {
-        switch (err.code) {
-          case "auth/popup-closed-by-user":
-            errorMessage = "Sign-in was cancelled. Please try again.";
-            break;
-          case "auth/popup-blocked":
-            errorMessage =
-              "Sign-in popup was blocked by your browser. Please allow popups for this site.";
-            break;
-          case "auth/cancelled-popup-request":
-            errorMessage = "Sign-in operation was cancelled.";
-            break;
-          case "auth/network-request-failed":
-            errorMessage =
-              "Network error. Please check your internet connection.";
-            break;
-          case "auth/invalid-api-key":
-            errorMessage =
-              "Authentication service unavailable. Please contact support.";
-            break;
-          case "auth/operation-not-allowed":
-            errorMessage =
-              "Google sign-in is not enabled for this project. Please contact the administrator.";
-            break;
-          case "auth/internal-error":
-            errorMessage =
-              "Authentication service error. Please ensure Google sign-in is enabled in Firebase console.";
-            break;
-          case "auth/configuration-not-found":
-            errorMessage =
-              "Authentication configuration error. Make sure Google sign-in provider is enabled in Firebase.";
-            break;
-          default:
-            errorMessage = `Authentication error: ${err.message || err.code}`;
-        }
+        setError(getErrorMessage(err.code, err.message));
       } else if (err.message) {
-        errorMessage = err.message;
+        setError({ message: err.message });
+      } else {
+        setError({
+          message: "An unexpected error occurred. Please try again.",
+        });
       }
-
-      setError(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -88,8 +122,14 @@ const AuthForm = () => {
 
       <div className="flex flex-col gap-4">
         {error && (
-          <div className="bg-red-500 bg-opacity-20 border border-red-500 rounded-md p-3 text-center">
-            {error}
+          <div
+            className={`${
+              error.isWarning
+                ? "bg-yellow-500 bg-opacity-20 border-yellow-500"
+                : "bg-red-500 bg-opacity-20 border-red-500"
+            } border rounded-md p-3 text-center`}
+          >
+            {error.message}
           </div>
         )}
 

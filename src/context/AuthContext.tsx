@@ -14,11 +14,14 @@ import {
   User as FirebaseUser,
   GoogleAuthProvider,
   signInWithPopup,
+  signInWithRedirect,
+  getRedirectResult,
 } from "firebase/auth";
 import { auth } from "../config/firebase";
 import axios from "axios";
 import { userService } from "../services/userService";
 import { User } from "../types/user";
+import { isMobileDevice, supportsPopups } from "../utils/deviceDetection";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -58,14 +61,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     };
   }, [currentUser]);
 
-  // Verify token and get user data from server
+  /**
+   * Handles the verification and retrieval of user data from the server
+   * If the user doesn't exist in our database, creates a new user record
+   */
   const verifyAndGetUserData = async (user: FirebaseUser) => {
     try {
       const token = await user.getIdToken();
       const response = await axios.get(`${API_URL}/auth/verify`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      
+
       if (!response.data.userData) {
         // If user doesn't exist in our database, create them
         const newUser = await userService.createUser(
@@ -83,6 +89,23 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  // Handle redirect result when the page loads
+  useEffect(() => {
+    const handleRedirectResult = async () => {
+      try {
+        const result = await getRedirectResult(auth);
+        if (result?.user) {
+          await verifyAndGetUserData(result.user);
+        }
+      } catch (error) {
+        console.error("Error handling redirect result:", error);
+      }
+    };
+
+    handleRedirectResult();
+  }, []);
+
+  // Listen for auth state changes
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       console.log("Auth state changed:", user?.email);
@@ -119,13 +142,56 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  /**
+   * Handles Google sign-in using either popup or redirect based on:
+   * 1. Device type (mobile vs desktop)
+   * 2. Browser popup support
+   * 3. Previous failed attempts
+   */
   const signInWithGoogle = async () => {
     try {
       const provider = new GoogleAuthProvider();
-      await signInWithPopup(auth, provider);
-    } catch (error) {
+
+      // Add additional scopes if needed
+      provider.addScope("profile");
+      provider.addScope("email");
+
+      // Set custom parameters for better UX
+      provider.setCustomParameters({
+        prompt: "select_account", // Always show account selection
+      });
+
+      // Determine sign-in method based on device and browser capabilities
+      const shouldUseRedirect = isMobileDevice() || !supportsPopups();
+
+      if (shouldUseRedirect) {
+        // Use redirect method for mobile devices or when popups might be blocked
+        await signInWithRedirect(auth, provider);
+        // The redirect result will be handled by the useEffect hook
+      } else {
+        // Use popup for desktop browsers
+        const result = await signInWithPopup(auth, provider);
+        if (result.user) {
+          await verifyAndGetUserData(result.user);
+        }
+      }
+    } catch (error: any) {
       console.error("Error signing in with Google:", error);
-      throw error;
+
+      // If popup fails, try redirect as fallback
+      if (
+        error.code === "auth/popup-blocked" ||
+        error.code === "auth/popup-closed-by-user"
+      ) {
+        try {
+          await signInWithRedirect(auth, new GoogleAuthProvider());
+        } catch (redirectError) {
+          console.error("Error during redirect sign-in:", redirectError);
+          throw redirectError;
+        }
+      } else {
+        throw error;
+      }
     }
   };
 

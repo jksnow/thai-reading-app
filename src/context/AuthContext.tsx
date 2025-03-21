@@ -17,24 +17,14 @@ import {
 } from "firebase/auth";
 import { auth } from "../config/firebase";
 import axios from "axios";
+import { userService } from "../services/userService";
+import { User } from "../types/user";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
-interface UserData {
-  displayName?: string;
-  email?: string;
-  photoURL?: string;
-  settings?: {
-    spinRotationSpeed?: number;
-    moveSpeed?: number;
-    spinAmount?: number;
-  };
-  // Add other user data fields as needed
-}
-
 interface AuthContextType {
   currentUser: FirebaseUser | null;
-  userData: UserData | null;
+  userData: User | null;
   loading: boolean;
   signIn: (email: string, password: string) => Promise<UserCredential>;
   signUp: (email: string, password: string) => Promise<void>;
@@ -42,19 +32,15 @@ interface AuthContextType {
   signOut: () => Promise<void>;
 }
 
-const AuthContext = createContext<AuthContextType | null>(null);
+const AuthContext = createContext<AuthContextType>({} as AuthContextType);
 
 export const useAuth = () => {
-  const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error("useAuth must be used within an AuthProvider");
-  }
-  return context;
+  return useContext(AuthContext);
 };
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [currentUser, setCurrentUser] = useState<FirebaseUser | null>(null);
-  const [userData, setUserData] = useState<UserData | null>(null);
+  const [userData, setUserData] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
   // Set up axios interceptor for auth token
@@ -79,23 +65,21 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       const response = await axios.get(`${API_URL}/auth/verify`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      setUserData(response.data.userData);
+      
+      if (!response.data.userData) {
+        // If user doesn't exist in our database, create them
+        const newUser = await userService.createUser(
+          user.uid,
+          user.email || "",
+          user.displayName || user.email || "Anonymous User"
+        );
+        setUserData(newUser);
+      } else {
+        setUserData(response.data.userData);
+      }
     } catch (error) {
       console.error("Error verifying token:", error);
       await signOut();
-    }
-  };
-
-  // Update user data on server
-  const updateUserData = async (user: FirebaseUser) => {
-    try {
-      await axios.post(`${API_URL}/auth/user`, {
-        displayName: user.displayName,
-        email: user.email,
-        photoURL: user.photoURL,
-      });
-    } catch (error) {
-      console.error("Error updating user data:", error);
     }
   };
 
@@ -106,7 +90,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       if (user) {
         setCurrentUser(user);
         await verifyAndGetUserData(user);
-        await updateUserData(user);
       } else {
         setCurrentUser(null);
         setUserData(null);

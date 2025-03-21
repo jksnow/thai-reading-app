@@ -25,8 +25,30 @@ const AuthForm = () => {
         isWarning: true,
       });
 
+      // Get redirect start time or set a default
+      const redirectStartTime = parseInt(
+        sessionStorage.getItem("redirectStartTime") || "0",
+        10
+      );
+
+      // If redirect has been pending for too long (more than 3 minutes), reset the state
+      // This handles cases where someone left the app during authentication
+      if (
+        redirectStartTime > 0 &&
+        Date.now() - redirectStartTime > 3 * 60 * 1000
+      ) {
+        console.log("Redirect has been pending for too long, resetting state");
+        sessionStorage.removeItem("pendingGoogleRedirect");
+        sessionStorage.removeItem("redirectStartTime");
+        setLoading(false);
+        setError({
+          message: "Previous sign-in attempt timed out. Please try again.",
+          isWarning: false,
+        });
+        return;
+      }
+
       // Clear the flag after a timeout if we don't get signed in
-      // Give plenty of time for the auth process to complete
       const timeout = setTimeout(() => {
         if (!currentUser) {
           setLoading(false);
@@ -35,11 +57,13 @@ const AuthForm = () => {
             isWarning: false,
           });
           sessionStorage.removeItem("pendingGoogleRedirect");
+          sessionStorage.removeItem("redirectStartTime");
         } else {
           // If we do have a current user, clear the pending flag
           sessionStorage.removeItem("pendingGoogleRedirect");
+          sessionStorage.removeItem("redirectStartTime");
         }
-      }, 15000); // Increased from 5000ms to 15000ms (15 seconds)
+      }, 30000); // Increase timeout to 30 seconds to account for slower mobile connections
 
       return () => clearTimeout(timeout);
     }
@@ -51,6 +75,7 @@ const AuthForm = () => {
       // If we're signed in, clean up the pending flag
       if (sessionStorage.getItem("pendingGoogleRedirect") === "true") {
         sessionStorage.removeItem("pendingGoogleRedirect");
+        sessionStorage.removeItem("redirectStartTime");
         setLoading(false);
       }
     }

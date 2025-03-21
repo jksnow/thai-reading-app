@@ -19,8 +19,10 @@ import {
   setPersistence,
   browserLocalPersistence,
   getAuth,
+  browserPopupRedirectResolver,
+  initializeAuth,
 } from "firebase/auth";
-import { auth } from "../config/firebase";
+import { app } from "../config/firebase";
 import axios from "axios";
 import { userService } from "../services/userService";
 import { User } from "../types/user";
@@ -32,6 +34,14 @@ const API_URL = import.meta.env.VITE_API_URL;
 let redirectProcessed = false;
 // Store the last redirect result
 let lastRedirectResult: { user: FirebaseUser } | null = null;
+
+// Initialize auth with proper configuration for redirect best practices
+// Use same auth domain as your app domain, and rely on the proxy for /__/auth/ paths
+// This follows Firebase's best practice Option 3
+const auth = initializeAuth(app, {
+  // Use popupRedirectResolver to ensure the proper flow is used
+  popupRedirectResolver: browserPopupRedirectResolver,
+});
 
 interface AuthContextType {
   currentUser: FirebaseUser | null;

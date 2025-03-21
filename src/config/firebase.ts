@@ -1,6 +1,10 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
-import { getAuth } from "firebase/auth";
+import {
+  getAuth,
+  browserPopupRedirectResolver,
+  connectAuthEmulator,
+} from "firebase/auth";
 
 // Your web app's Firebase configuration
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
@@ -16,14 +20,24 @@ const firebaseConfig = {
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
+// Initialize Auth with explicit redirect resolver for better mobile support
 const auth = getAuth(app);
+
+// Connect to auth emulator in development if VITE_USE_FIREBASE_EMULATOR is set
+if (import.meta.env.DEV && import.meta.env.VITE_USE_FIREBASE_EMULATOR) {
+  // Use emulator on localhost:9099
+  connectAuthEmulator(auth, "http://localhost:9099", { disableWarnings: true });
+  console.log("Using Firebase Auth emulator");
+}
 
 // Log initialization status
 if (import.meta.env.DEV) {
   console.log(
     "Firebase initialized with:",
     "API Key exists:",
-    !!import.meta.env.VITE_FIREBASE_API_KEY
+    !!import.meta.env.VITE_FIREBASE_API_KEY,
+    "Auth Domain:",
+    firebaseConfig.authDomain
   );
 }
 

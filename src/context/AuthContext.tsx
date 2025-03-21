@@ -116,18 +116,25 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const handleRedirectResult = async () => {
       try {
         // This will only return a result if there was a pending redirect operation
-        const result = await getRedirectResult(auth);
+        // Pass browserPopupRedirectResolver explicitly to ensure proper handling
+        const result = await getRedirectResult(
+          auth,
+          browserPopupRedirectResolver
+        );
 
         // If we got a result, the user has just signed in via redirect
         if (result && result.user) {
           console.log("Redirect sign-in successful:", result.user.email);
-          // Auth state change will be picked up by onAuthStateChanged
+          // Manually trigger user data fetching to ensure all user data is loaded
+          await verifyAndGetUserData(result.user);
+          await updateUserData(result.user);
         }
       } catch (error) {
         console.error("Error processing redirect result:", error);
       }
     };
 
+    // Only run this on initial mount to process any pending redirects
     handleRedirectResult();
   }, []);
 
@@ -180,7 +187,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         console.log(
           "Using redirect for mobile Google sign-in with local persistence"
         );
-        await signInWithRedirect(auth, provider);
+        // Pass browserPopupRedirectResolver to ensure redirect works properly on mobile
+        await signInWithRedirect(auth, provider, browserPopupRedirectResolver);
         // The redirect will navigate away from the app
         // Result will be handled in the useEffect with getRedirectResult
       } else {

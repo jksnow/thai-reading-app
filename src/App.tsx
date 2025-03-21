@@ -11,7 +11,7 @@ import { ShaderSettingsProvider } from "./context/ShaderSettingsContext";
 import AuthForm from "./components/AuthForm";
 import MobileMenu from "./components/MobileMenu";
 
-const APP_VERSION = "0.8.45"; // Beta version
+const APP_VERSION = "0.8.46"; // Beta version
 
 // Component for the background and main content
 const AppContent = () => {

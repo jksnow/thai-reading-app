@@ -18,7 +18,6 @@ import {
   getRedirectResult,
   browserPopupRedirectResolver,
   setPersistence,
-  browserSessionPersistence,
   browserLocalPersistence,
 } from "firebase/auth";
 import { auth } from "../config/firebase";

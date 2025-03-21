@@ -34,6 +34,11 @@ const isMobileDevice = (): boolean => {
 
 // Key for tracking redirect state in local storage
 const REDIRECT_IN_PROGRESS_KEY = "firebase_auth_redirect_in_progress";
+// Store the redirect start time for better UX handling
+const REDIRECT_START_TIME_KEY = "firebase_auth_redirect_start_time";
+
+// Set a timeout for redirect operations (5 minutes)
+const REDIRECT_TIMEOUT_MS = 5 * 60 * 1000;
 
 interface UserData {
   displayName?: string;
@@ -122,24 +127,42 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const handleRedirectResult = async () => {
       try {
         // Check if we're returning from a redirect
-        if (
-          redirectInProgress ||
-          localStorage.getItem(REDIRECT_IN_PROGRESS_KEY) === "true"
-        ) {
+        const redirectInProgress =
+          localStorage.getItem(REDIRECT_IN_PROGRESS_KEY) === "true";
+        const redirectStartTime = localStorage.getItem(REDIRECT_START_TIME_KEY);
+
+        if (redirectInProgress) {
           console.log("Detected return from auth redirect");
+
+          // Check if the redirect has timed out
+          if (redirectStartTime) {
+            const startTime = parseInt(redirectStartTime, 10);
+            const elapsed = Date.now() - startTime;
+
+            if (elapsed > REDIRECT_TIMEOUT_MS) {
+              console.warn(
+                "Redirect timeout exceeded, cleaning up stale state"
+              );
+              localStorage.removeItem(REDIRECT_IN_PROGRESS_KEY);
+              localStorage.removeItem(REDIRECT_START_TIME_KEY);
+              setRedirectInProgress(false);
+              return;
+            }
+          }
+
+          // Clear the redirect flags immediately
           localStorage.removeItem(REDIRECT_IN_PROGRESS_KEY);
+          localStorage.removeItem(REDIRECT_START_TIME_KEY);
           setRedirectInProgress(false);
 
-          // First check if we already have a user (in case redirect already completed)
-          const currentAuthUser = auth.currentUser;
-          if (currentAuthUser) {
+          // First check if we already have a user (redirects sometimes get processed automatically)
+          if (auth.currentUser) {
             console.log(
               "User already signed in after redirect:",
-              currentAuthUser.email
+              auth.currentUser.email
             );
-            // Ensure user data is loaded
-            await verifyAndGetUserData(currentAuthUser);
-            await updateUserData(currentAuthUser);
+            await verifyAndGetUserData(auth.currentUser);
+            await updateUserData(auth.currentUser);
             return;
           }
 
@@ -150,23 +173,24 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             browserPopupRedirectResolver
           );
 
-          // If we got a result, the user has just signed in via redirect
           if (result && result.user) {
             console.log("Redirect sign-in successful:", result.user.email);
-            // Manually trigger user data fetching to ensure all user data is loaded
             await verifyAndGetUserData(result.user);
             await updateUserData(result.user);
           } else {
             console.log(
               "No redirect result found, but redirect was in progress"
             );
-            // Special case: sometimes mobile browsers clear auth state
-            // Try to re-initialize auth state through polling
+            // Some mobile browsers have problems with maintaining the redirect state
+            // Start polling for auth changes as a fallback
             let attempts = 0;
-            const maxAttempts = 5;
+            const maxAttempts = 10; // More attempts with a shorter interval
             const checkAuthInterval = setInterval(async () => {
               attempts++;
+              // Force refresh the token to ensure we're getting latest state
+              await auth.currentUser?.getIdToken(true).catch(() => null);
               const user = auth.currentUser;
+
               if (user) {
                 console.log("Found user after polling:", user.email);
                 clearInterval(checkAuthInterval);
@@ -175,22 +199,22 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
               } else if (attempts >= maxAttempts) {
                 console.log("Failed to find user after polling");
                 clearInterval(checkAuthInterval);
+                // Consider showing a "Sign-in failed" message to the user here
               }
-            }, 1000);
+            }, 500); // Shorter polling interval
           }
-        } else {
-          console.log("No redirect in progress");
         }
       } catch (error) {
         console.error("Error processing redirect result:", error);
         localStorage.removeItem(REDIRECT_IN_PROGRESS_KEY);
+        localStorage.removeItem(REDIRECT_START_TIME_KEY);
         setRedirectInProgress(false);
       }
     };
 
-    // Only run this on initial mount to process any pending redirects
+    // Process any pending redirects on mount
     handleRedirectResult();
-  }, [redirectInProgress]);
+  }, []);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
@@ -239,38 +263,41 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
       // Use setCustomParameters to bypass some of the Firebase auth issues
       provider.setCustomParameters({
+        // Important: This forces Google to show the account selection dialog
+        // which helps with authentication flows, especially on mobile
         prompt: "select_account",
+        // Use our proxy setup for redirects on same domain
+        auth_domain: window.location.hostname,
       });
 
-      // Choose the appropriate persistence method
-      // This ensures auth state is maintained across page redirects
-      if (isMobileDevice()) {
-        // Set persistence explicitly for mobile to ensure state is preserved through redirects
-        await setPersistence(auth, browserLocalPersistence);
+      // Ensure we're using local persistence for better auth state survival
+      await setPersistence(auth, browserLocalPersistence);
 
+      if (isMobileDevice()) {
         // Mark redirect as in progress in localStorage before navigating away
         localStorage.setItem(REDIRECT_IN_PROGRESS_KEY, "true");
+        // Store the current timestamp to detect timeout/stale redirects
+        localStorage.setItem(REDIRECT_START_TIME_KEY, Date.now().toString());
         setRedirectInProgress(true);
 
         console.log(
-          "Using redirect for mobile Google sign-in with local persistence"
+          "Using redirect for mobile Google sign-in with proxied auth"
         );
-        // Pass browserPopupRedirectResolver to ensure redirect works properly on mobile
+
+        // When using firebase.json proxying or vercel.json rewrites,
+        // this redirect should work correctly even with custom domains
         await signInWithRedirect(auth, provider, browserPopupRedirectResolver);
-        // The redirect will navigate away from the app
-        // Result will be handled in the useEffect with getRedirectResult
+        // The page will navigate away and later return to our app
       } else {
-        // For desktop, browserLocalPersistence is usually the default but we'll set it explicitly
-        await setPersistence(auth, browserLocalPersistence);
-        console.log(
-          "Using popup for desktop Google sign-in with local persistence"
-        );
+        console.log("Using popup for desktop Google sign-in");
+        // On desktop, popup is more reliable
         await signInWithPopup(auth, provider, browserPopupRedirectResolver);
       }
     } catch (error) {
       console.error("Error signing in with Google:", error);
-      // Clean up if redirect fails
+      // Clean up regardless of error type
       localStorage.removeItem(REDIRECT_IN_PROGRESS_KEY);
+      localStorage.removeItem(REDIRECT_START_TIME_KEY);
       setRedirectInProgress(false);
       throw error;
     }

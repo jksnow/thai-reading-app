@@ -8,7 +8,7 @@ const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
   authDomain: "thai-tale.firebaseapp.com",
   projectId: "thai-tale",
-  storageBucket: "thai-tale.firebasestorage.app",
+  storageBucket: "thai-tale.appspot.app",
   messagingSenderId: "978691216228",
   appId: "1:978691216228:web:39da0bbd6feac2a69de071",
   measurementId: "G-3M8N73LKV3",

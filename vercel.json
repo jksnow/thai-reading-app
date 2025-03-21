@@ -38,18 +38,17 @@
     {
       "source": "/(.*)",
       "headers": [
-        { "key": "Access-Control-Allow-Credentials", "value": "true" },
         {
           "key": "Access-Control-Allow-Origin",
-          "value": "https://thai-tale.firebaseapp.com"
+          "value": "*"
         },
         {
           "key": "Access-Control-Allow-Methods",
-          "value": "GET,OPTIONS,PATCH,DELETE,POST,PUT"
+          "value": "GET, POST, PUT, DELETE, OPTIONS"
         },
         {
           "key": "Access-Control-Allow-Headers",
-          "value": "X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version, Authorization"
+          "value": "X-Requested-With, Content-Type, Accept, Authorization"
         }
       ]
     }
@@ -66,6 +65,14 @@
     {
       "source": "/:path*",
       "destination": "dist/:path*"
+    },
+    {
+      "source": "/__/auth/:path*",
+      "destination": "https://thai-tale.firebaseapp.com/__/auth/:path*"
+    },
+    {
+      "source": "/__/firebase/:path*",
+      "destination": "https://thai-tale.firebaseapp.com/__/firebase/:path*"
     }
   ],
   "trailingSlash": false

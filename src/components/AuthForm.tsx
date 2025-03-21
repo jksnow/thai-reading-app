@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
 import thaiTaleLogo from "../assets/v1e.png";
 import ButtonOptions from "./ButtonOptions";
@@ -12,7 +12,34 @@ interface AuthError {
 const AuthForm = () => {
   const [error, setError] = useState<AuthError | null>(null);
   const [loading, setLoading] = useState(false);
-  const { signInWithGoogle } = useAuth();
+  const { signInWithGoogle, currentUser } = useAuth();
+
+  // Check if we have a pending redirect
+  useEffect(() => {
+    // If we find the pending redirect flag in session storage, show loading state
+    const pendingRedirect = sessionStorage.getItem("pendingGoogleRedirect");
+    if (pendingRedirect === "true") {
+      setLoading(true);
+      setError({
+        message: "Completing your sign-in...",
+        isWarning: true,
+      });
+
+      // Clear the flag after a timeout if we don't get signed in
+      const timeout = setTimeout(() => {
+        if (!currentUser) {
+          setLoading(false);
+          setError({
+            message: "Sign-in was not completed. Please try again.",
+            isWarning: false,
+          });
+          sessionStorage.removeItem("pendingGoogleRedirect");
+        }
+      }, 5000);
+
+      return () => clearTimeout(timeout);
+    }
+  }, [currentUser]);
 
   /**
    * Maps Firebase auth error codes to user-friendly messages
@@ -61,6 +88,9 @@ const AuthForm = () => {
         message:
           "Sign-in requires browser storage to be enabled. Please enable cookies and try again.",
       },
+      "auth/null-credential": {
+        message: "Sign-in was not completed. Please try again.",
+      },
     };
 
     return (
@@ -75,17 +105,27 @@ const AuthForm = () => {
     setLoading(true);
 
     try {
-      // Show a message for mobile users about the redirect
+      // If on mobile, set a flag that we're starting a redirect
       if (isMobileDevice()) {
+        sessionStorage.setItem("pendingGoogleRedirect", "true");
         setError({
-          message: "You'll be redirected to Google to sign in...",
+          message:
+            "You're being redirected to Google to sign in. Please complete the process.",
           isWarning: true,
         });
       }
 
       await signInWithGoogle();
+
+      // If we get here on mobile (unlikely due to redirect), clean up the flag
+      if (isMobileDevice()) {
+        sessionStorage.removeItem("pendingGoogleRedirect");
+      }
     } catch (err: any) {
       console.error("Google sign-in error:", err);
+
+      // Remove the pending redirect flag if there's an error
+      sessionStorage.removeItem("pendingGoogleRedirect");
 
       // Handle specific error cases
       if (err.code) {
@@ -98,7 +138,11 @@ const AuthForm = () => {
         });
       }
     } finally {
-      setLoading(false);
+      // Only set loading to false if we're not in a redirect flow
+      // For redirect flow, the loading state will be handled by the useEffect
+      if (!isMobileDevice()) {
+        setLoading(false);
+      }
     }
   };
 

@@ -7,13 +7,20 @@
  * Uses a combination of screen size and user agent detection
  */
 export const isMobileDevice = (): boolean => {
+  // Check via user agent (most reliable method)
   const userAgent = navigator.userAgent.toLowerCase();
   const isMobileUA =
-    /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(
+    /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini|mobile|tablet|samsung/i.test(
       userAgent
     );
+
+  // Alternative check via screen size
   const isMobileWidth = window.innerWidth <= 768;
-  return isMobileUA || isMobileWidth;
+
+  // Use navigator.maxTouchPoints as an additional signal
+  const hasTouchScreen = navigator.maxTouchPoints > 0;
+
+  return isMobileUA || (isMobileWidth && hasTouchScreen);
 };
 
 /**
@@ -22,8 +29,17 @@ export const isMobileDevice = (): boolean => {
 export const isIOSSafari = (): boolean => {
   const userAgent = navigator.userAgent.toLowerCase();
   const isIOS = /iphone|ipad|ipod/.test(userAgent);
-  const isSafari = /safari/.test(userAgent);
+  const isSafari = /safari/.test(userAgent) && !/chrome/.test(userAgent);
   return isIOS && isSafari;
+};
+
+/**
+ * Checks if the current browser is Samsung Internet
+ * Samsung Internet is known to have issues with popups
+ */
+export const isSamsungBrowser = (): boolean => {
+  const userAgent = navigator.userAgent.toLowerCase();
+  return /samsungbrowser/.test(userAgent);
 };
 
 /**
@@ -32,7 +48,10 @@ export const isIOSSafari = (): boolean => {
  */
 export const supportsPopups = (): boolean => {
   // iOS Safari and some mobile browsers don't reliably support popups
-  if (isIOSSafari()) return false;
+  if (isIOSSafari() || isSamsungBrowser()) return false;
+
+  // Mobile browsers generally don't handle popups well
+  if (isMobileDevice()) return false;
 
   // Check if window.open is available and not blocked
   try {

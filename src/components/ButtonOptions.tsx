@@ -1,6 +1,6 @@
 import React, { ReactNode } from "react";
 
-export interface ButtonOptionsProps {
+interface ButtonOptionsProps {
   children: ReactNode;
   variant?: "blue" | "green" | "amber" | "red" | "purple";
   backgroundColor?: string;
@@ -8,8 +8,6 @@ export interface ButtonOptionsProps {
   padding?: string;
   onClick?: () => void;
   disabled?: boolean;
-  className?: string;
-  type?: "button" | "submit" | "reset";
 }
 
 const ButtonOptions: React.FC<ButtonOptionsProps> = ({
@@ -20,8 +18,6 @@ const ButtonOptions: React.FC<ButtonOptionsProps> = ({
   padding = "py-4",
   onClick,
   disabled = false,
-  className = "",
-  type = "button",
 }) => {
   // Get variant-specific color
   const getVariantColor = () => {
@@ -56,6 +52,7 @@ const ButtonOptions: React.FC<ButtonOptionsProps> = ({
     rounded-lg
     text-white
     transition-colors
+    w-full
     focus:outline-none
     focus:ring-0
     focus:border-transparent
@@ -63,7 +60,6 @@ const ButtonOptions: React.FC<ButtonOptionsProps> = ({
     active:border-transparent
     app-button-reset
     ${disabled ? "opacity-50 cursor-not-allowed" : ""}
-    ${className}
   `;
 
   // Button content with onClick handler
@@ -72,7 +68,6 @@ const ButtonOptions: React.FC<ButtonOptionsProps> = ({
       className={buttonStyles}
       onClick={onClick}
       disabled={disabled}
-      type={type}
       style={{
         boxShadow: "2px 3px 0 rgba(0, 0, 0, 0.9)",
         textShadow: "0px 2px 0px rgba(0,0,0,1)",

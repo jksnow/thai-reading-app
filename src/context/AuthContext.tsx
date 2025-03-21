@@ -16,18 +16,35 @@ import {
   signInWithPopup,
   signInWithRedirect,
   getRedirectResult,
-  AuthError,
+  browserPopupRedirectResolver,
 } from "firebase/auth";
 import { auth } from "../config/firebase";
 import axios from "axios";
-import { userService } from "../services/userService";
-import { User } from "../types/user";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
+// Helper function to detect mobile devices
+const isMobileDevice = (): boolean => {
+  return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+    navigator.userAgent
+  );
+};
+
+interface UserData {
+  displayName?: string;
+  email?: string;
+  photoURL?: string;
+  settings?: {
+    spinRotationSpeed?: number;
+    moveSpeed?: number;
+    spinAmount?: number;
+  };
+  // Add other user data fields as needed
+}
+
 interface AuthContextType {
   currentUser: FirebaseUser | null;
-  userData: User | null;
+  userData: UserData | null;
   loading: boolean;
   signIn: (email: string, password: string) => Promise<UserCredential>;
   signUp: (email: string, password: string) => Promise<void>;
@@ -35,30 +52,19 @@ interface AuthContextType {
   signOut: () => Promise<void>;
 }
 
-const AuthContext = createContext<AuthContextType>({} as AuthContextType);
+const AuthContext = createContext<AuthContextType | null>(null);
 
 export const useAuth = () => {
-  return useContext(AuthContext);
-};
-
-// Helper to check if device is mobile
-const isMobileDevice = () => {
-  return (
-    typeof window !== "undefined" &&
-    (navigator.userAgent.match(/Android/i) ||
-      navigator.userAgent.match(/webOS/i) ||
-      navigator.userAgent.match(/iPhone/i) ||
-      navigator.userAgent.match(/iPad/i) ||
-      navigator.userAgent.match(/iPod/i) ||
-      navigator.userAgent.match(/BlackBerry/i) ||
-      navigator.userAgent.match(/Windows Phone/i) ||
-      window.innerWidth < 768)
-  );
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error("useAuth must be used within an AuthProvider");
+  }
+  return context;
 };
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [currentUser, setCurrentUser] = useState<FirebaseUser | null>(null);
-  const [userData, setUserData] = useState<User | null>(null);
+  const [userData, setUserData] = useState<UserData | null>(null);
   const [loading, setLoading] = useState(true);
 
   // Set up axios interceptor for auth token
@@ -83,38 +89,42 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       const response = await axios.get(`${API_URL}/auth/verify`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-
-      if (!response.data.userData) {
-        // If user doesn't exist in our database, create them
-        const newUser = await userService.createUser(
-          user.uid,
-          user.email || "",
-          user.displayName || user.email || "Anonymous User"
-        );
-        setUserData(newUser);
-      } else {
-        setUserData(response.data.userData);
-      }
+      setUserData(response.data.userData);
     } catch (error) {
       console.error("Error verifying token:", error);
       await signOut();
     }
   };
 
-  // Process redirect result on component mount
+  // Update user data on server
+  const updateUserData = async (user: FirebaseUser) => {
+    try {
+      await axios.post(`${API_URL}/auth/user`, {
+        displayName: user.displayName,
+        email: user.email,
+        photoURL: user.photoURL,
+      });
+    } catch (error) {
+      console.error("Error updating user data:", error);
+    }
+  };
+
+  // Handle redirect result when returning from a redirect auth flow
   useEffect(() => {
-    async function handleRedirectResult() {
+    const handleRedirectResult = async () => {
       try {
+        // This will only return a result if there was a pending redirect operation
         const result = await getRedirectResult(auth);
-        if (result?.user) {
-          console.log("Redirect sign-in successful");
+
+        // If we got a result, the user has just signed in via redirect
+        if (result && result.user) {
+          console.log("Redirect sign-in successful:", result.user.email);
+          // Auth state change will be picked up by onAuthStateChanged
         }
       } catch (error) {
-        console.error("Error processing redirect sign-in:", error);
-      } finally {
-        setLoading(false);
+        console.error("Error processing redirect result:", error);
       }
-    }
+    };
 
     handleRedirectResult();
   }, []);
@@ -126,6 +136,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       if (user) {
         setCurrentUser(user);
         await verifyAndGetUserData(user);
+        await updateUserData(user);
       } else {
         setCurrentUser(null);
         setUserData(null);
@@ -158,36 +169,16 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const signInWithGoogle = async () => {
     try {
       const provider = new GoogleAuthProvider();
-      provider.setCustomParameters({
-        prompt: "select_account", // Force account selection
-      });
 
-      const isMobile = isMobileDevice();
-      console.log(`Using ${isMobile ? "redirect" : "popup"} auth for device`);
-
-      if (isMobile) {
-        // Use redirect for mobile devices
+      // Use different auth methods based on device type
+      if (isMobileDevice()) {
+        console.log("Using redirect for mobile Google sign-in");
         await signInWithRedirect(auth, provider);
-        // This will redirect the page, so the code won't continue here
+        // The redirect will navigate away from the app
+        // Result will be handled in the useEffect with getRedirectResult
       } else {
-        // Try popup for desktop, with fallback to redirect
-        try {
-          await signInWithPopup(auth, provider);
-          console.log("Popup sign-in completed successfully");
-        } catch (error) {
-          const authError = error as AuthError;
-          // If popup blocked or closed, fall back to redirect
-          if (
-            authError.code === "auth/popup-blocked" ||
-            authError.code === "auth/popup-closed-by-user" ||
-            authError.code === "auth/cancelled-popup-request"
-          ) {
-            console.log("Popup was blocked, falling back to redirect");
-            await signInWithRedirect(auth, provider);
-          } else {
-            throw error;
-          }
-        }
+        console.log("Using popup for desktop Google sign-in");
+        await signInWithPopup(auth, provider, browserPopupRedirectResolver);
       }
     } catch (error) {
       console.error("Error signing in with Google:", error);

@@ -115,8 +115,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     const handleRedirectResult = async () => {
       try {
-        // This will only return a result if there was a pending redirect operation
-        // Pass browserPopupRedirectResolver explicitly to ensure proper handling
+        // Process pending redirects as soon as the component mounts
+        // Always pass browserPopupRedirectResolver
+        console.log("Checking for redirect results...");
         const result = await getRedirectResult(
           auth,
           browserPopupRedirectResolver
@@ -128,6 +129,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           // Manually trigger user data fetching to ensure all user data is loaded
           await verifyAndGetUserData(result.user);
           await updateUserData(result.user);
+        } else {
+          console.log("No redirect result found");
         }
       } catch (error) {
         console.error("Error processing redirect result:", error);

@@ -6,7 +6,7 @@ import { getAuth, connectAuthEmulator } from "firebase/auth";
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
-  authDomain: "thaitale.io",
+  authDomain: "thai-tale.firebaseapp.com",
   projectId: "thai-tale",
   storageBucket: "thai-tale.firebasestorage.app",
   messagingSenderId: "978691216228",

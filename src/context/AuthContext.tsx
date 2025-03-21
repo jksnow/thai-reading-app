@@ -18,6 +18,7 @@ import {
   getRedirectResult,
   setPersistence,
   browserLocalPersistence,
+  getAuth,
 } from "firebase/auth";
 import { auth } from "../config/firebase";
 import axios from "axios";
@@ -100,6 +101,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  // Check for session storage indication that we've just redirected from Google auth
+  const checkPendingRedirectFlag = () => {
+    const pendingRedirect = sessionStorage.getItem("pendingGoogleRedirect");
+    return pendingRedirect === "true";
+  };
+
   // Process redirect result and initialize auth state
   useEffect(() => {
     async function initializeAuth() {
@@ -109,13 +116,33 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         // Set persistence to LOCAL to ensure the user stays signed in
         await setPersistence(auth, browserLocalPersistence);
 
-        // Handle redirect result if not already processed
-        if (!redirectProcessed) {
+        // Check if we have a pending Google redirect
+        const hasPendingRedirect = checkPendingRedirectFlag();
+
+        // Get a fresh auth instance to ensure we're not working with stale data
+        const freshAuth = getAuth();
+
+        // Handle redirect result if we haven't already or if we have a pending redirect flag
+        if (!redirectProcessed || hasPendingRedirect) {
           redirectProcessed = true;
           console.log("Checking for redirect result...");
 
           try {
-            const result = await getRedirectResult(auth);
+            // Try to get the redirect result with a timeout
+            const redirectResultPromise = getRedirectResult(freshAuth);
+
+            // Create a timeout promise
+            const timeoutPromise = new Promise<null>((_, reject) => {
+              setTimeout(() => {
+                reject(new Error("Redirect result timeout"));
+              }, 10000); // 10 second timeout
+            });
+
+            // Race the redirect result against the timeout
+            const result = await Promise.race([
+              redirectResultPromise,
+              timeoutPromise,
+            ]);
             lastRedirectResult = result;
 
             if (result && result.user) {
@@ -123,28 +150,81 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                 "Successfully signed in via redirect:",
                 result.user.email
               );
+
+              // Force token refresh to ensure we have a valid token
+              await result.user.getIdToken(true);
+
               setCurrentUser(result.user);
               await verifyAndGetUserData(result.user);
+
+              // Clear the pending redirect flag on success
+              sessionStorage.removeItem("pendingGoogleRedirect");
             } else {
-              console.log("No redirect result found or already processed");
+              console.log("No redirect result found or empty result");
+
+              // If we had a pending redirect flag but got no result, we might need to recover
+              if (hasPendingRedirect) {
+                // Try to get the current user as a fallback
+                const currentUser = freshAuth.currentUser;
+                if (currentUser) {
+                  console.log(
+                    "Recovered user from current auth state:",
+                    currentUser.email
+                  );
+
+                  // Force token refresh
+                  await currentUser.getIdToken(true);
+
+                  setCurrentUser(currentUser);
+                  await verifyAndGetUserData(currentUser);
+
+                  // Clear the pending redirect flag on success
+                  sessionStorage.removeItem("pendingGoogleRedirect");
+                } else {
+                  console.log("No user found in current auth state either");
+                }
+              }
             }
           } catch (redirectError: any) {
             console.error("Error processing redirect result:", redirectError);
+
             // Specific error handling for redirect errors
             if (redirectError.code === "auth/null-credential") {
               console.log(
                 "Null credential error - likely user canceled auth or token expired"
               );
             }
+
+            // Try to fall back to current user if available
+            const currentUser = freshAuth.currentUser;
+            if (currentUser && hasPendingRedirect) {
+              console.log(
+                "Error during redirect, but recovered user:",
+                currentUser.email
+              );
+
+              // Force token refresh
+              await currentUser.getIdToken(true);
+
+              setCurrentUser(currentUser);
+              await verifyAndGetUserData(currentUser);
+
+              // Clear the pending redirect flag on success
+              sessionStorage.removeItem("pendingGoogleRedirect");
+            }
           }
         }
 
         // Set up auth state listener
-        const unsubscribe = onAuthStateChanged(auth, async (user) => {
+        const unsubscribe = onAuthStateChanged(freshAuth, async (user) => {
           console.log("Auth state changed:", user?.email);
 
           if (user) {
+            // Force token refresh when auth state changes
+            await user.getIdToken(true);
+
             setCurrentUser(user);
+
             // Only verify user data if we haven't just processed a redirect
             // This prevents duplicate verification
             if (
@@ -153,6 +233,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
               lastRedirectResult.user.uid !== user.uid
             ) {
               await verifyAndGetUserData(user);
+            }
+
+            // Clear the pending redirect flag if it exists
+            if (checkPendingRedirectFlag()) {
+              sessionStorage.removeItem("pendingGoogleRedirect");
             }
           } else {
             setCurrentUser(null);
@@ -229,7 +314,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         // Reset the redirect processed flag
         redirectProcessed = false;
         console.log("Using redirect sign-in method");
-        await signInWithRedirect(auth, provider);
+
+        // Get a fresh auth instance
+        const freshAuth = getAuth();
+
+        await signInWithRedirect(freshAuth, provider);
         // The redirect result will be handled when the page loads again
       } else {
         console.log("Using popup sign-in method");
@@ -250,7 +339,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         try {
           redirectProcessed = false;
           console.log("Popup failed, falling back to redirect");
-          await signInWithRedirect(auth, new GoogleAuthProvider());
+
+          // Get a fresh auth instance for redirect
+          const freshAuth = getAuth();
+
+          await signInWithRedirect(freshAuth, new GoogleAuthProvider());
         } catch (redirectError) {
           console.error("Error during redirect sign-in:", redirectError);
           throw redirectError;
@@ -263,6 +356,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const signOut = async () => {
     try {
+      // Clear redirect flag on sign out
+      sessionStorage.removeItem("pendingGoogleRedirect");
+
       await firebaseSignOut(auth);
       setCurrentUser(null);
       setUserData(null);

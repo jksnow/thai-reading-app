@@ -26,6 +26,7 @@ const AuthForm = () => {
       });
 
       // Clear the flag after a timeout if we don't get signed in
+      // Give plenty of time for the auth process to complete
       const timeout = setTimeout(() => {
         if (!currentUser) {
           setLoading(false);
@@ -34,10 +35,24 @@ const AuthForm = () => {
             isWarning: false,
           });
           sessionStorage.removeItem("pendingGoogleRedirect");
+        } else {
+          // If we do have a current user, clear the pending flag
+          sessionStorage.removeItem("pendingGoogleRedirect");
         }
-      }, 5000);
+      }, 15000); // Increased from 5000ms to 15000ms (15 seconds)
 
       return () => clearTimeout(timeout);
+    }
+  }, [currentUser]);
+
+  // Effect to clean up the pending flag when we have a current user
+  useEffect(() => {
+    if (currentUser) {
+      // If we're signed in, clean up the pending flag
+      if (sessionStorage.getItem("pendingGoogleRedirect") === "true") {
+        sessionStorage.removeItem("pendingGoogleRedirect");
+        setLoading(false);
+      }
     }
   }, [currentUser]);
 
@@ -91,6 +106,14 @@ const AuthForm = () => {
       "auth/null-credential": {
         message: "Sign-in was not completed. Please try again.",
       },
+      "auth/redirect-cancelled-by-user": {
+        message: "Sign-in was cancelled. Please try again.",
+        isWarning: true,
+      },
+      "auth/redirect-operation-pending": {
+        message: "A sign-in operation is already in progress. Please wait.",
+        isWarning: true,
+      },
     };
 
     return (
@@ -105,6 +128,9 @@ const AuthForm = () => {
     setLoading(true);
 
     try {
+      // Clear any existing pending flags first
+      sessionStorage.removeItem("pendingGoogleRedirect");
+
       // If on mobile, set a flag that we're starting a redirect
       if (isMobileDevice()) {
         sessionStorage.setItem("pendingGoogleRedirect", "true");
@@ -113,6 +139,9 @@ const AuthForm = () => {
             "You're being redirected to Google to sign in. Please complete the process.",
           isWarning: true,
         });
+
+        // Add a timestamp to track when the redirect started
+        sessionStorage.setItem("redirectStartTime", Date.now().toString());
       }
 
       await signInWithGoogle();
@@ -120,12 +149,14 @@ const AuthForm = () => {
       // If we get here on mobile (unlikely due to redirect), clean up the flag
       if (isMobileDevice()) {
         sessionStorage.removeItem("pendingGoogleRedirect");
+        sessionStorage.removeItem("redirectStartTime");
       }
     } catch (err: any) {
       console.error("Google sign-in error:", err);
 
       // Remove the pending redirect flag if there's an error
       sessionStorage.removeItem("pendingGoogleRedirect");
+      sessionStorage.removeItem("redirectStartTime");
 
       // Handle specific error cases
       if (err.code) {

@@ -21,6 +21,7 @@ import {
   getAuth,
   browserPopupRedirectResolver,
   initializeAuth,
+  Auth,
 } from "firebase/auth";
 import { app } from "../config/firebase";
 import axios from "axios";
@@ -38,10 +39,16 @@ let lastRedirectResult: { user: FirebaseUser } | null = null;
 // Initialize auth with proper configuration for redirect best practices
 // Use same auth domain as your app domain, and rely on the proxy for /__/auth/ paths
 // This follows Firebase's best practice Option 3
-const auth = initializeAuth(app, {
-  // Use popupRedirectResolver to ensure the proper flow is used
-  popupRedirectResolver: browserPopupRedirectResolver,
-});
+let auth: Auth;
+try {
+  // Try to get existing auth instance first
+  auth = getAuth(app);
+} catch (e) {
+  // If no existing auth instance, initialize with custom config
+  auth = initializeAuth(app, {
+    popupRedirectResolver: browserPopupRedirectResolver,
+  });
+}
 
 interface AuthContextType {
   currentUser: FirebaseUser | null;

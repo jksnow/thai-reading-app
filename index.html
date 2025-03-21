@@ -44,6 +44,23 @@
       name="apple-mobile-web-app-status-bar-style"
       content="black-translucent"
     />
+    <!-- Firebase Auth redirect handling -->
+    <meta
+      http-equiv="origin-trial"
+      content="Firebase Auth for Mobile Web"
+    />
+    <script>
+      // Check for Firebase Auth redirect in progress on page load
+      window.addEventListener("load", function () {
+        // Check if returning from auth redirect
+        if (
+          localStorage.getItem("firebase_auth_redirect_in_progress") === "true"
+        ) {
+          console.log("Returning from auth redirect, processing auth state...");
+          // Auth state will be handled by AuthContext component
+        }
+      });
+    </script>
   </head>
   <body>
     <div id="root"></div>

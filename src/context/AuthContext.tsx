@@ -32,6 +32,9 @@ const isMobileDevice = (): boolean => {
   );
 };
 
+// Key for tracking redirect state in local storage
+const REDIRECT_IN_PROGRESS_KEY = "firebase_auth_redirect_in_progress";
+
 interface UserData {
   displayName?: string;
   email?: string;
@@ -68,6 +71,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [currentUser, setCurrentUser] = useState<FirebaseUser | null>(null);
   const [userData, setUserData] = useState<UserData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [redirectInProgress, setRedirectInProgress] = useState<boolean>(
+    localStorage.getItem(REDIRECT_IN_PROGRESS_KEY) === "true"
+  );
 
   // Set up axios interceptor for auth token
   useEffect(() => {
@@ -115,40 +121,76 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     const handleRedirectResult = async () => {
       try {
-        // Process pending redirects as soon as the component mounts
-        // Always pass browserPopupRedirectResolver
-        console.log("Checking for redirect results...");
+        // Check if we're returning from a redirect
+        if (
+          redirectInProgress ||
+          localStorage.getItem(REDIRECT_IN_PROGRESS_KEY) === "true"
+        ) {
+          console.log("Detected return from auth redirect");
+          localStorage.removeItem(REDIRECT_IN_PROGRESS_KEY);
+          setRedirectInProgress(false);
 
-        // First check if we already have a user (in case redirect already completed)
-        const currentAuthUser = auth.currentUser;
-        if (currentAuthUser) {
-          console.log("User already signed in:", currentAuthUser.email);
-          return;
-        }
+          // First check if we already have a user (in case redirect already completed)
+          const currentAuthUser = auth.currentUser;
+          if (currentAuthUser) {
+            console.log(
+              "User already signed in after redirect:",
+              currentAuthUser.email
+            );
+            // Ensure user data is loaded
+            await verifyAndGetUserData(currentAuthUser);
+            await updateUserData(currentAuthUser);
+            return;
+          }
 
-        // Otherwise try to get the redirect result
-        const result = await getRedirectResult(
-          auth,
-          browserPopupRedirectResolver
-        );
+          // Otherwise try to get the redirect result
+          console.log("Getting redirect result...");
+          const result = await getRedirectResult(
+            auth,
+            browserPopupRedirectResolver
+          );
 
-        // If we got a result, the user has just signed in via redirect
-        if (result && result.user) {
-          console.log("Redirect sign-in successful:", result.user.email);
-          // Manually trigger user data fetching to ensure all user data is loaded
-          await verifyAndGetUserData(result.user);
-          await updateUserData(result.user);
+          // If we got a result, the user has just signed in via redirect
+          if (result && result.user) {
+            console.log("Redirect sign-in successful:", result.user.email);
+            // Manually trigger user data fetching to ensure all user data is loaded
+            await verifyAndGetUserData(result.user);
+            await updateUserData(result.user);
+          } else {
+            console.log(
+              "No redirect result found, but redirect was in progress"
+            );
+            // Special case: sometimes mobile browsers clear auth state
+            // Try to re-initialize auth state through polling
+            let attempts = 0;
+            const maxAttempts = 5;
+            const checkAuthInterval = setInterval(async () => {
+              attempts++;
+              const user = auth.currentUser;
+              if (user) {
+                console.log("Found user after polling:", user.email);
+                clearInterval(checkAuthInterval);
+                await verifyAndGetUserData(user);
+                await updateUserData(user);
+              } else if (attempts >= maxAttempts) {
+                console.log("Failed to find user after polling");
+                clearInterval(checkAuthInterval);
+              }
+            }, 1000);
+          }
         } else {
-          console.log("No redirect result found");
+          console.log("No redirect in progress");
         }
       } catch (error) {
         console.error("Error processing redirect result:", error);
+        localStorage.removeItem(REDIRECT_IN_PROGRESS_KEY);
+        setRedirectInProgress(false);
       }
     };
 
     // Only run this on initial mount to process any pending redirects
     handleRedirectResult();
-  }, []);
+  }, [redirectInProgress]);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
@@ -205,6 +247,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       if (isMobileDevice()) {
         // Set persistence explicitly for mobile to ensure state is preserved through redirects
         await setPersistence(auth, browserLocalPersistence);
+
+        // Mark redirect as in progress in localStorage before navigating away
+        localStorage.setItem(REDIRECT_IN_PROGRESS_KEY, "true");
+        setRedirectInProgress(true);
+
         console.log(
           "Using redirect for mobile Google sign-in with local persistence"
         );
@@ -222,6 +269,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       }
     } catch (error) {
       console.error("Error signing in with Google:", error);
+      // Clean up if redirect fails
+      localStorage.removeItem(REDIRECT_IN_PROGRESS_KEY);
+      setRedirectInProgress(false);
       throw error;
     }
   };

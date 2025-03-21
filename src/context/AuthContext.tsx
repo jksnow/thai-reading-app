@@ -17,6 +17,9 @@ import {
   signInWithRedirect,
   getRedirectResult,
   browserPopupRedirectResolver,
+  setPersistence,
+  browserSessionPersistence,
+  browserLocalPersistence,
 } from "firebase/auth";
 import { auth } from "../config/firebase";
 import axios from "axios";
@@ -170,14 +173,23 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     try {
       const provider = new GoogleAuthProvider();
 
-      // Use different auth methods based on device type
+      // Choose the appropriate persistence method
+      // This ensures auth state is maintained across page redirects
       if (isMobileDevice()) {
-        console.log("Using redirect for mobile Google sign-in");
+        // Set persistence explicitly for mobile to ensure state is preserved through redirects
+        await setPersistence(auth, browserLocalPersistence);
+        console.log(
+          "Using redirect for mobile Google sign-in with local persistence"
+        );
         await signInWithRedirect(auth, provider);
         // The redirect will navigate away from the app
         // Result will be handled in the useEffect with getRedirectResult
       } else {
-        console.log("Using popup for desktop Google sign-in");
+        // For desktop, browserLocalPersistence is usually the default but we'll set it explicitly
+        await setPersistence(auth, browserLocalPersistence);
+        console.log(
+          "Using popup for desktop Google sign-in with local persistence"
+        );
         await signInWithPopup(auth, provider, browserPopupRedirectResolver);
       }
     } catch (error) {

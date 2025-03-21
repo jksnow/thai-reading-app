@@ -9,8 +9,9 @@ import SocialMediaButtons from "./components/SocialMediaButtons";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import { ShaderSettingsProvider } from "./context/ShaderSettingsContext";
 import AuthForm from "./components/AuthForm";
+import MobileMenu from "./components/MobileMenu";
 
-const APP_VERSION = "0.8.43"; // Beta version
+const APP_VERSION = "0.8.45"; // Beta version
 
 // Component for the background and main content
 const AppContent = () => {
@@ -74,8 +75,11 @@ const AppContent = () => {
       {/* Selected Modifiers Modal (only when authenticated) */}
       {currentUser && <SelectedModifiersModal />}
 
-      {/* Social Media Buttons */}
+      {/* Social Media Buttons - Only visible on desktop */}
       <SocialMediaButtons />
+
+      {/* Mobile Menu - Only visible on mobile */}
+      {currentUser && <MobileMenu />}
 
       {/* Content based on app state */}
       <div className="relative min-h-screen">{renderContent()}</div>

@@ -8,6 +8,7 @@ interface ButtonOptionsProps {
   padding?: string;
   onClick?: () => void;
   disabled?: boolean;
+  className?: string;
 }
 
 const ButtonOptions: React.FC<ButtonOptionsProps> = ({
@@ -18,6 +19,7 @@ const ButtonOptions: React.FC<ButtonOptionsProps> = ({
   padding = "py-4",
   onClick,
   disabled = false,
+  className = "",
 }) => {
   // Get variant-specific color
   const getVariantColor = () => {
@@ -60,6 +62,7 @@ const ButtonOptions: React.FC<ButtonOptionsProps> = ({
     active:border-transparent
     app-button-reset
     ${disabled ? "opacity-50 cursor-not-allowed" : ""}
+    ${className}
   `;
 
   // Button content with onClick handler

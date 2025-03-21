@@ -7,7 +7,13 @@ import DonateModal from "./DonateModal";
 
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
 
-const SocialMediaButtons: React.FC = () => {
+interface SocialMediaButtonsProps {
+  isMobile?: boolean;
+}
+
+const SocialMediaButtons: React.FC<SocialMediaButtonsProps> = ({
+  isMobile = false,
+}) => {
   const [isDonateModalOpen, setIsDonateModalOpen] = useState(false);
   const [donationAmount, setDonationAmount] = useState(5);
 
@@ -22,27 +28,37 @@ const SocialMediaButtons: React.FC = () => {
     setDonationAmount(amount);
   };
 
+  const renderButtons = () => (
+    <ButtonContainer className={isMobile ? "w-full" : ""}>
+      <ButtonOptions
+        onClick={handleDiscordClick}
+        variant="blue"
+        padding="py-2 px-4"
+        className={isMobile ? "mb-2" : ""}
+      >
+        DISCORD
+      </ButtonOptions>
+
+      <ButtonOptions
+        onClick={() => setIsDonateModalOpen(true)}
+        variant="purple"
+        padding="py-2 px-4"
+        className={isMobile ? "mb-2" : ""}
+      >
+        DONATE
+      </ButtonOptions>
+    </ButtonContainer>
+  );
+
   return (
     <>
-      <div className="fixed bottom-8 right-8 z-30">
-        <ButtonContainer>
-          <ButtonOptions
-            onClick={handleDiscordClick}
-            variant="blue"
-            padding="py-2 px-4"
-          >
-            DISCORD
-          </ButtonOptions>
-
-          <ButtonOptions
-            onClick={() => setIsDonateModalOpen(true)}
-            variant="purple"
-            padding="py-2 px-4"
-          >
-            DONATE
-          </ButtonOptions>
-        </ButtonContainer>
-      </div>
+      {!isMobile ? (
+        <div className="fixed bottom-8 right-8 z-30 md:block hidden">
+          {renderButtons()}
+        </div>
+      ) : (
+        <div className="flex flex-col w-full">{renderButtons()}</div>
+      )}
 
       {isDonateModalOpen && (
         <Elements

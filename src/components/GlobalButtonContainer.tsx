@@ -7,7 +7,13 @@ import OptionsModalContent from "./OptionsModalContent";
 import CollectionModalContent from "./CollectionModalContent";
 import StartModalContent from "./StartModalContent";
 
-const GlobalButtonContainer: React.FC = () => {
+interface GlobalButtonContainerProps {
+  isMobile?: boolean;
+}
+
+const GlobalButtonContainer: React.FC<GlobalButtonContainerProps> = ({
+  isMobile = false,
+}) => {
   const { currentSection } = useAppState();
 
   const [isOptionsModalOpen, setIsOptionsModalOpen] = useState(false);
@@ -16,6 +22,11 @@ const GlobalButtonContainer: React.FC = () => {
 
   // Define positioning based on current section
   const getContainerClasses = () => {
+    // For mobile display, no special positioning is needed
+    if (isMobile) {
+      return "";
+    }
+
     // On main screen, center position like in MainTitleScreen
     if (currentSection === "home") {
       return ""; // Empty for default positioning, it will inherit from parent
@@ -49,34 +60,45 @@ const GlobalButtonContainer: React.FC = () => {
     setIsStartModalOpen(false);
   };
 
+  const renderButtons = () => (
+    <ButtonContainer className={isMobile ? "w-full" : ""}>
+      {/* Only show START button on home screen */}
+      {currentSection === "home" && (
+        <ButtonOptions
+          onClick={openStartModal}
+          variant="blue"
+          className={isMobile ? "w-full" : ""}
+        >
+          START
+        </ButtonOptions>
+      )}
+
+      <ButtonOptions
+        variant="green"
+        onClick={openOptionsModal}
+        className={isMobile ? "w-full" : ""}
+      >
+        OPTIONS
+      </ButtonOptions>
+
+      <ButtonOptions
+        variant="amber"
+        onClick={openCollectionModal}
+        className={isMobile ? "w-full" : ""}
+      >
+        COLLECTION
+      </ButtonOptions>
+    </ButtonContainer>
+  );
+
   return (
     <>
-      <div className={getContainerClasses()}>
-        <ButtonContainer>
-          {/* Only show START button on home screen */}
-          {currentSection === "home" && (
-            <ButtonOptions
-              onClick={openStartModal}
-              variant="blue"
-            >
-              START
-            </ButtonOptions>
-          )}
-
-          <ButtonOptions
-            variant="green"
-            onClick={openOptionsModal}
-          >
-            OPTIONS
-          </ButtonOptions>
-
-          <ButtonOptions
-            variant="amber"
-            onClick={openCollectionModal}
-          >
-            COLLECTION
-          </ButtonOptions>
-        </ButtonContainer>
+      <div
+        className={`${getContainerClasses()} ${
+          isMobile ? "" : "md:block hidden"
+        }`}
+      >
+        {renderButtons()}
       </div>
 
       {/* Options Modal */}

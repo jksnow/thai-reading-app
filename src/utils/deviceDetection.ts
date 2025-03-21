@@ -16,11 +16,6 @@ export const isMobileDevice = (): boolean => {
       userAgent
     );
 
-  // Alternative check via browser-specific patterns
-  const hasDrivers = /touch|mobile|tablet/i.test(
-    navigator.maxTouchPoints > 0 ? "touch" : ""
-  );
-
   // Alternative check via screen size
   const isMobileWidth = window.innerWidth <= 1024;
 
